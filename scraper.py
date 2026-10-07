@@ -1453,6 +1453,60 @@ def fetch_undp_ipsa_bing():
     }
 
 
+def parse_unvacancies_undp_card(anchor):
+    title = clean(anchor.get_text(" ", strip=True))
+    href = clean(anchor.get("href"))
+    if not title or not href:
+        return None
+
+    context = clean(anchor.parent.get_text(" ", strip=True)) if anchor.parent else ""
+    if anchor.parent and anchor.parent.parent:
+        context = clean(
+            f"{context} {anchor.parent.parent.get_text(' ', strip=True)}"
+        )
+
+    grade_match = re.search(r"\b(IPSA-\d+)\b", context, flags=re.I)
+    if not grade_match:
+        return None
+
+    grade = grade_match.group(1).upper()
+
+    location_match = re.search(
+        r"UNDP\s*[·|]\s*(.+?)(?=\s+UNDP Tiers\b|\s+Nationals\b|\s+Locally recruited\b|\s+Closes\b|\s+Posted\b|$)",
+        context,
+        flags=re.I,
+    )
+    location = clean(location_match.group(1)) if location_match else ""
+
+    deadline_match = re.search(
+        r"Closes(?:\s+in\s+\d+\s+days?:)?\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        context,
+        flags=re.I,
+    )
+    deadline = deadline_match.group(1) if deadline_match else ""
+
+    ref_match = re.search(r"-DP-(\d{4,6})", href, flags=re.I)
+    requisition_id = ref_match.group(1) if ref_match else ""
+
+    official_url = (
+        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+        f"{UNDP_ORACLE_SITE}/job/{requisition_id}"
+        if requisition_id else href
+    )
+
+    return normalize_undp_oracle({
+        "Id": requisition_id,
+        "Title": title,
+        "EmployerName": "UNDP",
+        "PrimaryLocation": location,
+        "PostedDate": "",
+        "ExternalPostedEndDate": deadline,
+        "JobGrade": grade,
+        "ExternalDescriptionStr": context,
+        "ExternalUrl": official_url,
+    })
+
+
 def parse_unvacancies_undp_detail(html, source_url):
     soup = BeautifulSoup(html, "html.parser")
     lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
@@ -1528,10 +1582,13 @@ def parse_unvacancies_undp_detail(html, source_url):
 
 def fetch_undp_ipsa_unvacancies():
     errors = []
+    jobs = []
     detail_urls = set()
     page_urls = [
-        f"https://unvacancies.org/explore?organization=UNDP&page={page}"
-        for page in range(1, 16)
+        "https://unvacancies.org/explore?organization=UNDP&q=IPSA",
+        "https://unvacancies.org/explore?organization=UNDP&query=IPSA",
+        "https://unvacancies.org/explore?organization=UNDP&keyword=IPSA",
+        "https://unvacancies.org/explore?organization=UNDP&contract=International%20PSA",
     ]
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
@@ -1547,414 +1604,29 @@ def fetch_undp_ipsa_unvacancies():
                 jina_first=False,
             )
             soup = BeautifulSoup(text, "html.parser")
+
             for anchor in soup.select('a[href*="/jobs/"]'):
-                href = clean(anchor.get("href"))
-                if not href:
-                    continue
-                context = clean(anchor.parent.get_text(" ", strip=True))
-                if anchor.parent and anchor.parent.parent:
-                    context = clean(
-                        f"{context} {anchor.parent.parent.get_text(' ', strip=True)}"
-                    )
-                if re.search(r"\bIPSA-\d+\b|International PSA", context, flags=re.I):
-                    detail_urls.add(urljoin("https://unvacancies.org", href))
+                job = parse_unvacancies_undp_card(anchor)
+                if job:
+                    jobs.append(job)
+                    href = clean(anchor.get("href"))
+                    if href:
+                        detail_urls.add(urljoin("https://unvacancies.org", href))
         except Exception as exc:
-            errors.append(
-                f"{page_url}: {type(exc).__name__}: {exc}"
-            )
+            errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-        if len(detail_urls) >= 80:
-            break
-
-    jobs = []
-
-    def fetch_detail(url):
-        try:
-            text, _ = fetch_public_text(
-                url,
-                headers=headers,
-                jina_fallback=True,
-                jina_first=False,
-            )
-            return parse_unvacancies_undp_detail(text, url), None
-        except Exception as exc:
-            return None, f"{url}: {type(exc).__name__}: {exc}"
-
-    with ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [
-            executor.submit(fetch_detail, url)
-            for url in sorted(detail_urls)[:80]
-        ]
-        for future in as_completed(futures):
-            job, error = future.result()
-            if error:
-                errors.append(error)
-            elif job:
-                jobs.append(job)
-
-    jobs = dedupe(jobs)
-    return jobs, {
-        "status": "ok" if jobs else ("error" if errors else "empty"),
-        "count": len(jobs),
-        "pages_checked": len(page_urls),
+    unique = dedupe(jobs)
+    return unique, {
+        "status": "ok" if unique else ("error" if errors else "empty"),
+        "count": len(unique),
+        "queries": page_urls,
+        "card_jobs": len(jobs),
         "detail_urls": len(detail_urls),
         "errors": errors[:25],
         "source": "unvacancies.org (UNDP official application links)",
     }
 
 
-def parse_undp_oracle_job_html(text, url):
-    soup = BeautifulSoup(text, "html.parser")
-    lines = [
-        clean(x)
-        for x in soup.get_text("\n", strip=True).splitlines()
-        if clean(x)
-    ]
-    blob = " ".join(lines)
-
-    heading = soup.find("h1")
-    title = clean(heading.get_text(" ", strip=True)) if heading else ""
-
-    def field(pattern):
-        match = re.search(pattern, blob, flags=re.I)
-        return clean(match.group(1)) if match else ""
-
-    grade = field(r"Grade\s+([A-Z0-9]+-?\d+)")
-    if not re.search(
-        r"\bIPSA-?\d+\b",
-        f"{grade} {title} {blob}",
-        flags=re.I,
-    ):
-        return None
-
-    posting = field(
-        r"Posting\s+Date\s+(.+?)(?=\s+Apply\s+Before\s+)"
-    )
-    deadline = field(
-        r"Apply\s+Before\s+(.+?)(?=\s+Job\s+Schedule\s+)"
-    )
-    location = field(
-        r"Locations?\s+(.+?)(?=\s+Agency\s+)"
-    )
-    agency = field(
-        r"Agency\s+(.+?)(?=\s+Grade\s+)"
-    )
-    vacancy_type = field(
-        r"Vacancy\s+Type\s+(.+?)(?=\s+Practice\s+Area\s+)"
-    )
-    practice = field(
-        r"Practice\s+Area\s+(.+?)(?=\s+Bureau\s+)"
-    )
-    bureau = field(
-        r"Bureau\s+(.+?)(?=\s+Contract\s+Duration\s+)"
-    )
-    duration = field(
-        r"Contract\s+Duration\s+(.+?)(?=\s+Education\s+&\s+Work\s+Experience\s+)"
-    )
-
-    try:
-        description_start = next(
-            i for i, line in enumerate(lines)
-            if canon(line) == "job description"
-        )
-        description = clean(" ".join(lines[description_start + 1:]))
-    except StopIteration:
-        description = clean(blob)
-
-    def iso(value):
-        try:
-            return (
-                datetime.strptime(
-                    value.strip(),
-                    "%m/%d/%Y, %I:%M %p",
-                )
-                .replace(tzinfo=timezone.utc)
-                .isoformat()
-                .replace("+00:00", "Z")
-            )
-        except ValueError:
-            return value
-
-    match = re.search(r"/job/(\d+)", url)
-    requisition_id = match.group(1) if match else ""
-
-    return normalize_undp_oracle({
-        "Id": requisition_id,
-        "Title": title,
-        "EmployerName": agency or "UNDP",
-        "PrimaryLocation": location,
-        "PostedDate": iso(posting),
-        "ExternalPostedEndDate": iso(deadline),
-        "JobGrade": grade,
-        "JobType": vacancy_type,
-        "PracticeArea": practice,
-        "Bureau": bureau,
-        "ContractDuration": duration,
-        "ExternalDescriptionStr": description,
-        "ExternalUrl": url,
-    })
-
-
-def fetch_undp_ipsa_oracle_html():
-    search_url = (
-        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
-        f"{UNDP_ORACLE_SITE}/jobs?keyword=IPSA"
-    )
-    headers = {
-        "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
-        "Accept": "text/html,application/xhtml+xml",
-    }
-
-    try:
-        text, proxied = fetch_public_text(
-            search_url,
-            headers=headers,
-            jina_fallback=True,
-            jina_first=True,
-        )
-
-        urls = set()
-        for href in re.findall(
-            r'href=["\'](/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+[^"\']*)',
-            text,
-            flags=re.I,
-        ):
-            urls.add(urljoin(UNDP_ORACLE_BASE, href))
-
-        urls.update(
-            re.findall(
-                r'https://estm\.fa\.em2\.oraclecloud\.com/hcmUI/'
-                r'CandidateExperience/en/sites/CX_1/job/\d+[^)\s"\']*',
-                text,
-                flags=re.I,
-            )
-        )
-
-        if not urls:
-            for query in [
-                'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-" "2026"',
-                'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-"',
-            ]:
-                for job_url in search_bing_links(
-                    query,
-                    r"estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+",
-                ):
-                    urls.add(job_url)
-            urls = sorted(urls)
-
-        urls = sorted(urls)[:80]
-        jobs = []
-        sample_urls = urls[:10]
-        parsed_jobs = 0
-        errors = []
-
-        def fetch_detail(job_url):
-            try:
-                detail_text, _ = fetch_public_text(
-                    job_url,
-                    headers=headers,
-                    jina_fallback=True,
-                    jina_first=True,
-                )
-                return parse_undp_oracle_job_html(
-                    detail_text,
-                    job_url,
-                ), None
-            except Exception as exc:
-                return None, f"{job_url}: {type(exc).__name__}: {exc}"
-
-        with ThreadPoolExecutor(max_workers=8) as executor:
-            futures = [
-                executor.submit(fetch_detail, job_url)
-                for job_url in urls
-            ]
-            for future in as_completed(futures):
-                job, error = future.result()
-                if error:
-                    errors.append(error)
-                elif job:
-                    jobs.append(job)
-                    parsed_jobs += 1
-
-        jobs = dedupe(jobs)
-        return jobs, {
-            "status": "ok" if jobs else ("error" if errors else "empty"),
-            "count": len(jobs),
-            "endpoint": search_url,
-            "filter": "IPSA keyword",
-            "discovered_urls": len(urls),
-            "parsed_jobs": parsed_jobs,
-            "sample_urls": sample_urls,
-            "proxy": proxied,
-            "errors": errors[:25],
-        }
-    except Exception as exc:
-        return [], {
-            "status": "error",
-            "count": 0,
-            "endpoint": search_url,
-            "filter": "IPSA keyword",
-            "errors": [f"{type(exc).__name__}: {exc}"],
-        }
-
-
-def fetch_undp_ipsa_oracle_public():
-    jobs = []
-    errors = []
-    seen = set()
-    offset = 0
-    page_size = 100
-    max_pages = 5
-
-    list_url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
-
-    try:
-        for _ in range(max_pages):
-            response = requests.get(
-                list_url,
-                params={
-                    "onlyData": "true",
-                    "expand": "requisitionList.secondaryLocations",
-                    "finder": (
-                        f"findReqs;keyword=IPSA,siteNumber={UNDP_ORACLE_SITE},"
-                        f"useExactKeywordFlag=true,limit={page_size},"
-                        f"offset={offset},sortBy=POSTING_DATES_DESC"
-                    ),
-                },
-                headers={
-                    "User-Agent": "MyJOBS/1.0",
-                    "Accept": "application/json",
-                    "Ora-Irc-Language": "en",
-                    "Referer": f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs",
-                },
-                timeout=TIMEOUT,
-            )
-            response.raise_for_status()
-            payload = response.json()
-
-            requisitions = []
-            for item in payload.get("items", []) if isinstance(payload, dict) else []:
-                nested = item.get("requisitionList")
-                if isinstance(nested, list):
-                    requisitions.extend(nested)
-                elif isinstance(item, dict) and item.get("Id"):
-                    requisitions.append(item)
-
-            if not requisitions:
-                break
-
-            ids = []
-            for item in requisitions:
-                rid = clean(item.get("Id") or item.get("RequisitionId") or item.get("requisitionId"))
-                if rid and rid not in seen:
-                    seen.add(rid)
-                    ids.append(rid)
-
-            def get_detail(rid):
-                try:
-                    return rid, fetch_undp_oracle_detail(rid), None
-                except Exception as exc:
-                    return rid, None, f"{rid}: {type(exc).__name__}: {exc}"
-
-            with ThreadPoolExecutor(max_workers=6) as executor:
-                futures = [executor.submit(get_detail, rid) for rid in ids]
-                for future in as_completed(futures):
-                    rid, detail, err = future.result()
-                    base_item = dict(next(
-                        (
-                            row for row in requisitions
-                            if clean(row.get("Id") or row.get("RequisitionId") or row.get("requisitionId")) == rid
-                        ),
-                        {}
-                    ))
-                    if err:
-                        errors.append(err)
-                    if detail:
-                        base_item.update(detail)
-
-                    job = normalize_undp_oracle(base_item)
-                    if job:
-                        jobs.append(job)
-            has_more = bool(payload.get("hasMore")) if isinstance(payload, dict) else False
-            if not has_more:
-                break
-            offset += page_size
-
-        unique = dedupe(jobs)
-        return unique, {
-            "status": "ok" if unique else "empty",
-            "count": len(unique),
-            "endpoint": list_url,
-            "filter": "IPSA only",
-            "site": UNDP_ORACLE_SITE,
-            "errors": errors[:25],
-        }
-    except Exception as exc:
-        return [], {
-            "status": "error",
-            "count": 0,
-            "endpoint": list_url,
-            "filter": "IPSA only",
-            "errors": errors[:20] + [f"{type(exc).__name__}: {exc}"],
-        }
-
-def fetch_undp_ipsa_apify():
-    if not APIFY_API_TOKEN:
-        return [], {
-            "status": "skipped",
-            "count": 0,
-            "message": "APIFY_API_TOKEN not configured",
-            "actor": APIFY_UNDP_ACTOR,
-            "filter": "IPSA only",
-        }
-
-    url = (
-        "https://api.apify.com/v2/acts/"
-        + APIFY_UNDP_ACTOR.replace("/", "~")
-        + "/run-sync-get-dataset-items"
-    )
-    careers_url = "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions"
-
-    try:
-        response = requests.post(
-            url,
-            params={"token": APIFY_API_TOKEN},
-            json={
-                "careersUrls": [careers_url],
-                "maxJobsPerSite": 500,
-                "includeDetails": True,
-                "keyword": "IPSA",
-                "sortBy": "POSTING_DATES_DESC",
-                "maxRunSeconds": 240,
-            },
-            headers={"User-Agent": "MyJOBS/1.0"},
-            timeout=max(TIMEOUT, 90),
-        )
-        response.raise_for_status()
-        data = response.json()
-        jobs = []
-
-        for item in data if isinstance(data, list) else []:
-            job = normalize_undp_oracle(item)
-            if job:
-                jobs.append(job)
-
-        unique = dedupe(jobs)
-        return unique, {
-            "status": "ok" if unique else "empty",
-            "count": len(unique),
-            "actor": APIFY_UNDP_ACTOR,
-            "filter": "IPSA only",
-            "errors": [],
-        }
-    except Exception as exc:
-        return [], {
-            "status": "error",
-            "count": 0,
-            "actor": APIFY_UNDP_ACTOR,
-            "filter": "IPSA only",
-            "errors": [f"{type(exc).__name__}: {exc}"],
-        }
 
 def load_historical_source_jobs(source_name, max_commits=20):
     try:
