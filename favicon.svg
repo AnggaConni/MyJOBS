@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title">
+  <title>MyJOBS</title>
+  <rect width="64" height="64" rx="14" fill="#0b1220"/>
+  <path d="M14 16h9v17.5c0 5.9 2.2 8.9 6.7 8.9 4.4 0 6.5-3 6.5-8.9V16h9v17.8c0 11.2-5.2 16.8-15.5 16.8S14 45 14 33.8V16Z" fill="#fff"/>
+  <path d="M46 16h6v34h-6z" fill="#ff5d3a"/>
+</svg>
