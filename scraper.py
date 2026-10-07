@@ -909,7 +909,7 @@ def extract_un_p_level(*values):
 def normalize_un_search_result(item):
     title = clean(item.get("title") or item.get("name"))
     link = clean(item.get("url") or item.get("link"))
-    snippet = clean(item.get("snippet") or item.get("description") or item.get("text"))
+    snippet = html_description_to_text(item.get("snippet") or item.get("description") or item.get("text"))
     level = extract_un_p_level(title, snippet)
     if not level:
         return None
@@ -1355,9 +1355,58 @@ def fetch_un_professional_search():
     }
 
 
+def html_description_to_text(value):
+    """Convert source HTML/prose into readable paragraphs and bullet lines."""
+    raw = str(value or "")
+    if not raw.strip():
+        return ""
+
+    soup = BeautifulSoup(raw, "html.parser")
+
+    # When a source gives a complete webpage, discard navigation chrome.
+    for tag in soup.select("script, style, noscript, nav, header, footer, aside"):
+        tag.decompose()
+
+    root = soup.find("main") or soup.find("article") or soup
+
+    for br in root.find_all("br"):
+        br.replace_with("\n")
+
+    for li in root.find_all("li"):
+        text = li.get_text(" ", strip=True)
+        li.clear()
+        li.append(f"- {text}")
+
+    block_tags = {
+        "p", "div", "section", "article", "blockquote",
+        "h1", "h2", "h3", "h4", "h5", "h6", "li"
+    }
+    for tag in root.find_all(block_tags):
+        if tag.name != "li":
+            tag.insert_after("\n\n")
+
+    text = root.get_text("", strip=False)
+    text = text.replace("\xa0", " ")
+    text = text.replace("\r\n", "\n").replace("\r", "\n")
+    text = re.sub(r"[ \t]+", " ", text)
+    text = re.sub(r"[ \t]*\n[ \t]*", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+
+    lines = []
+    for line in text.split("\n"):
+        line = line.strip()
+        if line:
+            lines.append(line)
+
+    # Collapse accidental duplicate navigation fragments.
+    result = "\n\n".join(lines)
+    result = re.sub(r"(?:\s*\|\s*){3,}", " | ", result)
+    return result.strip()
+
+
 def normalize_undp_oracle(item):
     title = clean(item.get("title") or item.get("Title") or item.get("name"))
-    description = clean(
+    description = html_description_to_text(
         item.get("descriptionText")
         or item.get("shortDescription")
         or item.get("ExternalDescriptionStr")
@@ -1391,11 +1440,11 @@ def normalize_undp_oracle(item):
         or item.get("PostingEndDate")
     )
     salary_text = clean(item.get("salaryText") or item.get("SalaryText"))
-    qualifications = clean(
+    qualifications = html_description_to_text(
         item.get("qualificationsText")
         or item.get("ExternalQualificationsStr")
     )
-    responsibilities = clean(
+    responsibilities = html_description_to_text(
         item.get("responsibilitiesText")
         or item.get("ExternalResponsibilitiesStr")
     )
@@ -2417,7 +2466,7 @@ def parse_unvacancies_un_professional_detail(text, source_url):
         "expires_at": closed_match.group(1) if closed_match else "",
         "schedule_type": level,
         "salary": "",
-        "description": clean(blob[:6000]),
+        "description": html_description_to_text(soup)[:8000],
         "original_url": official_url or source_url,
         "search_query": "UN Secretariat P-level / unvacancies",
         "extensions": [level],
