@@ -1745,27 +1745,11 @@ def main():
         all_jobs.extend(un_api_jobs)
         sources["UN Careers — P-level / Apify"] = un_api_health
 
-    # UNDP now runs on Oracle Candidate Experience.
-    # Prefer the public HTML search/detail pages, then keep the older JSON/Apify
-    # adapters as fallbacks.
-    undp_html_jobs, undp_html_health = fetch_undp_ipsa_oracle_html()
-    all_jobs.extend(undp_html_jobs)
-    sources["UNDP — IPSA / Oracle HTML"] = undp_html_health
-
-    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
-        undp_mirror_jobs, undp_mirror_health = fetch_undp_ipsa_unvacancies()
-        all_jobs.extend(undp_mirror_jobs)
-        sources["UNDP — IPSA / unvacancies"] = undp_mirror_health
-
-    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
-        undp_bing_jobs, undp_bing_health = fetch_undp_ipsa_bing()
-        all_jobs.extend(undp_bing_jobs)
-        sources["UNDP — IPSA / Bing"] = undp_bing_health
-
-    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
-        undp_public_jobs, undp_public_health = fetch_undp_ipsa_oracle_public()
-        all_jobs.extend(undp_public_jobs)
-        sources["UNDP — IPSA / Oracle public JSON"] = undp_public_health
+    # UNDP IPSA: use the stable unvacancies live index, which links
+    # each listing back to the official UNDP application page.
+    undp_mirror_jobs, undp_mirror_health = fetch_undp_ipsa_unvacancies()
+    all_jobs.extend(undp_mirror_jobs)
+    sources["UNDP — IPSA / unvacancies"] = undp_mirror_health
 
     if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs) and APIFY_API_TOKEN:
         undp_api_jobs, undp_api_health = fetch_undp_ipsa_apify()
