@@ -1282,11 +1282,11 @@ def normalize_undp_oracle(item):
         )
         if clean(item.get(key))
     )
-    level_match = re.search(r"\b(IPSA-\d+)\b", level_blob, flags=re.I)
+    level_match = re.search(r"\bIPSA\s*-?\s*(\d+)\b", level_blob, flags=re.I)
     if not level_match:
         return None
 
-    level = level_match.group(1).upper()
+    level = f"IPSA-{level_match.group(1)}"
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
@@ -1398,11 +1398,11 @@ def normalize_undp_bing_result(item):
     url = clean(item.get("url"))
     blob = " ".join([title, snippet])
 
-    grade_match = re.search(r"\b(IPSA-\d+)\b", blob, flags=re.I)
+    grade_match = re.search(r"\bIPSA\s*-?\s*(\d+)\b", blob, flags=re.I)
     if not grade_match:
         return None
 
-    level = grade_match.group(1).upper()
+    level = f"IPSA-{grade_match.group(1)}"
 
     posting_match = re.search(
         r"Posting\s+Date\s+(\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)",
