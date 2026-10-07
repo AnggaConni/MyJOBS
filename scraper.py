@@ -323,7 +323,7 @@ def normalize_reliefweb(item):
         "extensions": [clean(experience.get("name"))] if experience.get("name") else [],
         "remote": False,
         "status": clean(fields.get("status") or "current"),
-        "o​cha": "ocha" in canon(source_name),
+        "ocha": "ocha" in canon(source_name),
     }
 
 
@@ -406,7 +406,8 @@ def fetch_un_careers():
             guid = clean(text_from_xml(item.find("guid")))
 
             blob = f"{title} {description}"
-            if not any(canon(term) in canon(blob) for term in INDONESIA_TERMS):
+            kalbar_blob = canon(blob)
+            if not any(canon(term) in kalbar_blob for term in CITIES):
                 continue
 
             deadline = extract_deadline(description)
@@ -418,7 +419,7 @@ def fetch_un_careers():
                 "company": "United Nations Secretariat",
                 "location": city_of(blob),
                 "district": city_of(blob),
-                "province": "West Kalimantan" if city_of(blob) in CITIES else "",
+                "province": "West Kalimantan",
                 "country": "Indonesia",
                 "via": "UN Careers",
                 "source": "UN Careers",
