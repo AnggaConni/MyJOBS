@@ -209,6 +209,13 @@ def extract_deadline(text):
             return match.group(1)
     return ""
 
+def make_source_details(source, **kwargs):
+    details = {"source": source}
+    for key, value in kwargs.items():
+        if value not in (None, "", [], {}):
+            details[key] = value
+    return details
+
 def normalize_google(item, query, market_country="Indonesia"):
     detected = item.get("detected_extensions") or {}
     apply_options = item.get("apply_options") or []
@@ -246,6 +253,14 @@ def normalize_google(item, query, market_country="Indonesia"):
         "remote": bool(detected.get("work_from_home")),
         "status": "current",
         "country_code": next((m["code"] for m in ASEAN_COUNTRIES if m["country"] == market_country), "ID"),
+        "details": make_source_details(
+            "Google Jobs",
+            via=clean(item.get("via")),
+            posted_at=clean(detected.get("posted_at")),
+            schedule_type=clean(detected.get("schedule_type")),
+            salary=clean(detected.get("salary")),
+            extensions=[clean(x) for x in (item.get("extensions") or []) if clean(x)],
+        ),
     }
 
 def fetch_google():
