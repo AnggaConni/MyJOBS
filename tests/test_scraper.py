@@ -8,6 +8,9 @@ from scraper import (
     filter_expired,
     make_id,
     normalize_google,
+    extract_un_p_level,
+    normalize_un_search_result,
+    looks_like_undp_ipsa,
     preserve_text,
     normalize_un_professional,
     parse_datetime,
@@ -99,6 +102,36 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["country"], "Malaysia")
         self.assertEqual(job["region"], "ASEAN")
         self.assertEqual(job["country_code"], "MY")
+
+    def test_un_p_level_variants(self):
+        self.assertEqual(extract_un_p_level("P-4"), "P-4")
+        self.assertEqual(extract_un_p_level("Professional and Higher Categories, P 3"), "P-3")
+        self.assertEqual(extract_un_p_level("Grade: P.2"), "P-2")
+
+    def test_un_search_result_normalization(self):
+        job = normalize_un_search_result({
+            "title": "Programme Officer",
+            "url": "https://careers.un.org/jobopening/12345",
+            "snippet": "Professional and Higher Categories, P-3 Duty Station: Nairobi Deadline: Jun 18, 2026",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "P-3")
+        self.assertEqual(job["source_job_id"], "12345")
+
+    def test_undp_ipsa_candidate_detection(self):
+        self.assertTrue(looks_like_undp_ipsa({
+            "Id": "123",
+            "VacancyType": "International Personnel Service Agreement",
+        }))
+        self.assertTrue(looks_like_undp_ipsa({
+            "Id": "124",
+            "Title": "Programme Specialist, IPSA-10",
+        }))
+        self.assertFalse(looks_like_undp_ipsa({
+            "Id": "125",
+            "Title": "Programme Specialist, P-3",
+            "VacancyType": "Service Contract",
+        }))
 
     def test_un_p_normalization(self):
         job = normalize_un_professional(
