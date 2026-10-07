@@ -490,6 +490,7 @@ def normalize_toploker(item):
     title = clean(item.get("title"))
     company = clean(item.get("company")) or "TopLoker employer"
     location = clean(item.get("location"))
+    location = re.sub(r"\s*\*\s*\*\s*\*\s*$", "", location).strip()
     posted_at = clean(item.get("posted_at"))
     expires_at = clean(item.get("expires_at"))
     description = clean(item.get("description"))
@@ -1658,6 +1659,14 @@ def load_historical_source_jobs(source_name, max_commits=20):
     return []
 
 
+def load_previous_jobs():
+    try:
+        with open("vacancy.json", "r", encoding="utf-8") as handle:
+            payload = json.load(handle)
+        return payload.get("jobs") or []
+    except Exception:
+        return []
+
 def carry_forward_source_jobs(all_jobs, previous_jobs, source_name):
     if any(job.get("source") == source_name for job in all_jobs):
         return 0
@@ -1724,7 +1733,7 @@ def summary(jobs):
 def main():
     started = time.time()
     all_jobs, sources = [], {}
-    previous_jobs = []
+    previous_jobs = load_previous_jobs()
 
     for fetcher, name in [
         (fetch_google, "Google Jobs"),
@@ -1744,6 +1753,12 @@ def main():
         un_api_jobs, un_api_health = fetch_un_professional_apify()
         all_jobs.extend(un_api_jobs)
         sources["UN Careers — P-level / Apify"] = un_api_health
+
+    # UNDP IPSA: use Bing-indexed official Oracle job pages first. This is a
+    # resilient fallback when Oracle's public REST endpoint is empty from CI.
+    undp_bing_jobs, undp_bing_health = fetch_undp_ipsa_bing()
+    all_jobs.extend(undp_bing_jobs)
+    sources["UNDP — IPSA / Bing Oracle"] = undp_bing_health
 
     # UNDP IPSA: use the stable unvacancies live index, which links
     # each listing back to the official UNDP application page.
