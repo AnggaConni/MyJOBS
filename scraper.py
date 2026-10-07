@@ -679,15 +679,16 @@ def parse_undp_job_anchor(anchor):
 
 def fetch_undp_ipsa_global():
     try:
-        response = requests.get(UNDP_URL, headers={"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}, timeout=TIMEOUT)
+        response = requests.get(
+            UNDP_URL,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"},
+            timeout=TIMEOUT,
+        )
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
         jobs = []
 
         for anchor in soup.select("a[href]"):
-            text = clean(anchor.get_text(" ", strip=True))
-            if not re.search(r"\bPost level\s+IPSA-\d+\b", text, flags=re.I):
-                continue
             job = parse_undp_job_anchor(anchor)
             if job:
                 jobs.append(job)
@@ -708,6 +709,7 @@ def fetch_undp_ipsa_global():
             "filter": "IPSA only",
             "errors": [f"{type(exc).__name__}: {exc}"],
         }
+
 
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
