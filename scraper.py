@@ -993,7 +993,7 @@ def normalize_un_professional(item):
     level = extract_un_p_level(description, fields.get("Category and Level"))
     return {
         "id": make_id("UN P", guid or link, title),
-        "source_job_id": clean(fields.get("Job ID") or guid or link),
+        "source_job_id": clean(fields.get("Job ID")),
         "title": title,
         "company": "United Nations Secretariat",
         "location": duty_station or "Global",
@@ -1038,7 +1038,7 @@ def fetch_un_professional_global():
         for item in root.findall(".//item"):
             description = xml_text(item.find("description"))
             category_ok = "Professional and Higher Categories" in description
-            level_ok = bool(re.search(r"\bP-[1-7]\b", description, flags=re.I))
+            level_ok = bool(extract_un_p_level(description))
             if not (category_ok and level_ok):
                 continue
             jobs.append(normalize_un_professional(item))
