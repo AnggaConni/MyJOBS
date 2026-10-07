@@ -900,6 +900,77 @@ def parse_key_value_fields(text):
             fields[label] = clean(value)
     return fields
 
+def extract_un_p_level(*values):
+    blob = " ".join(clean(value) for value in values if clean(value))
+    match = re.search(r"\bP\s*[-–—.]?\s*([1-7])\b", blob, flags=re.I)
+    return f"P-{match.group(1)}" if match else ""
+
+
+def normalize_un_search_result(item):
+    title = clean(item.get("title") or item.get("name"))
+    link = clean(item.get("url") or item.get("link"))
+    snippet = clean(item.get("snippet") or item.get("description") or item.get("text"))
+    level = extract_un_p_level(title, snippet)
+    if not level:
+        return None
+
+    location = ""
+    for pattern in (
+        r"Duty Station\s*[:|-]\s*([^|;]+)",
+        r"Location\s*[:|-]\s*([^|;]+)",
+    ):
+        match = re.search(pattern, snippet, flags=re.I)
+        if match:
+            location = clean(match.group(1))
+            break
+
+    deadline = ""
+    for pattern in (
+        r"Deadline\s*[:|-]\s*([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})",
+        r"Apply(?:ing)?\s+by\s*[:|-]?\s*([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})",
+        r"Closes?\s*[:|-]?\s*(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+    ):
+        match = re.search(pattern, snippet, flags=re.I)
+        if match:
+            deadline = clean(match.group(1))
+            break
+
+    job_id_match = re.search(r"/(?:job-opening|jobopenings|job-opening-details|job)/(\d+)", link, flags=re.I)
+    job_id = job_id_match.group(1) if job_id_match else ""
+
+    return {
+        "id": make_id("UN P", job_id or link or title, title),
+        "source_job_id": job_id,
+        "title": title,
+        "company": "United Nations Secretariat",
+        "location": location or "Global",
+        "district": location or "Global",
+        "province": "",
+        "country": "Global",
+        "via": "UN Careers",
+        "source": "UN Careers — P-level",
+        "source_family": "UN Secretariat — Professional",
+        "posted_at": "",
+        "expires_at": deadline,
+        "schedule_type": level,
+        "salary": "",
+        "description": snippet,
+        "original_url": link or "https://careers.un.org/job-openings",
+        "search_query": "UN Careers P-level search",
+        "extensions": [level],
+        "remote": "home-based" in snippet.lower() or "home based" in snippet.lower(),
+        "status": "current",
+        "contract_level": level,
+        "details": make_source_details(
+            "UN Careers",
+            job_id=job_id,
+            level=level,
+            duty_station=location,
+            deadline=deadline,
+        ),
+    }
+
+
 def normalize_un_professional(item):
     if isinstance(item, dict):
         title = clean(item.get("title"))
@@ -911,8 +982,7 @@ def normalize_un_professional(item):
         link = xml_text(item.find("link"))
         description = xml_text(item.find("description"))
         guid = xml_text(item.find("guid"))
-    level_match = re.search(r"\bP-([1-7])\b", description, flags=re.I)
-    level = f"P-{level_match.group(1)}" if level_match else ""
+    level = extract_un_p_level(description)
     duty_station = extract_un_field(description, "Duty Station", "Staffing Exercise|Date Posted|Deadline")
     posted = extract_un_field(description, "Date Posted", "Deadline|Job ID|Job Network")
     deadline = extract_un_field(description, "Deadline", "Job ID|Job Network|Job Family|Category")
@@ -920,10 +990,10 @@ def normalize_un_professional(item):
     network = extract_un_field(description, "Job Network", "Job Family|Category|Recruitment Type|Department/Office")
     family = extract_un_field(description, "Job Family", "Category|Recruitment Type|Department/Office")
     fields = parse_key_value_fields(description)
-    level_match = re.search(r"\bP-([1-7])\b", description, flags=re.I)
-    level = f"P-{level_match.group(1)}" if level_match else clean(fields.get("Category and Level"))
+    level = extract_un_p_level(description, fields.get("Category and Level"))
     return {
         "id": make_id("UN P", guid or link, title),
+        "source_job_id": clean(fields.get("Job ID") or guid or link),
         "title": title,
         "company": "United Nations Secretariat",
         "location": duty_station or "Global",
@@ -1130,12 +1200,20 @@ def normalize_un_apify(item):
     title = clean(item.get("title") or item.get("jobTitle") or item.get("name"))
     link = clean(item.get("url") or item.get("applyUrl") or item.get("jobUrl"))
     description = clean(item.get("description") or item.get("jobDescription") or item.get("summary"))
-    level = clean(item.get("level") or item.get("categoryAndLevel") or item.get("grade"))
-    match = re.search(r"\bP-([1-7])\b", f"{level} {description}", flags=re.I)
-    if not match:
+    level = extract_un_p_level(
+        item.get("level"),
+        item.get("postLevel"),
+        item.get("jobLevel"),
+        item.get("categoryAndLevel"),
+        item.get("category_level"),
+        item.get("grade"),
+        item.get("positionLevel"),
+        item.get("title"),
+        item.get("description"),
+        item.get("jobDescription"),
+    )
+    if not level:
         return None
-
-    level = f"P-{match.group(1)}"
     duty = clean(item.get("dutyStation") or item.get("location"))
     deadline = clean(item.get("deadline") or item.get("closingDate"))
     posted = clean(item.get("datePosted") or item.get("publishedAt"))
@@ -1148,6 +1226,7 @@ def normalize_un_apify(item):
 
     return {
         "id": make_id("UN P", job_id or link or title, title),
+        "source_job_id": job_id,
         "title": title,
         "company": "United Nations Secretariat",
         "location": duty or "Global",
@@ -1230,6 +1309,51 @@ def fetch_un_professional_apify():
             "filter": "P-1 through P-7 only",
             "errors": [f"{type(exc).__name__}: {exc}"],
         }
+
+def fetch_un_professional_search():
+    queries = [
+        'site:careers.un.org "Professional and Higher Categories" "P-1"',
+        'site:careers.un.org "Professional and Higher Categories" "P-2"',
+        'site:careers.un.org "Professional and Higher Categories" "P-3"',
+        'site:careers.un.org "Professional and Higher Categories" "P-4"',
+        'site:careers.un.org "Professional and Higher Categories" "P-5"',
+        'site:careers.un.org "Professional and Higher Categories" "P-6"',
+        'site:careers.un.org "Professional and Higher Categories" "P-7"',
+    ]
+    items = []
+    seen = set()
+    errors = []
+
+    for query in queries:
+        try:
+            for result in search_bing_results(query, r"careers\.un\.org/"):
+                url = clean(result.get("url")).split("#", 1)[0]
+                if url and url not in seen:
+                    seen.add(url)
+                    items.append(result)
+            for url in search_duckduckgo_links(query, r"careers\.un\.org/"):
+                url = clean(url).split("#", 1)[0]
+                if url and url not in seen:
+                    seen.add(url)
+                    items.append({"url": url, "title": "", "snippet": ""})
+        except Exception as exc:
+            errors.append(f"{query}: {type(exc).__name__}: {exc}")
+
+    jobs = []
+    for item in items[:150]:
+        job = normalize_un_search_result(item)
+        if job:
+            jobs.append(job)
+
+    unique = dedupe(jobs)
+    return unique, {
+        "status": "ok" if unique else ("error" if errors else "empty"),
+        "count": len(unique),
+        "queries": queries,
+        "discovered_results": len(items),
+        "errors": errors[:25],
+    }
+
 
 def normalize_undp_oracle(item):
     title = clean(item.get("title") or item.get("Title") or item.get("name"))
@@ -1344,6 +1468,7 @@ def normalize_undp_oracle(item):
         "details": make_source_details(
             "UNDP Careers",
             requisition_id=req_id,
+            source_job_id=req_id,
             post_level=level,
             job_level=clean(item.get("JobLevel")),
             job_grade=clean(item.get("JobGrade")),
@@ -1485,6 +1610,35 @@ def fetch_undp_oracle_detail(requisition_id):
     return first_json_item(response.json())
 
 
+def looks_like_undp_ipsa(row):
+    row_blob = " ".join(
+        clean(row.get(key))
+        for key in (
+            "Title",
+            "ShortDescriptionStr",
+            "ContractType",
+            "JobType",
+            "WorkerType",
+            "VacancyType",
+            "CategoryAndLevel",
+            "JobGrade",
+            "JobLevel",
+            "EmploymentType",
+        )
+        if clean(row.get(key))
+    )
+    contract_type = canon(
+        row.get("ContractType")
+        or row.get("VacancyType")
+        or row.get("JobType")
+        or row.get("EmploymentType")
+    )
+    return (
+        "international personnel service agreement" in contract_type
+        or bool(re.search(r"\bIPSA\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
+    )
+
+
 def fetch_undp_ipsa_oracle_public():
     list_url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
     page_size = 100
@@ -1560,12 +1714,12 @@ def fetch_undp_ipsa_oracle_public():
             if not rid or rid in seen:
                 continue
             seen.add(rid)
-            unique_rows.append((rid, row))
+            if looks_like_undp_ipsa(row):
+                unique_rows.append((rid, row))
 
-        listed_rows += len(unique_rows)
-
+        listed_rows += len(rows)
         if not row_preview:
-            for rid, row in unique_rows[:12]:
+            for rid, row in rows[:12]:
                 row_preview.append({
                     "id": rid,
                     "title": clean(row.get("Title")),
@@ -1574,6 +1728,7 @@ def fetch_undp_ipsa_oracle_public():
                     "worker_type": clean(row.get("WorkerType")),
                     "vacancy_type": clean(row.get("VacancyType")),
                     "short_description": clean(row.get("ShortDescriptionStr"))[:180],
+                    "is_ipsa_candidate": looks_like_undp_ipsa(row),
                 })
 
         def get_detail(pair):
@@ -1584,18 +1739,16 @@ def fetch_undp_ipsa_oracle_public():
                 return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
 
         detail_attempts += len(unique_rows)
-        with ThreadPoolExecutor(max_workers=12) as executor:
+        with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [executor.submit(get_detail, pair) for pair in unique_rows]
             for future in as_completed(futures):
                 rid, row, detail, err = future.result()
-                if err:
-                    errors.append(err)
-                    continue
-                if not detail:
-                    continue
-
                 merged = dict(row)
-                merged.update(detail)
+                if detail:
+                    merged.update(detail)
+                elif err:
+                    errors.append(err)
+
                 job = normalize_undp_oracle(merged)
                 if job:
                     jobs.append(job)
@@ -2266,9 +2419,20 @@ def filter_expired(jobs):
 def dedupe(jobs):
     unique = {}
     for job in jobs:
+        source = canon(job.get("source"))
+        source_id = canon(
+            job.get("source_job_id")
+            or job.get("requisition_id")
+            or job.get("job_id")
+        )
         url = canon(job.get("original_url"))
         title = canon(job.get("title"))
-        key = f"url:{url}" if url and url != "#" else f"text:{title}|{canon(job.get('company'))}|{canon(job.get('location'))}"
+        if source_id:
+            key = f"source:{source}|id:{source_id}"
+        elif url and url != "#":
+            key = f"url:{url}"
+        else:
+            key = f"text:{title}|{canon(job.get('company'))}|{canon(job.get('location'))}"
         if key not in unique:
             unique[key] = job
     return list(unique.values())
@@ -2301,11 +2465,20 @@ def main():
         all_jobs.extend(jobs)
         sources[name] = health
 
-    # If direct UN Careers access is blocked, use the optional Apify adapter.
-    if not any(job.get("source") == "UN Careers — P-level" for job in all_jobs) and APIFY_API_TOKEN:
+    # Enrich UN P-level from Apify when configured. Do not require RSS to
+    # be empty: the RSS endpoint can be partial even when the live vacancy pool is larger.
+    un_p_count = sum(job.get("source") == "UN Careers — P-level" for job in all_jobs)
+    if APIFY_API_TOKEN:
         un_api_jobs, un_api_health = fetch_un_professional_apify()
         all_jobs.extend(un_api_jobs)
         sources["UN Careers — P-level / Apify"] = un_api_health
+
+    un_p_count = sum(job.get("source") == "UN Careers — P-level" for job in all_jobs)
+    if un_p_count < 20:
+        un_search_jobs, un_search_health = fetch_un_professional_search()
+        all_jobs.extend(un_search_jobs)
+        sources["UN Careers — P-level / Search"] = un_search_health
+
 
     # UNDP IPSA: use Bing-indexed official Oracle job pages first. This is a
     # resilient fallback when Oracle's public REST endpoint is empty from CI.
