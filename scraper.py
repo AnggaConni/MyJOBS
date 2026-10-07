@@ -1632,19 +1632,37 @@ def parse_unvacancies_undp_detail(html, source_url):
     lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
     blob = " ".join(lines)
 
-    grade_match = re.search(r"\b(IPSA-\d+)\b", blob, flags=re.I)
+    grade_match = re.search(r"\bIPSA-?(\d+)\b", blob, flags=re.I)
+    if not grade_match:
+        grade_match = re.search(r"ipsa-?(\d+)", source_url, flags=re.I)
     if not grade_match:
         return None
 
-    grade = grade_match.group(1).upper()
+    grade = f"IPSA-{grade_match.group(1)}".upper()
+
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
+    if not title:
+        title_match = re.search(
+            r"(?:^|\n)\s*(.+?)\s+(?:\n|UNDP\s*[·|])",
+            html,
+            flags=re.I,
+        )
+        title = clean(title_match.group(1)) if title_match else ""
+    if not title:
+        title = clean(next((line for line in lines if line and "UNDP" not in line and "IPSA" not in line), ""))
 
     location_match = re.search(
-        r"UNDP\s*[·|]\s*(.+?)(?=\s+Posted\b|\s+Grade\b|\s+IPSA-\d+\b)",
+        r"UNDP\s*[·|]\s*(.+?)(?=\s+Posted\b|\s+Grade\b|\s+IPSA-?\d+\b)",
         blob,
         flags=re.I,
     )
+    if not location_match:
+        location_match = re.search(
+            r"UNDP[^\n]{0,40}?[·|]\s*([^\n]+?)(?=\s+Posted\b|\s+Grade\b)",
+            blob,
+            flags=re.I,
+        )
     location = clean(location_match.group(1)) if location_match else ""
 
     posted_match = re.search(
@@ -1668,6 +1686,14 @@ def parse_unvacancies_undp_detail(html, source_url):
         ):
             official_url = href
             break
+
+    if not official_url:
+        official_match = re.search(
+            r"https://estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/[^\s)\]]+",
+            html,
+            flags=re.I,
+        )
+        official_url = clean(official_match.group(0)) if official_match else ""
 
     ref_match = re.search(r"(?:-DP-|/job/)(\d{4,6})", source_url, flags=re.I)
     requisition_id = ref_match.group(1) if ref_match else ""

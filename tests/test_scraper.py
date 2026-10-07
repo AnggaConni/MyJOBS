@@ -249,6 +249,34 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["location"], "Libreville, Gabon")
         self.assertIn("/job/37266", job["original_url"])
 
+    def test_unvacancies_undp_markdown_detail(self):
+        text = """
+        Project Manager, IPSA11, Dakar, Senegal (UNCDF)
+        UNDP · Dakar, Senegal
+        IPSA-11 International PSA Closes in 4 days
+        # Project Manager, IPSA11, Dakar, Senegal (UNCDF)
+        UNDP United Nations Development Programme Direct from UNDP careers
+        Dakar, Senegal Posted 30 Sep 2026
+        Who can apply
+        UNDP Tiers 0, 1 & 2 applicants only
+        Grade
+        IPSA-11
+        Contract
+        International PSA · 1 year
+        Closes
+        7 Oct 2026
+        Description
+        Lead project implementation of UNCDF programmes.
+        """
+        job = parse_unvacancies_undp_detail(
+            text,
+            "https://unvacancies.org/jobs/project-manager-ipsa11-dakar-senegal-uncdf-open-to-tier-0-1-2-applicants-DP-37195",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-11")
+        self.assertEqual(job["location"], "Dakar, Senegal")
+        self.assertIn("/job/37195", job["original_url"])
+
     def test_dedupe_by_url(self):
         job = {
             "title": "A",
