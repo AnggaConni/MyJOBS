@@ -84,7 +84,7 @@ button{cursor:pointer}
 .modal-head-main{display:flex;gap:14px;min-width:0}.modal-logo{width:54px;height:54px;flex:0 0 54px;border-radius:10px;background:#edf1f5;display:grid;place-items:center;color:#536174;font-weight:900;font-size:17px}
 .modal-kicker{font-size:11px;color:var(--muted);font-weight:800;margin-bottom:4px}.modal-title{font-size:23px;line-height:1.2;margin:0 0 5px;letter-spacing:-.02em}.modal-company{font-size:13px;font-weight:800;color:#445064}
 .modal-close{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:21px;line-height:1;color:#566274}
-.modal-body{padding:20px 24px;overflow:auto}.modal-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.modal-meta span{padding:6px 9px;border:1px solid #e6eaf0;background:#f8fafc;border-radius:999px;font-size:10px;font-weight:800;color:#526074}
+.modal-body{padding:20px 24px;overflow:auto}.modal-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.modal-facts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0;border:1px solid #e8ecf1;border-radius:10px;overflow:hidden;margin-bottom:22px}.fact{padding:10px 12px;border-bottom:1px solid #edf0f3}.fact:nth-child(odd){border-right:1px solid #edf0f3}.fact-label{font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#8a95a5;font-weight:900}.fact-value{font-size:11px;font-weight:800;color:#364152;margin-top:3px;word-break:break-word}@media(max-width:640px){.modal-facts{grid-template-columns:1fr}.fact:nth-child(odd){border-right:0}}.modal-meta span{padding:6px 9px;border:1px solid #e6eaf0;background:#f8fafc;border-radius:999px;font-size:10px;font-weight:800;color:#526074}
 .modal-section{margin-bottom:22px}.modal-section h3{margin:0 0 8px;font-size:13px}.modal-description{font-size:13px;line-height:1.7;color:#3d4859}.modal-description p{margin:0 0 11px}.modal-description ul{margin:6px 0 12px;padding-left:20px}.modal-foot{padding:15px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff}.modal-source{font-size:10px;color:var(--muted)}.apply-btn{border:0;background:var(--blue);color:#fff;padding:11px 16px;border-radius:8px;font-size:12px;font-weight:900;display:inline-flex;align-items:center;gap:7px}.apply-btn.disabled{background:#98a2b3;pointer-events:none}body.modal-open{overflow:hidden}
 @media(max-width:640px){.modal-backdrop{padding:0}.job-modal{max-height:100vh;height:100vh;border-radius:0}.modal-head{padding:18px}.modal-body{padding:18px}.modal-foot{padding:13px 18px}.modal-title{font-size:19px}.apply-btn{flex:1;justify-content:center}.modal-source{max-width:46%}}
 @media(max-width:1050px){.layout{grid-template-columns:200px minmax(0,1fr)}.right{display:none}}
@@ -195,6 +195,7 @@ button{cursor:pointer}
     </div>
     <div class="modal-body">
       <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-facts" id="modalFacts"></div>
       <div class="modal-section"><h3>About this opportunity</h3><div class="modal-description" id="modalDescription"></div></div>
       <div class="modal-section"><h3>Source</h3><div class="modal-description" id="modalSourceDetails"></div></div>
     </div>
@@ -319,6 +320,7 @@ button{cursor:pointer}
     $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP International (IPSA)":(j.source||"Job opportunity"));
     $("#modalJobTitle").textContent=j.title||"Untitled opportunity";
     $("#modalCompany").textContent=j.company||"Unknown company";
+
     var meta=[];
     if(j.location||j.district)meta.push("Location · "+(j.location||j.district));
     if(j.schedule_type)meta.push("Employment · "+j.schedule_type);
@@ -326,10 +328,38 @@ button{cursor:pointer}
     if(j.remote)meta.push("Remote");
     if(j.expires_at)meta.push("Deadline · "+j.expires_at);
     $("#modalMeta").innerHTML=meta.map(function(x){return "<span>"+esc(x)+"</span>"}).join("");
+
+    var details=j.details||{};
+    var factLabels={
+      job_id:"Job ID",job_network:"Job Network",job_family:"Job Family",
+      category_level:"Category & Level",recruitment_type:"Recruitment Type",
+      duty_station:"Duty Station",department_office:"Department / Office",
+      date_posted:"Date Posted",deadline:"Deadline",post_level:"Post Level",
+      apply_by:"Apply By",agency:"Agency",experience:"Experience",
+      type:"Job Type",organization:"Organisation",country:"Country",city:"City",
+      date_created:"Published",date_closing:"Closing"
+    };
+    var facts=[];
+    Object.keys(details).forEach(function(key){
+      if(key==="source")return;
+      var value=details[key];
+      if(Array.isArray(value))value=value.join(", ");
+      if(value===null||value===undefined||String(value).trim()==="")return;
+      facts.push("<div class='fact'><div class='fact-label'>"+esc(factLabels[key]||key.replace(/_/g," "))+"</div><div class='fact-value'>"+esc(value)+"</div></div>");
+    });
+    if(!facts.length && j.source)facts.push("<div class='fact'><div class='fact-label'>Source</div><div class='fact-value'>"+esc(j.source)+"</div></div>");
+    $("#modalFacts").innerHTML=facts.join("");
+
     $("#modalDescription").innerHTML=formatDescription(j.description);
     $("#modalSourceDetails").innerHTML="<p><strong>"+esc(j.source||"Original source")+"</strong><br>"+esc(j.via||j.source_family||"Source listing")+"</p>";
+
     var apply=$("#modalApply");
-    if(j.original_url&&j.original_url!=="#"){apply.href=j.original_url;apply.classList.remove("disabled");apply.textContent="Apply on source ↗"}else{apply.removeAttribute("href");apply.classList.add("disabled");apply.textContent="Source link unavailable"}
+    if(j.original_url&&j.original_url!=="#"){
+      apply.href=j.original_url;apply.classList.remove("disabled");apply.textContent="Apply on source ↗";
+    }else{
+      apply.removeAttribute("href");apply.classList.add("disabled");apply.textContent="Source link unavailable";
+    }
+
     $("#modalSourceLabel").textContent=(j.source?"Source: "+j.source:"Original source")+" · MyJOBS does not collect applications.";
     $("#jobModal").classList.add("open");$("#jobModal").setAttribute("aria-hidden","false");document.body.classList.add("modal-open");
     setTimeout(function(){$("#modalClose").focus()},0);
