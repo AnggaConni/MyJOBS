@@ -1,9 +1,9 @@
 {
   "name": "MyJOBS",
-  "scope": "Indonesia",
-  "strategy": "Indonesia-first",
-  "max_google_queries_per_run": 8,
-  "regions": "Nationwide Indonesia",
+  "scope": "Indonesia + ASEAN",
+  "strategy": "Indonesia-first, ASEAN Phase 2",
+  "max_google_queries_per_run": 19,
+  "regions": "Nationwide Indonesia + all 11 ASEAN member states",
   "sources": ["Google Jobs", "Loker.id", "ReliefWeb", "UN Careers"],
   "expiry_policy": {
     "stale_days": 7,
@@ -11,5 +11,9 @@
     "remove_when_expires_at_is_before_now": true,
     "do_not_infer_deadlines_for_sources_without_deadline": true
   },
-  "future_expansion": "ASEAN-ready architecture; expansion requires source, privacy and jurisdiction review"
+  "asean_phase_2": {
+    "enabled": true,
+    "members": ["Brunei Darussalam","Cambodia","Indonesia","Lao PDR","Malaysia","Myanmar","Philippines","Singapore","Thailand","Timor-Leste","Viet Nam"],
+    "strategy": "Google Jobs market query per ASEAN member; ReliefWeb remains global"
+  }
 }
