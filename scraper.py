@@ -2793,17 +2793,18 @@ def main():
     if APIFY_API_TOKEN:
         un_api_jobs, un_api_health = fetch_un_professional_apify()
         all_jobs.extend(un_api_jobs)
-        sources["UN Careers — P-level / Apify"] = un_api_health
+        sources["UN Careers / Apify"] = un_api_health
 
-    un_p_count = sum(job.get("source") == "UN Careers — P-level" for job in all_jobs)
-    if un_p_count < 20:
-        un_search_jobs, un_search_health = fetch_un_professional_search()
-        all_jobs.extend(un_search_jobs)
-        sources["UN Careers — P-level / Search"] = un_search_health
+    # Broad UN Secretariat ingestion: always crawl the mirror so the frontend
+    # can classify P-1..P-7 without Python dropping other UN roles.
+    un_mirror_jobs, un_mirror_health = fetch_un_professional_unvacancies()
+    all_jobs.extend(un_mirror_jobs)
+    sources["UN Careers / unvacancies"] = un_mirror_health
 
-        un_mirror_jobs, un_mirror_health = fetch_un_professional_unvacancies()
-        all_jobs.extend(un_mirror_jobs)
-        sources["UN Careers — P-level / unvacancies"] = un_mirror_health
+    # Optional search fallback supplements the broad mirror when it looks thin.
+    un_search_jobs, un_search_health = fetch_un_professional_search()
+    all_jobs.extend(un_search_jobs)
+    sources["UN Careers / Search"] = un_search_health
 
 
     # UNDP IPSA: use Bing-indexed official Oracle job pages first. This is a
