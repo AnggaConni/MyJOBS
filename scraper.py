@@ -264,7 +264,10 @@ def normalize_reliefweb(item):
     source_name = clean(source.get("name") or source.get("shortname"))
     country_name = clean(country.get("name") or country.get("shortname"))
     city_name = clean(city.get("name"))
-    closing_date = clean((fields.get("date") or {}).get("closing"))
+    date_info = first_reliefweb_value(fields.get("date"))
+    job_type = first_reliefweb_value(fields.get("type"))
+    closing_date = clean(date_info.get("closing"))
+    created_date = clean(date_info.get("created"))
     blob = f"{fields.get('title','')} {fields.get('body','')} {city_name} {country_name}"
 
     return {
@@ -278,9 +281,9 @@ def normalize_reliefweb(item):
         "via": "ReliefWeb",
         "source": "ReliefWeb",
         "source_family": "Humanitarian / UN ecosystem",
-        "posted_at": clean((fields.get("date") or {}).get("created")),
+        "posted_at": created_date,
         "expires_at": closing_date,
-        "schedule_type": clean((fields.get("type") or {}).get("name")),
+        "schedule_type": clean(job_type.get("name")),
         "salary": "",
         "description": clean(fields.get("body"))[:600],
         "original_url": clean(fields.get("url")),
