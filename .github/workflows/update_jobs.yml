@@ -37,7 +37,7 @@ jobs:
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
-          MAX_GOOGLE_QUERIES: 8
+          MAX_GOOGLE_QUERIES: 19
           STALE_DAYS: 7
         run: python scraper.py
 
