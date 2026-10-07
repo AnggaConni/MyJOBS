@@ -65,6 +65,24 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["salary"], "Rp 5.000.000")
         self.assertEqual(job["original_url"], "https://example.com/job/1")
 
+    def test_google_asean_market(self):
+        job = normalize_google(
+            {
+                "title": "Programme Officer",
+                "company_name": "Example ASEAN Co",
+                "location": "Kuala Lumpur",
+                "via": "Example",
+                "share_link": "https://example.com/job/asean",
+                "description": "Programme role.",
+                "detected_extensions": {},
+            },
+            "jobs Malaysia",
+            market_country="Malaysia",
+        )
+        self.assertEqual(job["country"], "Malaysia")
+        self.assertEqual(job["region"], "ASEAN")
+        self.assertEqual(job["country_code"], "MY")
+
     def test_un_p_normalization(self):
         job = normalize_un_professional(
             {
