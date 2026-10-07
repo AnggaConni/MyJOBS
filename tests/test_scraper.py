@@ -14,6 +14,8 @@ from scraper import (
     normalize_un_apify,
     normalize_undp_oracle,
     parse_undp_oracle_job_html,
+    normalize_toploker,
+    parse_toploker_detail,
 )
 
 
