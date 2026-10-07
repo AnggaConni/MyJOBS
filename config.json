@@ -1,0 +1,23 @@
+{
+  "name": "ketapangJOBS",
+  "scope": "West Kalimantan, Indonesia",
+  "max_google_queries_per_run": 6,
+  "reliefweb_api": {
+    "enabled": true,
+    "endpoint": "https://api.reliefweb.int/v2/jobs",
+    "requires_secret": "RELIEFWEB_APPNAME",
+    "filters": ["Indonesia", "current"]
+  },
+  "un_careers": {
+    "enabled": true,
+    "feed": "https://careers.un.org/jobfeed?isPage=true&language=en",
+    "type": "RSS"
+  },
+  "expiry_policy": {
+    "remove_when_status": ["past", "closed", "expired", "inactive"],
+    "remove_when_expires_at_is_before_now": true,
+    "do_not_infer_deadlines_for_sources_without_deadline": true
+  },
+  "regions": ["Ketapang", "Pontianak", "Singkawang", "Kubu Raya", "Sintang", "Sambas", "Sanggau", "Sekadau", "Melawi", "Landak", "Bengkayang", "Kapuas Hulu", "Mempawah"],
+  "never_create_dummy_jobs": true
+}
