@@ -1740,6 +1740,7 @@ def fetch_undp_ipsa_unvacancies():
     jobs = []
     detail_urls = set()
     page_urls = [
+        "https://unvacancies.org/organizations/undp",
         "https://unvacancies.org/explore?organization=UNDP&q=IPSA",
         "https://unvacancies.org/explore?organization=UNDP&query=IPSA",
         "https://unvacancies.org/explore?organization=UNDP&keyword=IPSA",
@@ -1784,7 +1785,7 @@ def fetch_undp_ipsa_unvacancies():
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-    detail_urls = set(list(detail_urls)[:50])
+    detail_urls = set(list(detail_urls)[:120])
 
     def fetch_detail(source_url):
         try:
@@ -1798,6 +1799,8 @@ def fetch_undp_ipsa_unvacancies():
         except Exception as exc:
             return None, f"{source_url}: {type(exc).__name__}: {exc}"
 
+    parsed_details = 0
+    failed_detail_samples = []
     if detail_urls:
         with ThreadPoolExecutor(max_workers=6) as executor:
             futures = [executor.submit(fetch_detail, url) for url in detail_urls]
@@ -1807,6 +1810,9 @@ def fetch_undp_ipsa_unvacancies():
                     errors.append(error)
                 elif job:
                     jobs.append(job)
+                    parsed_details += 1
+                elif len(failed_detail_samples) < 5:
+                    failed_detail_samples.append("detail parser returned no job")
 
     unique = dedupe(jobs)
     return unique, {
@@ -1815,6 +1821,8 @@ def fetch_undp_ipsa_unvacancies():
         "queries": page_urls,
         "card_jobs": len(jobs),
         "detail_urls": len(detail_urls),
+        "parsed_details": parsed_details,
+        "failed_detail_samples": failed_detail_samples,
         "errors": errors[:25],
         "source": "unvacancies.org (UNDP official application links)",
     }
