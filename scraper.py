@@ -1850,7 +1850,7 @@ def parse_undp_oracle_job_page(text, url):
 def fetch_undp_ipsa_oracle_html():
     search_url = (
         f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
-        f"{UNDP_ORACLE_SITE}/jobs?keyword=IPSA"
+        f"{UNDP_ORACLE_SITE}/jobs"
     )
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
@@ -1883,7 +1883,9 @@ def fetch_undp_ipsa_oracle_html():
 
         discovered = list(dict.fromkeys(discovered))
 
-        # Prefer links whose nearby page text already contains IPSA.
+        # Prefer links whose nearby page text already contains IPSA, but keep
+        # the full current-job set as a fallback because the Oracle keyword
+        # parameter is not consistently honored by CI requests.
         ipsas = []
         for url in discovered:
             if url.lower() in text.lower():
@@ -1891,7 +1893,7 @@ def fetch_undp_ipsa_oracle_html():
                 context = text[max(0, idx-500):idx+500]
                 if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
                     ipsas.append(url)
-        urls = list(dict.fromkeys(ipsas or discovered))[:50]
+        urls = list(dict.fromkeys(ipsas or discovered))[:150]
 
         jobs = []
 
@@ -1941,11 +1943,13 @@ def fetch_undp_ipsa_bing():
     # Oracle Candidate Experience search pages can render inconsistently in CI.
     # Search engines remain a useful free discovery index for the official job URLs.
     grade_queries = [
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-9" "UNDP Careers"',
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-10" "UNDP Careers"',
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-11" "UNDP Careers"',
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-12" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-8" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-9" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-10" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-11" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-12" "UNDP Careers"',
         'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "International Personnel Service Agreement" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Vacancy Type" "International Personnel Service Agreement"',
     ]
     results = []
     seen = set()
@@ -2336,6 +2340,187 @@ def fetch_undp_ipsa_unvacancies():
     }
 
 
+def parse_unvacancies_un_professional_detail(text, source_url):
+    soup = BeautifulSoup(text, "html.parser")
+    lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
+    blob = " ".join(lines)
+
+    if not re.search(r"United Nations Secretariat|UN Secretariat", blob, flags=re.I):
+        return None
+
+    level = extract_un_p_level(blob)
+    if not level:
+        return None
+
+    heading = soup.find("h1")
+    title = clean(heading.get_text(" ", strip=True)) if heading else ""
+    if not title:
+        title = clean(next((line for line in lines if line and "UN Secretariat" not in line and "United Nations Secretariat" not in line and "P-" not in line), ""))
+
+    location = ""
+    location_match = re.search(
+        r"(?:UN Secretariat|United Nations Secretariat)\s*[·|]\s*([^\n]+?)(?=\s+(?:Closes|Posted|Grade|Contract)\b|$)",
+        blob,
+        flags=re.I,
+    )
+    if location_match:
+        location = clean(location_match.group(1))
+
+    posted_match = re.search(
+        r"Posted\s+(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        blob,
+        flags=re.I,
+    )
+    closed_match = re.search(
+        r"(?:Closes|Close)\s+(?:in\s+\d+\s+days?:\s*)?(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        blob,
+        flags=re.I,
+    )
+
+    official_url = ""
+    for anchor in soup.select("a[href]"):
+        href = clean(anchor.get("href"))
+        if re.search(r"(?:careers\.un\.org|inspira)", href, flags=re.I):
+            official_url = href
+            break
+
+    requisition_match = re.search(r"/(?:job-opening|jobopening|job)/(\d+)", official_url, flags=re.I)
+    requisition_id = requisition_match.group(1) if requisition_match else ""
+
+    return {
+        "id": make_id("UN P", requisition_id or official_url or source_url or title, title),
+        "source_job_id": requisition_id,
+        "title": title,
+        "company": "United Nations Secretariat",
+        "location": location or "Global",
+        "district": location or "Global",
+        "province": "",
+        "country": "Global",
+        "via": "UN Careers",
+        "source": "UN Careers — P-level",
+        "source_family": "UN Secretariat — Professional",
+        "posted_at": posted_match.group(1) if posted_match else "",
+        "expires_at": closed_match.group(1) if closed_match else "",
+        "schedule_type": level,
+        "salary": "",
+        "description": clean(blob[:6000]),
+        "original_url": official_url or source_url,
+        "search_query": "UN Secretariat P-level / unvacancies",
+        "extensions": [level],
+        "remote": "remote" in blob.lower() or "home based" in blob.lower() or "home-based" in blob.lower(),
+        "status": "current",
+        "contract_level": level,
+        "details": make_source_details(
+            "UN Careers",
+            level=level,
+            duty_station=location,
+            date_posted=posted_match.group(1) if posted_match else "",
+            deadline=closed_match.group(1) if closed_match else "",
+        ),
+    }
+
+
+def fetch_un_professional_unvacancies():
+    page_urls = [
+        "https://unvacancies.org/jobs/organization/un-secretariat",
+        "https://unvacancies.org/organizations/un-secretariat",
+    ]
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+    detail_urls = []
+    seen = set()
+    errors = []
+
+    for page_url in page_urls:
+        try:
+            text, _ = fetch_public_text(
+                page_url,
+                headers=headers,
+                jina_fallback=True,
+                jina_first=False,
+            )
+            soup = BeautifulSoup(text, "html.parser")
+
+            for anchor in soup.select('a[href*="/jobs/"]'):
+                href = clean(anchor.get("href"))
+                if not href:
+                    continue
+                candidate = urljoin("https://unvacancies.org", href).split("#", 1)[0]
+                if candidate in seen:
+                    continue
+
+                context = clean(" ".join([
+                    anchor.get_text(" ", strip=True),
+                    anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
+                    anchor.parent.parent.get_text(" ", strip=True)
+                    if anchor.parent and anchor.parent.parent else "",
+                ]))
+                if not extract_un_p_level(context):
+                    continue
+                if not re.search(r"UN Secretariat|United Nations Secretariat", context, flags=re.I):
+                    continue
+
+                seen.add(candidate)
+                detail_urls.append(candidate)
+
+        except Exception as exc:
+            errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
+
+    # Search-engine discovery supplements the organization page when pagination
+    # is rendered client-side or the mirror returns only the first page.
+    for grade in range(1, 8):
+        query = f'site:unvacancies.org/jobs/ "UN Secretariat" "P-{grade}"'
+        try:
+            for candidate in search_duckduckgo_links(
+                query,
+                r"unvacancies\.org/jobs/[^/]+",
+            ):
+                candidate = clean(candidate).split("#", 1)[0]
+                if candidate not in seen:
+                    seen.add(candidate)
+                    detail_urls.append(candidate)
+        except Exception as exc:
+            errors.append(f"{query}: {type(exc).__name__}: {exc}")
+
+    detail_urls = detail_urls[:150]
+    jobs = []
+    parsed = 0
+
+    def fetch_detail(url):
+        try:
+            detail_text, _ = fetch_public_text(
+                url,
+                headers=headers,
+                jina_fallback=True,
+                jina_first=False,
+            )
+            return parse_unvacancies_un_professional_detail(detail_text, url), None
+        except Exception as exc:
+            return None, f"{url}: {type(exc).__name__}: {exc}"
+
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {executor.submit(fetch_detail, url): url for url in detail_urls}
+        for future in as_completed(futures):
+            job, error = future.result()
+            if error:
+                errors.append(error)
+            elif job:
+                jobs.append(job)
+                parsed += 1
+
+    unique = dedupe(jobs)
+    return unique, {
+        "status": "ok" if unique else ("error" if errors else "empty"),
+        "count": len(unique),
+        "discovered_urls": len(detail_urls),
+        "parsed_details": parsed,
+        "errors": errors[:25],
+        "source": "unvacancies.org — UN Secretariat mirror with official application links",
+    }
+
+
 def load_historical_source_jobs(source_name, max_commits=20):
     try:
         log = subprocess.run(
@@ -2479,6 +2664,10 @@ def main():
         un_search_jobs, un_search_health = fetch_un_professional_search()
         all_jobs.extend(un_search_jobs)
         sources["UN Careers — P-level / Search"] = un_search_health
+
+        un_mirror_jobs, un_mirror_health = fetch_un_professional_unvacancies()
+        all_jobs.extend(un_mirror_jobs)
+        sources["UN Careers — P-level / unvacancies"] = un_mirror_health
 
 
     # UNDP IPSA: use Bing-indexed official Oracle job pages first. This is a
