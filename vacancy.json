@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 12:47 UTC",
+  "last_updated": "2026-10-07 12:48 UTC",
   "total": 237,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -9,6 +9,30 @@
   "region": "Indonesia",
   "scope": "Indonesia-first job aggregator",
   "jobs": [
+    {
+      "id": "job-91b36dd7fd45037d",
+      "title": "République Démocratique du Congo : Coordinateur.rice de Zone – Uvira",
+      "company": "Agency for Technical Cooperation and Development",
+      "location": "Democratic Republic of the Congo",
+      "district": "Global",
+      "province": "Democratic Republic of the Congo",
+      "country": "Democratic Republic of the Congo",
+      "via": "ReliefWeb",
+      "source": "ReliefWeb",
+      "source_family": "Humanitarian / UN ecosystem",
+      "posted_at": "2026-10-07T12:48:25+00:00",
+      "expires_at": "2026-11-07T00:00:00+00:00",
+      "schedule_type": "Job",
+      "salary": "",
+      "description": "**CDD | 6 mois | Mi-janvier 2027** ## Acted ***Qui sommes-nous*** Acted travaille avec 19 millions de personnes dans 43 pays au carrefour de l’humanitaire, du développement, et des programmes climatiques et environnementaux. Grâce à une connaissance poussée des contextes et l’adoption de technologies émergentes, nous sauvons des vies, allégeons les souffrances, et protégeons et restaurons notre planète. Travaillant avec un écosystème croissant de partenaires locaux, nationaux et internationaux, nous poursuivons un objectif commun : un monde 3Zéro : Zéro Exclusion, Zéro Carbone, Zéro Pauvreté. ",
+      "original_url": "https://reliefweb.int/node/4233037",
+      "search_query": "ReliefWeb jobs",
+      "extensions": [],
+      "remote": false,
+      "status": "published",
+      "ocha": false,
+      "country_code": ""
+    },
     {
       "id": "job-e9edfd7e92ab1d17",
       "title": "ICT Systems Integration Technician EFMS/CARLOG",
@@ -5672,30 +5696,6 @@
       "status": "published",
       "ocha": false,
       "country_code": ""
-    },
-    {
-      "id": "job-c99ef7c83fe3a243",
-      "title": "Head of Humanitarian Mine Action",
-      "company": "Danish Refugee Council",
-      "location": "Ukraine",
-      "district": "Global",
-      "province": "Ukraine",
-      "country": "Ukraine",
-      "via": "ReliefWeb",
-      "source": "ReliefWeb",
-      "source_family": "Humanitarian / UN ecosystem",
-      "posted_at": "2026-10-02T07:31:26+00:00",
-      "expires_at": "2026-10-20T00:00:00+00:00",
-      "schedule_type": "Job",
-      "salary": "",
-      "description": "**The Danish Refugee Council (DRC)** is a leading protection agency with a mandate to protect, advocate for and promote durable solutions for displacement-affected populations. DRC has been operating in Ukraine since 2014 and currently employs over 800 staff implementing emergency and recovery programming across the Protection, Livelihoods, Shelter/NFIs and Humanitarian Disarmament and Peacebuilding (humanitarian mine action) sectors through direct interventions and support to duty bearers and civil society organisations (CSOs). DRC’s programming is based on an integrated approach in which sec",
-      "original_url": "https://reliefweb.int/node/4232336",
-      "search_query": "ReliefWeb jobs",
-      "extensions": [],
-      "remote": false,
-      "status": "published",
-      "ocha": false,
-      "country_code": ""
     }
   ],
   "summary": {
@@ -5823,5 +5823,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 3.17
+  "runtime_seconds": 2.74
 }
