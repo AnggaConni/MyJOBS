@@ -245,7 +245,7 @@ button{cursor:pointer}
       money:'<svg class="meta-icon" viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg>'
     };return p[name]||"";
   }
-  function render(){var list=sorted(state.jobs.filter(matches));$("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown"+(state.country==="all"?" · Indonesia-first view":"");if(!list.length){$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>🔎</div><h3>No matching opportunities</h3><p>Try a different keyword or filter. You can also explore the official sources on the right.</p><button class='nav-btn primary' id='emptyReset'>Clear filters</button></div>";$("#emptyReset").onclick=reset;return}$("#jobsList").innerHTML=list.map(card).join("");$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}});bindModal()}
+  function render(){var list=sorted(state.jobs.filter(matches));$("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown"+(state.country==="all"?" · Indonesia-first view":"");if(!list.length){$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>🔎</div><h3>No matching opportunities</h3><p>Try a different keyword or filter. You can also explore the official sources on the right.</p><button class='nav-btn primary' id='emptyReset'>Clear filters</button></div>";$("#emptyReset").onclick=reset;return}$("#jobsList").innerHTML=list.map(card).join("");$$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}});bindModal()}
   function populateGeoFilters(){
     var countryMap={};
     state.jobs.forEach(function(j){var c=String(j.country||"Indonesia").trim()||"Indonesia";countryMap[c]=(countryMap[c]||0)+1});
@@ -279,7 +279,7 @@ button{cursor:pointer}
     $("#locationSummary").textContent=summary.length?"Filtering: "+summary.join(" → "):"Choose a country, then narrow by province/state and city/district when available.";
     $("#locationTitle").textContent=summary.length?summary[summary.length-1]:"Indonesia-first · all indexed jobs";
   }
-  function sync(){$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
+  function sync(){$$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
   function reset(){state.query="";state.type="all";state.country="all";state.province="all";state.district="all";$("#searchInput").value="";sync();populateGeoFilters();render()}
   function toggleSave(id){var i=state.saved.indexOf(id);if(i>=0)state.saved.splice(i,1);else state.saved.push(id);localStorage.setItem("myjobs:saved",JSON.stringify(state.saved));render();toast(i>=0?"Removed from saved jobs":"Saved job")}
   function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(function(){t.classList.remove("show")},1400)}
@@ -338,7 +338,7 @@ button{cursor:pointer}
     $("#jobModal").classList.remove("open");$("#jobModal").setAttribute("aria-hidden","true");document.body.classList.remove("modal-open");
   }
   function bindModal(){
-    $(".view-btn[data-view]").forEach(function(b){b.onclick=function(){openJob(b.getAttribute("data-view"))}});
+    $$(".view-btn[data-view]").forEach(function(b){b.onclick=function(){openJob(b.getAttribute("data-view"))}});
   }
   function load(){Promise.all([fetch("vacancy.json?ts="+Date.now(),{cache:"no-store"}),fetch("sources.json?ts="+Date.now(),{cache:"no-store"})]).then(function(rs){return Promise.all([rs[0].json(),rs[1].ok?rs[1].json():Promise.resolve({})])}).then(function(v){var d=v[0],s=v[1];state.jobs=Array.isArray(d.jobs)?d.jobs:[];$("#statJobs").textContent=Number(d.total||state.jobs.length).toLocaleString();$("#statSources").textContent=d.sources?Object.keys(d.sources).length:"—";$("#statExpired").textContent=Number(d.expired_removed||0).toLocaleString();$("#statUpdated").textContent=d.last_updated?String(d.last_updated).split(" ")[0]:"—";(s.buttons||[]).forEach(function(x){if(x.id==="karirhub")$("#karirhubLink").href=x.url;if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="un-p")$("#unPLink").href=x.url;if(x.id==="undp-ipsa")$("#undpLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});populateGeoFilters();render()}).catch(function(error){console.error("MyJOBS data load failed:",error);$("#resultsMeta").textContent="Dataset unavailable";$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>⚠️</div><h3>Job data is temporarily unavailable</h3><p>The interface is ready, but the latest dataset could not be loaded. Try again shortly.</p><button class='nav-btn primary' onclick='location.reload()'>Refresh</button></div>"})}
   $("#searchForm").onsubmit=function(e){e.preventDefault();state.query=$("#searchInput").value.trim();state.sort="relevance";$("#sortSelect").value="relevance";render()}
