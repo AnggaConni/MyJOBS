@@ -127,23 +127,40 @@ CITY_ALIASES = {
     "mempawah": "Mempawah",
 }
 
-def fetch_public_text(url, headers=None, jina_fallback=False):
+def fetch_public_text(url, headers=None, jina_fallback=False, jina_first=False):
     headers = headers or {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
+
+    def via_jina():
+        target = "http://" + url[len("https://"):] if url.startswith("https://") else url
+        proxy = "https://r.jina.ai/" + target
+        proxy_response = requests.get(
+            proxy,
+            headers={"User-Agent": "MyJOBS/1.0"},
+            timeout=max(TIMEOUT, 30),
+        )
+        proxy_response.raise_for_status()
+        return proxy_response.text
+
+    if jina_first:
+        try:
+            text = via_jina()
+            if text.strip():
+                return text, True
+        except Exception:
+            pass
+
     response = requests.get(url, headers=headers, timeout=max(TIMEOUT, 30))
     if response.status_code < 400:
+        if response.text.strip():
+            return response.text, False
+        if jina_fallback:
+            return via_jina(), True
         return response.text, False
+
     if not jina_fallback:
         response.raise_for_status()
 
-    target = "http://" + url[len("https://"):] if url.startswith("https://") else url
-    proxy = "https://r.jina.ai/" + target
-    proxy_response = requests.get(
-        proxy,
-        headers={"User-Agent": "MyJOBS/1.0"},
-        timeout=max(TIMEOUT, 30),
-    )
-    proxy_response.raise_for_status()
-    return proxy_response.text, True
+    return via_jina(), True
 
 
 def clean(value):
@@ -552,7 +569,7 @@ def fetch_toploker():
         seen_pages.add(page)
 
         try:
-            text, proxied = fetch_public_text(page, headers=headers, jina_fallback=True)
+            text, proxied = fetch_public_text(page, headers=headers, jina_fallback=True, jina_first=True)
             soup = BeautifulSoup(text, "html.parser")
 
             for anchor in soup.select('a[href*="/lowongan/"]'):
@@ -592,6 +609,7 @@ def fetch_toploker():
                 job_url,
                 headers=headers,
                 jina_fallback=True,
+                jina_first=True,
             )
             return parse_toploker_detail(text, job_url), None
         except Exception as exc:
@@ -616,7 +634,7 @@ def fetch_toploker():
         "count": len(jobs),
         "list_urls": TOPLOKER_LIST_URLS,
         "pages_crawled": list(seen_pages),
-        "proxy_fallback": bool(seen_pages),
+        "proxy_fallback": True,
         "discovered_urls": len(detail_urls),
         "errors": errors[:25],
     }
@@ -1352,6 +1370,7 @@ def fetch_undp_ipsa_oracle_html():
             search_url,
             headers=headers,
             jina_fallback=True,
+            jina_first=True,
         )
 
         urls = set()
@@ -1381,6 +1400,7 @@ def fetch_undp_ipsa_oracle_html():
                     job_url,
                     headers=headers,
                     jina_fallback=True,
+                    jina_first=True,
                 )
                 return parse_undp_oracle_job_html(
                     detail_text,
