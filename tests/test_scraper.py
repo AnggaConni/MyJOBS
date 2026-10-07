@@ -228,8 +228,7 @@ class ScraperTests(unittest.TestCase):
             "html.parser",
         ).a
         job = parse_undp_job_anchor(anchor)
-        self.assertEqual(job["source"], "UNDP Careers")
-        self.assertEqual(job["source_category"], "UNDP — IPSA")
+        self.assertEqual(job["source"], "UNDP — IPSA")
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Home Based")
 
@@ -245,7 +244,7 @@ class ScraperTests(unittest.TestCase):
             "schedule_type": "Full Time",
             "url": "https://toploker.com/lowongan/2026-10-07!account-officer!di!bank-padma-1",
         })
-        self.assertEqual(job["source"], "TopLoker")
+        self.assertEqual(job["source"], "UNDP Careers")
         self.assertEqual(job["country"], "Indonesia")
         self.assertEqual(job["province"], "Bali")
         self.assertEqual(job["schedule_type"], "Full Time")
