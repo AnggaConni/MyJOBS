@@ -33,15 +33,29 @@ INDONESIA_REGIONS = [
     "Sulawesi Utara", "Sumatera Barat", "Sumatera Selatan", "Sumatera Utara",
 ]
 
-QUERIES = [
-    "lowongan kerja Indonesia",
-    "lowongan kerja Jakarta",
-    "lowongan kerja Bandung",
-    "lowongan kerja Surabaya",
-    "lowongan kerja Bali",
-    "lowongan kerja Kalimantan",
-    "lowongan kerja Ketapang",
-    "lowongan kerja Pontianak",
+INDONESIA_QUERIES = [
+    {"q": "lowongan kerja Indonesia", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Jakarta", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Bandung", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Surabaya", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Bali", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Kalimantan", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Ketapang", "gl": "id", "country": "Indonesia"},
+    {"q": "lowongan kerja Pontianak", "gl": "id", "country": "Indonesia"},
+]
+
+ASEAN_COUNTRIES = [
+    {"country": "Brunei Darussalam", "code": "BN", "q": "jobs Brunei"},
+    {"country": "Cambodia", "code": "KH", "q": "jobs Cambodia"},
+    {"country": "Indonesia", "code": "ID", "q": "jobs Indonesia"},
+    {"country": "Lao PDR", "code": "LA", "q": "jobs Laos"},
+    {"country": "Malaysia", "code": "MY", "q": "jobs Malaysia"},
+    {"country": "Myanmar", "code": "MM", "q": "jobs Myanmar"},
+    {"country": "Philippines", "code": "PH", "q": "jobs Philippines"},
+    {"country": "Singapore", "code": "SG", "q": "jobs Singapore"},
+    {"country": "Thailand", "code": "TH", "q": "jobs Thailand"},
+    {"country": "Timor-Leste", "code": "TL", "q": "jobs Timor-Leste"},
+    {"country": "Viet Nam", "code": "VN", "q": "jobs Vietnam"},
 ]
 
 INDONESIA_PROVINCE_BY_CITY = {
@@ -195,7 +209,7 @@ def extract_deadline(text):
             return match.group(1)
     return ""
 
-def normalize_google(item, query):
+def normalize_google(item, query, market_country="Indonesia"):
     detected = item.get("detected_extensions") or {}
     apply_options = item.get("apply_options") or []
     apply_url = ""
@@ -215,7 +229,9 @@ def normalize_google(item, query):
         "location": location or "Indonesia",
         "district": infer_location(location or description, fallback=""),
         "province": infer_province(location or description),
-        "country": "Indonesia",
+        "country": infer_country(location or description, explicit=market_country),
+        "market": "ASEAN" if any(m["country"] == market_country for m in ASEAN_COUNTRIES) else "Indonesia",
+        "region": "ASEAN" if any(m["country"] == market_country for m in ASEAN_COUNTRIES) else "Indonesia",
         "via": clean(item.get("via") or "Google Jobs"),
         "source": "Google Jobs",
         "source_family": "Jobs Search",
@@ -229,20 +245,38 @@ def normalize_google(item, query):
         "extensions": [clean(x) for x in (item.get("extensions") or []) if clean(x)],
         "remote": bool(detected.get("work_from_home")),
         "status": "current",
-        "country_code": "ID",
+        "country_code": next((m["code"] for m in ASEAN_COUNTRIES if m["country"] == market_country), "ID"),
     }
 
 def fetch_google():
     if not SERPAPI_KEY:
         return [], {"status": "skipped", "count": 0, "message": "SERPAPI_KEY not configured"}
 
-    jobs, errors = [], []
-    queries = QUERIES[:max(1, MAX_GOOGLE_QUERIES)]
-    for query in queries:
+    query_specs = INDONESIA_QUERIES + ASEAN_COUNTRIES
+    queries = []
+    for item in query_specs:
+        queries.append({
+            "q": item["q"],
+            "gl": item["gl"] if "gl" in item else item["code"].lower(),
+            "country": item["country"],
+        })
+
+    queries = queries[:max(1, MAX_GOOGLE_QUERIES)]
+    jobs, errors, by_country = [], [], Counter()
+
+    for spec in queries:
+        query = spec["q"]
+        market_country = spec["country"]
         try:
             response = requests.get(
                 "https://serpapi.com/search.json",
-                params={"engine": "google_jobs", "q": query, "hl": "id", "gl": "id", "api_key": SERPAPI_KEY},
+                params={
+                    "engine": "google_jobs",
+                    "q": query,
+                    "hl": "id" if market_country == "Indonesia" else "en",
+                    "gl": spec["gl"],
+                    "api_key": SERPAPI_KEY,
+                },
                 timeout=TIMEOUT,
             )
             response.raise_for_status()
@@ -250,14 +284,25 @@ def fetch_google():
             if payload.get("error"):
                 errors.append(f"{query}: {payload['error']}")
                 continue
+
+            count = 0
             for item in payload.get("jobs_results") or []:
-                job = normalize_google(item, query)
+                job = normalize_google(item, query, market_country=market_country)
                 if job["title"]:
                     jobs.append(job)
+                    count += 1
+            by_country[market_country] += count
         except Exception as exc:
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "queries": queries, "errors": errors}
+    return jobs, {
+        "status": "ok" if jobs else ("error" if errors else "empty"),
+        "count": len(jobs),
+        "queries": [x["q"] for x in queries],
+        "markets": [x["country"] for x in queries],
+        "by_country": dict(by_country),
+        "errors": errors,
+    }
 
 def fetch_loker():
     jobs, errors = [], []
@@ -666,8 +711,9 @@ def main():
         "stale_removed": stale_count,
         "stale_days": STALE_DAYS,
         "status": "ok" if active_jobs else ("error" if errors else "empty"),
-        "region": "Indonesia",
-        "scope": "Indonesia-first job aggregator",
+        "region": "Indonesia + ASEAN",
+        "scope": "Indonesia-first with Phase 2 ASEAN job discovery",
+        "asean_members": [x["country"] for x in ASEAN_COUNTRIES],
         "jobs": active_jobs,
         "summary": summary(active_jobs),
         "sources": sources,
