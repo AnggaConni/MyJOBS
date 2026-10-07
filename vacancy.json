@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 12:53 UTC",
+  "last_updated": "2026-10-07 12:54 UTC",
   "total": 237,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -9,6 +9,30 @@
   "region": "Indonesia",
   "scope": "Indonesia-first job aggregator",
   "jobs": [
+    {
+      "id": "job-78f8dc9d91bfc970",
+      "title": "Regional Humanitarian Access and Safety Adviser (Colombia, Venezuela, Honduras nationals)",
+      "company": "Norwegian Refugee Council",
+      "location": "Colombia",
+      "district": "Remote",
+      "province": "",
+      "country": "Colombia",
+      "via": "ReliefWeb",
+      "source": "ReliefWeb",
+      "source_family": "Humanitarian / UN ecosystem",
+      "posted_at": "2026-10-07T12:53:59+00:00",
+      "expires_at": "2026-10-16T00:00:00+00:00",
+      "schedule_type": "Job",
+      "salary": "",
+      "description": "All NRC employees are expected to work in accordance with the organization’s values. To be dedicated, innovative, inclusive and accountable are attitudes and beliefs that shall guide our actions and relationships. NRC has a commitment to safety and wellbeing and together we build a positive working culture to feel valued, empowered, supported, safe and have a sense of belonging. NRC does not tolerate employees exploiting or abusing people and has zero tolerance to inaction. ## What we are looking for The Norwegian Refugee Council (NRC) is seeking a **highly qualified,** **resilient, and dynami",
+      "original_url": "https://reliefweb.int/node/4233038",
+      "search_query": "ReliefWeb jobs",
+      "extensions": [],
+      "remote": false,
+      "status": "published",
+      "ocha": false,
+      "country_code": ""
+    },
     {
       "id": "job-91b36dd7fd45037d",
       "title": "République Démocratique du Congo : Coordinateur.rice de Zone – Uvira",
@@ -5672,30 +5696,6 @@
       "status": "published",
       "ocha": false,
       "country_code": ""
-    },
-    {
-      "id": "job-d8e33b002138575e",
-      "title": "AI Platform Engineer",
-      "company": "International Rescue Committee",
-      "location": "Kenya",
-      "district": "Remote",
-      "province": "",
-      "country": "Kenya",
-      "via": "ReliefWeb",
-      "source": "ReliefWeb",
-      "source_family": "Humanitarian / UN ecosystem",
-      "posted_at": "2026-10-02T08:08:34+00:00",
-      "expires_at": "2026-12-02T00:00:00+00:00",
-      "schedule_type": "Job",
-      "salary": "",
-      "description": "The International Rescue Committee (IRC) responds to the world's worst humanitarian crises, helping to restore health, safety, education, economic wellbeing, and power to people devastated by conflict and disaster. Founded in 1933 at the call of Albert Einstein, the IRC is one of the world's largest international humanitarian non-governmental organizations (INGO), at work in more than 40 countries and 29 U.S. cities helping people to survive, reclaim control of their future and strengthen their communities. A force for humanity, IRC employees deliver lasting impact by restoring safety, dignity",
-      "original_url": "https://reliefweb.int/node/4232342",
-      "search_query": "ReliefWeb jobs",
-      "extensions": [],
-      "remote": false,
-      "status": "published",
-      "ocha": false,
-      "country_code": ""
     }
   ],
   "summary": {
@@ -5777,5 +5777,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 2.79
+  "runtime_seconds": 2.65
 }
