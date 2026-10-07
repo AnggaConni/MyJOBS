@@ -1,0 +1,7 @@
+{
+  "name": "ketapangJOBS",
+  "scope": "West Kalimantan, Indonesia",
+  "max_google_queries_per_run": 6,
+  "regions": ["Ketapang", "Pontianak", "Singkawang", "Kubu Raya", "Sintang", "Sambas", "Sanggau", "Sekadau", "Melawi", "Landak", "Bengkayang", "Kapuas Hulu", "Mempawah"],
+  "never_create_dummy_jobs": true
+}
