@@ -8,7 +8,9 @@ from scraper import (
     filter_expired,
     make_id,
     normalize_google,
+    normalize_un_professional,
     parse_datetime,
+    parse_undp_job_anchor,
 )
 
 
@@ -58,6 +60,30 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["source"], "Google Jobs")
         self.assertEqual(job["salary"], "Rp 5.000.000")
         self.assertEqual(job["original_url"], "https://example.com/job/1")
+
+    def test_un_p_normalization(self):
+        job = normalize_un_professional(
+            {
+                "title": "Programme Management Officer, P4",
+                "link": "https://careers.un.org/job-openings",
+                "guid": "123",
+                "description": "Level: P-4 Job Network: Economic, Social and Development Job Family: Programme Management Category: Professional and Higher Categories Department/Office: Example Office Duty Station: NEW YORK Date Posted: Sep 1, 2026 Deadline: Oct 1, 2026",
+            }
+        )
+        self.assertEqual(job["source"], "UN Careers — P-level")
+        self.assertEqual(job["contract_level"], "P-4")
+        self.assertEqual(job["country"], "Global")
+
+    def test_undp_ipsa_parser(self):
+        from bs4 import BeautifulSoup
+        anchor = BeautifulSoup(
+            '<a href="/cj_view_jobs.cfm/cj_view_job.cfm?cur_job_id=123">Job Title Policy Specialist Post level IPSA-11 Apply by Oct-20-26 Agency UNDP Location Home Based</a>',
+            "html.parser",
+        ).a
+        job = parse_undp_job_anchor(anchor)
+        self.assertEqual(job["source"], "UNDP — IPSA")
+        self.assertEqual(job["contract_level"], "IPSA-11")
+        self.assertEqual(job["location"], "Home Based")
 
     def test_dedupe_by_url(self):
         job = {
