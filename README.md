@@ -1,62 +1,57 @@
-# ketapangJOBS
+# MyJOBS
 
-Local Job Aggregator & Labour-Market Radar for West Kalimantan, Indonesia.
+**Indonesia-first job aggregator.**
 
-The project started as a Ketapang-focused vacancy collector and is being expanded into a regional job intelligence pipeline.
+MyJOBS brings together job opportunities from multiple sources into a lightweight, source-linked interface.
 
 ## Sources
 
 - Google Jobs via SerpApi
 - Loker.id
 - ReliefWeb Jobs API
-- UN Careers RSS feed
-- OCHA vacancies are detected from UN Careers / humanitarian sources
+- UN Careers RSS
+- OCHA-related vacancies detected from UN / humanitarian sources
 
-ReliefWeb currently requires a pre-approved `appname` for API use. Configure it as the GitHub Actions secret `RELIEFWEB_APPNAME`.
+## Scope
+
+The aggregator is **Indonesia-first**. Location detection in the frontend helps users filter the indexed dataset by area, but the scraper itself is no longer restricted to Ketapang or West Kalimantan.
 
 ## Expiry handling
 
-Jobs with an explicit source deadline are removed automatically once the deadline passes.
+Jobs are filtered out when the source provides an explicit expired/closed/past/inactive status or when an explicit closing date has passed.
 
-Jobs whose source reports a closed/past/expired/inactive status are also removed.
+MyJOBS does not invent deadlines for sources that do not provide one.
 
-The scraper does **not** invent a deadline for Google Jobs or Loker.id when the source does not provide one.
+## Location UX
 
-The latest run reports the number of removed expired jobs as `expired_removed`.
+The landing page defaults to Indonesia and lets users:
 
-## External source buttons
+- choose a location manually
+- detect an approximate location using their internet connection/IP
+- optionally use browser GPS after permission
 
-`sources.json` contains button labels and official destination URLs for ReliefWeb Jobs, UN Careers and UN OCHA vacancies.
+Raw GPS coordinates are not written into the job dataset.
 
 ## Data contract
 
-`vacancy.json` keeps the frontend fields `last_updated`, `total` and `jobs`.
+`vacancy.json` provides:
 
-It additionally provides:
-
-- `status`
-- `schema_version`
-- `coverage`
+- `last_updated`
+- `total`
+- `region`
+- `scope`
+- `jobs`
 - `summary`
 - `sources`
-- `external_links`
-- `errors`
 - `expired_removed`
+- `errors`
 
-No fake or dummy vacancy is created when all sources fail.
-
-## Coverage
-
-Ketapang, Pontianak, Singkawang, Kubu Raya, Sintang, Sambas, Sanggau, Sekadau, Melawi, Landak, Bengkayang, Kapuas Hulu and Mempawah.
-
-## Automation
-
-GitHub Actions refreshes the dataset twice per day and supports manual execution.
+No fake vacancy is generated when a source fails.
 
 ## Roadmap
 
-1. Add more employer-owned and local sources.
-2. Track first-seen / last-seen timestamps.
-3. Normalize skills, sectors, salary and employment type.
-4. Add map-based vacancy exploration.
-5. Build a labour-market trend dashboard.
+1. More Indonesian job sources and employer career pages.
+2. Salary, skills, sector and employment-type normalization.
+3. Better freshness and first-seen / last-seen tracking.
+4. Nationwide location intelligence.
+5. Optional ASEAN expansion after source, privacy and jurisdiction review.
