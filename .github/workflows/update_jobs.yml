@@ -1,6 +1,10 @@
 name: Auto Update MyJOBS
 
 on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "vacancy.json"
   schedule:
     - cron: '0 0,12 * * *'
   workflow_dispatch:
