@@ -572,6 +572,26 @@ def fetch_toploker():
             text, proxied = fetch_public_text(page, headers=headers, jina_fallback=True, jina_first=True)
             soup = BeautifulSoup(text, "html.parser")
 
+            for href in re.findall(
+                r'https?://toploker\\.com/lowongan/[^)\\s]+',
+                text,
+                flags=re.I,
+            ):
+                job_url = href.replace("%21", "!")
+                if "/lowongan/" in urlparse(job_url).path and job_url not in seen_urls:
+                    seen_urls.add(job_url)
+                    detail_urls.append(job_url)
+
+            for href in re.findall(
+                r'/lowongan/20\\d{2}-\\d{2}-\\d{2}![^)\\s)]+',
+                text,
+                flags=re.I,
+            ):
+                job_url = urljoin(TOPLOKER_BASE, href).replace("%21", "!")
+                if "/lowongan/" in urlparse(job_url).path and job_url not in seen_urls:
+                    seen_urls.add(job_url)
+                    detail_urls.append(job_url)
+
             for anchor in soup.select('a[href*="/lowongan/"]'):
                 href = clean(anchor.get("href"))
                 if not href:
@@ -1459,8 +1479,9 @@ def fetch_undp_ipsa_oracle_public():
                     "onlyData": "true",
                     "expand": "requisitionList.secondaryLocations",
                     "finder": (
-                        f"findReqs;siteNumber={UNDP_ORACLE_SITE},"
-                        f"limit={page_size},offset={offset},sortBy=POSTING_DATES_DESC"
+                        f"findReqs;keyword=IPSA,siteNumber={UNDP_ORACLE_SITE},"
+                        f"useExactKeywordFlag=true,limit={page_size},"
+                        f"offset={offset},sortBy=POSTING_DATES_DESC"
                     ),
                 },
                 headers={
