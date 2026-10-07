@@ -12,6 +12,7 @@ from scraper import (
     parse_datetime,
     parse_undp_job_anchor,
     normalize_un_apify,
+    normalize_undp_oracle,
 )
 
 
@@ -97,6 +98,21 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["contract_level"], "P-4")
         self.assertEqual(job["country"], "Global")
 
+    def test_undp_oracle_normalization(self):
+        job = normalize_undp_oracle({
+            "title": "Project Manager",
+            "requisitionId": "12345",
+            "url": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/12345",
+            "descriptionText": "Project management role, IPSA-10",
+            "primaryLocation": "Dili, Timor-Leste",
+            "postingDate": "2026-10-01T00:00:00Z",
+            "postingEndDate": "2026-10-31T00:00:00Z",
+            "jobSchedule": "Full time",
+            "detailFetched": True,
+        })
+        self.assertEqual(job["source"], "UNDP — IPSA")
+        self.assertEqual(job["contract_level"], "IPSA-10")
+        self.assertEqual(job["location"], "Dili, Timor-Leste")
     def test_un_apify_normalization(self):
         job = normalize_un_apify({
             "title": "Programme Officer",
