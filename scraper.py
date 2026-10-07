@@ -1538,6 +1538,161 @@ def fetch_undp_ipsa_oracle_public():
     }
 
 
+def parse_undp_oracle_job_page(text, url):
+    soup = BeautifulSoup(text, "html.parser")
+    lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
+    blob = " ".join(lines)
+    blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob).replace("\u00a0", " ")
+
+    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    if not grade_match:
+        return None
+    grade = f"IPSA-{grade_match.group(1)}".upper()
+
+    heading = soup.find("h1")
+    title = clean(heading.get_text(" ", strip=True)) if heading else ""
+    if not title:
+        title = next(
+            (
+                line for line in lines
+                if line
+                and "UNDP" not in line
+                and "Candidate Experience" not in line
+                and "Search" not in line
+                and len(line) < 220
+            ),
+            "",
+        )
+
+    def field(pattern):
+        m = re.search(pattern, blob, flags=re.I)
+        return clean(m.group(1)) if m else ""
+
+    posting = field(r"Posting\s+Date\s+(.+?)(?=\s+Apply\s+Before\s+)")
+    deadline = field(r"Apply\s+Before\s+(.+?)(?=\s+Job\s+Schedule\s+)")
+    location = field(r"Locations?\s+(.+?)(?=\s+Agency\s+)")
+    agency = field(r"Agency\s+(.+?)(?=\s+Grade\s+)") or "UNDP"
+    job_type = field(r"Vacancy\s+Type\s+(.+?)(?=\s+Practice\s+Area\s+)")
+    practice = field(r"Practice\s+Area\s+(.+?)(?=\s+Bureau\s+)")
+    bureau = field(r"Bureau\s+(.+?)(?=\s+Contract\s+Duration\s+)")
+    duration = field(r"Contract\s+Duration\s+(.+?)(?=\s+Education\s+&\s+Work\s+Experience\s+)")
+
+    try:
+        desc_start = next(i for i,line in enumerate(lines) if canon(line)=="job description")
+        description = clean(" ".join(lines[desc_start+1:desc_start+100]))
+    except StopIteration:
+        description = clean(blob[:6000])
+
+    rid_match = re.search(r"/job/(\d+)", url)
+    rid = rid_match.group(1) if rid_match else ""
+
+    return normalize_undp_oracle({
+        "Id": rid,
+        "Title": title,
+        "EmployerName": agency,
+        "PrimaryLocation": location,
+        "PostedDate": posting,
+        "ExternalPostedEndDate": deadline,
+        "JobGrade": grade,
+        "JobType": job_type,
+        "PracticeArea": practice,
+        "Bureau": bureau,
+        "ContractDuration": duration,
+        "ExternalDescriptionStr": description,
+        "ExternalUrl": url,
+    })
+
+
+def fetch_undp_ipsa_oracle_html():
+    search_url = (
+        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+        f"{UNDP_ORACLE_SITE}/jobs?keyword=IPSA"
+    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+    errors = []
+    discovered = set()
+
+    try:
+        text, proxied = fetch_public_text(
+            search_url,
+            headers=headers,
+            jina_fallback=True,
+            jina_first=True,
+        )
+
+        for href in re.findall(
+            r'https://estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+',
+            text,
+            flags=re.I,
+        ):
+            discovered.add(href)
+
+        for href in re.findall(
+            r'/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+',
+            text,
+            flags=re.I,
+        ):
+            discovered.add(urljoin(UNDP_ORACLE_BASE, href))
+
+        discovered = list(dict.fromkeys(discovered))
+
+        # Prefer links whose nearby page text already contains IPSA.
+        ipsas = []
+        for url in discovered:
+            if url.lower() in text.lower():
+                idx = text.lower().find(url.lower())
+                context = text[max(0, idx-500):idx+500]
+                if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
+                    ipsas.append(url)
+        urls = list(dict.fromkeys(ipsas or discovered))[:50]
+
+        jobs = []
+
+        def fetch_detail(url):
+            try:
+                detail_text, _ = fetch_public_text(
+                    url,
+                    headers=headers,
+                    jina_fallback=True,
+                    jina_first=True,
+                )
+                return parse_undp_oracle_job_page(detail_text, url), None
+            except Exception as exc:
+                return None, f"{url}: {type(exc).__name__}: {exc}"
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [executor.submit(fetch_detail, url) for url in urls]
+            for future in as_completed(futures):
+                job, error = future.result()
+                if error:
+                    errors.append(error)
+                elif job:
+                    jobs.append(job)
+
+        unique = dedupe(jobs)
+        return unique, {
+            "status": "ok" if unique else ("error" if errors else "empty"),
+            "count": len(unique),
+            "endpoint": search_url,
+            "filter": "IPSA keyword",
+            "discovered_urls": len(discovered),
+            "selected_urls": len(urls),
+            "proxy": proxied,
+            "errors": errors[:25],
+        }
+    except Exception as exc:
+        return [], {
+            "status": "error",
+            "count": 0,
+            "endpoint": search_url,
+            "filter": "IPSA keyword",
+            "errors": [f"{type(exc).__name__}: {exc}"],
+        }
+
+
 def fetch_undp_ipsa_bing():
     queries = [
         'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-" "UNDP Careers"',
@@ -1964,6 +2119,10 @@ def main():
     undp_oracle_jobs, undp_oracle_health = fetch_undp_ipsa_oracle_public()
     all_jobs.extend(undp_oracle_jobs)
     sources["UNDP — IPSA / Oracle REST"] = undp_oracle_health
+
+    undp_html_jobs, undp_html_health = fetch_undp_ipsa_oracle_html()
+    all_jobs.extend(undp_html_jobs)
+    sources["UNDP — IPSA / Oracle HTML"] = undp_html_health
 
     # UNDP IPSA: use the stable unvacancies live index, which links
     # each listing back to the official UNDP application page.

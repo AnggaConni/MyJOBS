@@ -297,6 +297,33 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
 
+    def test_undp_oracle_html_parser(self):
+        html = """
+        <html><body>
+        <h1>Public and Digital Investment Specialist</h1>
+        <div>Job Identification 36742</div>
+        <div>Posting Date 09/30/2026, 02:33 PM</div>
+        <div>Apply Before 10/08/2026, 03:59 AM</div>
+        <div>Locations Rome, Italy</div>
+        <div>Agency UNDP</div>
+        <div>Grade IPSA-10</div>
+        <div>Vacancy Type International Personnel Service Agreement</div>
+        <div>Practice Area Nature, Climate and Energy</div>
+        <div>Bureau Bureau for Policy and Programme Support</div>
+        <div>Contract Duration 1 Year</div>
+        <div>Job Description</div>
+        <div>Investment specialist role.</div>
+        </body></html>
+        """
+        job = parse_undp_oracle_job_page(
+            html,
+            "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/36742",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-10")
+        self.assertEqual(job["location"], "Rome, Italy")
+        self.assertIn("/job/36742", job["original_url"])
+
     def test_dedupe_by_url(self):
         job = {
             "title": "A",
