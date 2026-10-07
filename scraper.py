@@ -1453,6 +1453,156 @@ def fetch_undp_ipsa_bing():
     }
 
 
+def parse_unvacancies_undp_detail(html, source_url):
+    soup = BeautifulSoup(html, "html.parser")
+    lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
+    blob = " ".join(lines)
+
+    grade_match = re.search(r"\b(IPSA-\d+)\b", blob, flags=re.I)
+    if not grade_match:
+        return None
+
+    grade = grade_match.group(1).upper()
+    heading = soup.find("h1")
+    title = clean(heading.get_text(" ", strip=True)) if heading else ""
+
+    location_match = re.search(
+        r"UNDP\s*[·|]\s*(.+?)(?=\s+Posted\b|\s+Grade\b|\s+IPSA-\d+\b)",
+        blob,
+        flags=re.I,
+    )
+    location = clean(location_match.group(1)) if location_match else ""
+
+    posted_match = re.search(
+        r"Posted\s+(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        blob,
+        flags=re.I,
+    )
+    closed_match = re.search(
+        r"(?:Closes|Close)\s+(?:in\s+\d+\s+days?:\s*)?(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
+        blob,
+        flags=re.I,
+    )
+
+    official_url = ""
+    for anchor in soup.select("a[href]"):
+        href = clean(anchor.get("href"))
+        if re.search(
+            r"(?:estm\.fa\.em2\.oraclecloud\.com/hcmUI/|jobs\.undp\.org/)",
+            href,
+            flags=re.I,
+        ):
+            official_url = href
+            break
+
+    ref_match = re.search(r"(?:-DP-|/job/)(\d{4,6})", source_url, flags=re.I)
+    requisition_id = ref_match.group(1) if ref_match else ""
+
+    if not official_url and requisition_id:
+        official_url = (
+            f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+            f"{UNDP_ORACLE_SITE}/job/{requisition_id}"
+        )
+
+    try:
+        desc_start = next(
+            i for i, line in enumerate(lines)
+            if canon(line) in {"about this role", "job description", "description"}
+        )
+        description = clean(" ".join(lines[desc_start + 1:desc_start + 80]))
+    except StopIteration:
+        description = clean(blob[:6000])
+
+    return normalize_undp_oracle({
+        "Id": requisition_id,
+        "Title": title,
+        "EmployerName": "UNDP",
+        "PrimaryLocation": location,
+        "PostedDate": posted_match.group(1) if posted_match else "",
+        "ExternalPostedEndDate": closed_match.group(1) if closed_match else "",
+        "JobGrade": grade,
+        "ExternalDescriptionStr": description[:6000],
+        "ExternalUrl": official_url or source_url,
+    })
+
+
+def fetch_undp_ipsa_unvacancies():
+    errors = []
+    detail_urls = set()
+    page_urls = [
+        f"https://unvacancies.org/explore?organization=UNDP&page={page}"
+        for page in range(1, 16)
+    ]
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+
+    for page_url in page_urls:
+        try:
+            text, _ = fetch_public_text(
+                page_url,
+                headers=headers,
+                jina_fallback=True,
+                jina_first=False,
+            )
+            soup = BeautifulSoup(text, "html.parser")
+            for anchor in soup.select('a[href*="/jobs/"]'):
+                href = clean(anchor.get("href"))
+                if not href:
+                    continue
+                context = clean(anchor.parent.get_text(" ", strip=True))
+                if anchor.parent and anchor.parent.parent:
+                    context = clean(
+                        f"{context} {anchor.parent.parent.get_text(' ', strip=True)}"
+                    )
+                if re.search(r"\bIPSA-\d+\b|International PSA", context, flags=re.I):
+                    detail_urls.add(urljoin("https://unvacancies.org", href))
+        except Exception as exc:
+            errors.append(
+                f"{page_url}: {type(exc).__name__}: {exc}"
+            )
+
+        if len(detail_urls) >= 80:
+            break
+
+    jobs = []
+
+    def fetch_detail(url):
+        try:
+            text, _ = fetch_public_text(
+                url,
+                headers=headers,
+                jina_fallback=True,
+                jina_first=False,
+            )
+            return parse_unvacancies_undp_detail(text, url), None
+        except Exception as exc:
+            return None, f"{url}: {type(exc).__name__}: {exc}"
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [
+            executor.submit(fetch_detail, url)
+            for url in sorted(detail_urls)[:80]
+        ]
+        for future in as_completed(futures):
+            job, error = future.result()
+            if error:
+                errors.append(error)
+            elif job:
+                jobs.append(job)
+
+    jobs = dedupe(jobs)
+    return jobs, {
+        "status": "ok" if jobs else ("error" if errors else "empty"),
+        "count": len(jobs),
+        "pages_checked": len(page_urls),
+        "detail_urls": len(detail_urls),
+        "errors": errors[:25],
+        "source": "unvacancies.org (UNDP official application links)",
+    }
+
+
 def parse_undp_oracle_job_html(text, url):
     soup = BeautifulSoup(text, "html.parser")
     lines = [
@@ -1929,6 +2079,11 @@ def main():
     undp_html_jobs, undp_html_health = fetch_undp_ipsa_oracle_html()
     all_jobs.extend(undp_html_jobs)
     sources["UNDP — IPSA / Oracle HTML"] = undp_html_health
+
+    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
+        undp_mirror_jobs, undp_mirror_health = fetch_undp_ipsa_unvacancies()
+        all_jobs.extend(undp_mirror_jobs)
+        sources["UNDP — IPSA / unvacancies"] = undp_mirror_health
 
     if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
         undp_bing_jobs, undp_bing_health = fetch_undp_ipsa_bing()
