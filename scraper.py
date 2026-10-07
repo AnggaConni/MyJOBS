@@ -1509,6 +1509,7 @@ def fetch_undp_ipsa_oracle_public():
                 list_url,
                 params={
                     "onlyData": "true",
+                    "totalResults": "true",
                     "expand": "requisitionList",
                     "finder": finder,
                 },
@@ -1591,9 +1592,16 @@ def fetch_undp_ipsa_oracle_public():
                     jobs.append(job)
 
         has_more = bool(payload.get("hasMore")) if isinstance(payload, dict) else False
-        if not has_more:
+        total_results = 0
+        if isinstance(payload, dict):
+            try:
+                total_results = int(payload.get("totalResults") or 0)
+            except (TypeError, ValueError):
+                total_results = 0
+        fetched_so_far = offset + len(unique_rows)
+        if not (has_more or (total_results and fetched_so_far < total_results)):
             break
-        offset += page_size
+        offset += len(unique_rows) or page_size
 
     jobs = dedupe(jobs)
     return jobs, {
@@ -1601,6 +1609,7 @@ def fetch_undp_ipsa_oracle_public():
         "count": len(jobs),
         "listed_rows": listed_rows,
         "detail_attempts": detail_attempts,
+        "total_results": total_results if 'total_results' in locals() else 0,
         "endpoint": list_url,
         "filter": "authoritative IPSA grade from current Oracle requisition details",
         "finder": "findReqs;siteNumber=CX_1;current-job-list",
