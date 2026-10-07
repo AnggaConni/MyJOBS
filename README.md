@@ -54,4 +54,6 @@ No fake vacancy is generated when a source fails.
 2. Salary, skills, sector and employment-type normalization.
 3. Better freshness and first-seen / last-seen tracking.
 4. Nationwide location intelligence.
+5. Global UN opportunities: UN Careers P-1 to P-7 and UNDP IPSA.
+6. Optional ASEAN expansion after source, privacy and jurisdiction review.
 5. Optional ASEAN expansion after source, privacy and jurisdiction review.
