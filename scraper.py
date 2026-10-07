@@ -1478,27 +1478,44 @@ def fetch_undp_ipsa_oracle_public():
     seen = set()
     jobs = []
     errors = []
+    candidate_rows = 0
+
+    # Oracle's public Candidate Experience finder is more reliable when we
+    # retrieve the current job list and filter IPSA locally. The public API
+    # documents Keyword as a finder variable, but CI responses for keyword=IPSA
+    # can be empty even while the live site exposes International PSA jobs.
+    # The live site currently exposes International Personnel Service Agreement
+    # as a vacancy type, so use that as the discovery gate and inspect the
+    # requisition details for the authoritative grade.
+    facets_list = (
+        "LOCATIONS;WORK_LOCATIONS;WORKPLACE_TYPES;TITLES;"
+        "CATEGORIES;ORGANIZATIONS;POSTING_DATES;FLEX_FIELDS"
+    )
 
     for _ in range(max_pages):
         finder = (
-            f"findReqs;keyword=IPSA,siteNumber={UNDP_ORACLE_SITE},"
-            f"limit={page_size},offset={offset},sortBy=POSTING_DATES_DESC"
+            f"findReqs;siteNumber={UNDP_ORACLE_SITE},"
+            f"facetsList={facets_list},limit={page_size},offset={offset},"
+            f"sortBy=POSTING_DATES_DESC"
         )
         try:
             response = requests.get(
                 list_url,
                 params={
-                    "onlyData":"true",
-                    "expand":"requisitionList",
-                    "finder":finder,
+                    "onlyData": "true",
+                    "expand": "requisitionList",
+                    "finder": finder,
                 },
                 headers={
-                    "User-Agent":"MyJOBS/1.0",
-                    "Accept":"application/json",
-                    "Ora-Irc-Language":"en",
-                    "Referer":f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs?keyword=IPSA",
+                    "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+                    "Accept": "application/json",
+                    "Ora-Irc-Language": "en",
+                    "Referer": (
+                        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+                        f"{UNDP_ORACLE_SITE}/jobs"
+                    ),
                 },
-                timeout=max(TIMEOUT,30),
+                timeout=max(TIMEOUT, 30),
             )
             response.raise_for_status()
             payload = response.json()
@@ -1517,30 +1534,65 @@ def fetch_undp_ipsa_oracle_public():
         if not rows:
             break
 
-        ids = []
+        candidates = []
         for row in rows:
-            rid = clean(row.get("Id") or row.get("RequisitionId") or row.get("SearchId"))
-            if rid and rid not in seen:
-                seen.add(rid)
-                ids.append(rid)
+            rid = clean(
+                row.get("Id")
+                or row.get("RequisitionId")
+                or row.get("SearchId")
+            )
+            if not rid or rid in seen:
+                continue
+            seen.add(rid)
 
-        def get_detail(rid):
+            row_blob = " ".join(
+                clean(row.get(key))
+                for key in (
+                    "Title",
+                    "ShortDescriptionStr",
+                    "ContractType",
+                    "JobType",
+                    "WorkerType",
+                    "VacancyType",
+                    "CategoryAndLevel",
+                    "JobGrade",
+                    "JobLevel",
+                )
+                if clean(row.get(key))
+            )
+            contract_type = canon(
+                row.get("ContractType")
+                or row.get("JobType")
+                or row.get("VacancyType")
+            )
+            looks_international_psa = (
+                "international personnel service agreement" in contract_type
+                or bool(re.search(r"\bIPSA\s*-?\d+\b", row_blob, flags=re.I))
+            )
+            if looks_international_psa:
+                candidates.append((rid, row))
+        candidate_rows += len(candidates)
+
+        def get_detail(pair):
+            rid, row = pair
             try:
-                return rid, fetch_undp_oracle_detail(rid), None
+                return rid, row, fetch_undp_oracle_detail(rid), None
             except Exception as exc:
-                return rid, None, f"{rid}: {type(exc).__name__}: {exc}"
+                return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
 
         with ThreadPoolExecutor(max_workers=6) as executor:
-            futures = [executor.submit(get_detail, rid) for rid in ids]
+            futures = [executor.submit(get_detail, pair) for pair in candidates]
             for future in as_completed(futures):
-                rid, detail, err = future.result()
+                rid, row, detail, err = future.result()
                 if err:
                     errors.append(err)
                     continue
                 if not detail:
                     continue
 
-                job = normalize_undp_oracle(detail)
+                merged = dict(row)
+                merged.update(detail)
+                job = normalize_undp_oracle(merged)
                 if job:
                     jobs.append(job)
 
@@ -1551,13 +1603,14 @@ def fetch_undp_ipsa_oracle_public():
 
     jobs = dedupe(jobs)
     return jobs, {
-        "status":"ok" if jobs else ("error" if errors else "empty"),
-        "count":len(jobs),
-        "endpoint":list_url,
-        "filter":"IPSA keyword",
-        "finder":"findReqs;keyword=IPSA",
-        "site":UNDP_ORACLE_SITE,
-        "errors":errors[:25],
+        "status": "ok" if jobs else ("error" if errors else "empty"),
+        "count": len(jobs),
+        "candidate_rows": candidate_rows,
+        "endpoint": list_url,
+        "filter": "International Personnel Service Agreement / IPSA grade",
+        "finder": "findReqs;siteNumber=CX_1;current-job-list",
+        "site": UNDP_ORACLE_SITE,
+        "errors": errors[:25],
     }
 
 
