@@ -1,9 +1,11 @@
 {
   "brand": "MyJOBS",
-  "scope": "Indonesia",
+  "scope": "Indonesia + selected global UN professional opportunities",
   "buttons": [
     {"id":"reliefweb","label":"ReliefWeb Jobs","url":"https://reliefweb.int/jobs","description":"Humanitarian opportunities"},
-    {"id":"un-careers","label":"UN Careers","url":"https://careers.un.org/job-openings","description":"United Nations Secretariat vacancies"},
+    {"id":"un-careers","label":"UN Careers","url":"https://careers.un.org/job-openings","description":"UN Secretariat vacancies"},
+    {"id":"un-p","label":"UN P-Level","url":"https://careers.un.org/job-openings","description":"Global UN Professional and Higher Categories (P-1 to P-7)"},
+    {"id":"undp-ipsa","label":"UNDP IPSA","url":"https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100","description":"Global UNDP International Personnel Services Agreement roles"},
     {"id":"ocha","label":"UN OCHA","url":"https://careers.un.org/job-openings","description":"OCHA vacancies via UN Careers"}
   ]
 }
