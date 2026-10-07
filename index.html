@@ -58,6 +58,8 @@ footer{padding:50px 0 70px;color:var(--muted);font-size:12px}.footer-line{border
   <div class="quick" id="sources">
     <a id="reliefwebLink" href="https://reliefweb.int/jobs" target="_blank" rel="noopener"><span class="qicon">🌐</span><span><strong>ReliefWeb</strong><small>Humanitarian jobs</small></span></a>
     <a id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🇺🇳</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span></a>
+    <a id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🧑‍💼</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span></a>
+    <a id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="qicon">🌍</span><span><strong>UNDP IPSA</strong><small>International roles</small></span></a>
     <a id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🕊️</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span></a>
   </div>
 
@@ -74,7 +76,7 @@ footer{padding:50px 0 70px;color:var(--muted);font-size:12px}.footer-line{border
     <button class="outline tab active" data-filter="all">All</button>
     <button class="outline tab" data-filter="local">Local</button>
     <button class="outline tab" data-filter="humanitarian">Humanitarian</button>
-    <button class="outline tab" data-filter="un">UN / OCHA</button>
+    <button class="outline tab" data-filter="un">UN / OCHA</button><button class="outline tab" data-filter="un-p">UN P-Level</button><button class="outline tab" data-filter="undp-ipsa">UNDP IPSA</button>
   </div>
 
   <div class="workspace">
@@ -87,6 +89,8 @@ footer{padding:50px 0 70px;color:var(--muted);font-size:12px}.footer-line{border
           <button class="filter" data-filter="local">Local jobs</button>
           <button class="filter" data-filter="humanitarian">Humanitarian</button>
           <button class="filter" data-filter="un">UN / OCHA</button>
+          <button class="filter" data-filter="un-p">UN P-Level</button>
+          <button class="filter" data-filter="undp-ipsa">UNDP IPSA</button>
         </div>
       </div>
       <div class="group">
@@ -125,8 +129,10 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
   function norm(v){return String(v||"").toLowerCase().normalize("NFKC")}
   function initials(v){var p=String(v||"?").trim().split(/\s+/).slice(0,2);return p.map(function(x){return x[0]}).join("").toUpperCase()||"?"}
   function isUN(j){var t=norm([j.source,j.company,j.title,j.description].join(" "));return t.indexOf("un careers")>=0||t.indexOf("united nations")>=0||t.indexOf(" ocha")>=0||t.indexOf("ocha ")>=0}
+  function isUNP(j){return String(j.source||"")==="UN Careers — P-level"}
+  function isUNDPIPSA(j){return String(j.source||"")==="UNDP — IPSA"}
   function isHuman(j){var t=norm([j.source,j.source_family,j.company,j.title,j.description].join(" "));return t.indexOf("reliefweb")>=0||t.indexOf("humanitarian")>=0||t.indexOf("ngo")>=0||isUN(j)}
-  function typeOf(j){return isUN(j)?"un":(isHuman(j)?"humanitarian":"local")}
+  function typeOf(j){return isUNP(j)?"un-p":(isUNDPIPSA(j)?"undp-ipsa":(isUN(j)?"un":(isHuman(j)?"humanitarian":"local")))}
   function matches(j){
     if(state.type!=="all"&&typeOf(j)!==state.type)return false;
     if(state.location!=="all"&&j.district!==state.location)return false;
@@ -163,7 +169,7 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
       "<div class='actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"' aria-label='"+(saved?"Unsave":"Save")+" job'>"+(saved?"♥":"♡")+"</button>"+
       (href?"<a class='apply' href='"+href+"' target='_blank' rel='noopener'>View job ↗</a>":"")+"</div></div>"+
       "<div class='job-bottom'><div class='badges'><span class='badge "+cls+"'>"+esc(j.source||"Source")+"</span>"+
-      (t==="un"?"<span class='badge urgent'>UN / OCHA</span>":"")+(j.remote?"<span class='badge'>Remote</span>":"")+
+      (t==="un"?"<span class='badge urgent'>UN / OCHA</span>":"")+(t==="un-p"?"<span class='badge urgent'>UN P-Level</span>":"")+(t==="undp-ipsa"?"<span class='badge urgent'>UNDP IPSA</span>":"")+(j.remote?"<span class='badge'>Remote</span>":"")+
       (j.expires_at?"<span class='badge'>Deadline "+esc(j.expires_at)+"</span>":"")+
       "</div><div class='fresh'>"+esc(j.posted_at||"Source date unavailable")+"</div></div></article>"
   }
@@ -214,7 +220,7 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
       .then(function(r){return Promise.all([r[0].json(),r[1].ok?r[1].json():Promise.resolve({})])})
       .then(function(v){
         var d=v[0],s=v[1];state.jobs=Array.isArray(d.jobs)?d.jobs:[];updateStats(d);locations();render();
-        (s.buttons||[]).forEach(function(x){if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});
+        (s.buttons||[]).forEach(function(x){if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="un-p")$("#unPLink").href=x.url;if(x.id==="undp-ipsa")$("#undpLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});
         $("#footerStatus").textContent=d.status==="error"?"Latest source refresh reported an error. Official source links remain available.":"Automated source indexing · direct links open original listings."
       })
       .catch(function(){
