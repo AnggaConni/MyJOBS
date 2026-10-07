@@ -245,6 +245,15 @@ def search_bing_results(query, url_pattern):
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
+def preserve_text(value):
+    """Normalize prose whitespace while preserving paragraph and line breaks."""
+    text = str(value or "")
+    text = text.replace("\\r\\n", "\\n").replace("\\r", "\\n")
+    text = re.sub(r"[ \\t]+", " ", text)
+    text = re.sub(r"[ \\t]*\\n[ \\t]*", "\\n", text)
+    text = re.sub(r"\\n{3,}", "\\n\\n", text)
+    return text.strip()
+
 def canon(value):
     return re.sub(r"[^a-z0-9]+", " ", clean(value).lower()).strip()
 
@@ -801,7 +810,7 @@ def normalize_reliefweb(item):
         "expires_at": closing_date,
         "schedule_type": clean(job_type.get("name")),
         "salary": "",
-        "description": clean(fields.get("body")),
+        "description": preserve_text(fields.get("body")),
         "details": make_source_details(
             "ReliefWeb",
             organization=source_name,
