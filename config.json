@@ -4,7 +4,7 @@
   "strategy": "Indonesia-first, ASEAN Phase 2",
   "max_google_queries_per_run": 19,
   "regions": "Nationwide Indonesia + all 11 ASEAN member states",
-  "sources": ["Google Jobs", "Loker.id", "ReliefWeb", "UN Careers"],
+  "sources": ["Google Jobs", "Loker.id", "ReliefWeb", "UN Careers", "UNDP"],
   "expiry_policy": {
     "stale_days": 7,
     "remove_when_status": ["past", "closed", "expired", "inactive"],
