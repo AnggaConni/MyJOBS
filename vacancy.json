@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 12:04 UTC",
+  "last_updated": "2026-10-07 12:09 UTC",
   "total": 0,
   "expired_removed": 0,
   "stale_removed": 0,
@@ -36,10 +36,11 @@
       ]
     },
     "ReliefWeb": {
-      "status": "ok",
+      "status": "error",
       "count": 0,
-      "api_results": 0,
-      "errors": []
+      "errors": [
+        "AttributeError: 'list' object has no attribute 'get'"
+      ]
     },
     "UN Careers — P-level": {
       "status": "error",
@@ -56,8 +57,9 @@
       "errors": []
     },
     "UN Careers — Indonesia": {
-      "status": "error",
+      "status": "skipped",
       "count": 0,
+      "message": "UN Careers feed no longer returns parseable XML from this endpoint",
       "errors": [
         "ParseError: syntax error: line 1, column 0"
       ]
@@ -70,8 +72,9 @@
     "Surabaya: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Surabaya",
     "Kalimantan: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Kalimantan",
     "Bali: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bali",
+    "AttributeError: 'list' object has no attribute 'get'",
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 3.41
+  "runtime_seconds": 2.63
 }
