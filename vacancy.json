@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 19:13 UTC",
-  "total": 257,
+  "last_updated": "2026-10-07 19:16 UTC",
+  "total": 259,
   "expired_removed": 1,
   "stale_removed": 0,
   "stale_days": 7,
@@ -23,11 +23,40 @@
   ],
   "jobs": [
     {
-      "id": "job-1a7cd103dd6788f6",
+      "id": "job-fb1c962c948201bb",
+      "title": "Account Officer",
+      "company": "BANK PADMA",
+      "location": "kota denpasar",
+      "district": "kota denpasar",
+      "province": "Bali",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-10-07",
+      "expires_at": "07 April 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "pt. bank perekonomian rakyat padma membuka lowongan kerja untuk posisi account officer (ao). kandidat bertanggung jawab dalam mengelola portofolio nasabah, memasarkan produk perbankan, dan mencapai target pembiayaan atau pendanaan. penempatan tersedia untuk kantor pusat denpasar, cabang gianyar, dan cabang tabanan.\n\npendidikan minimal s1. pria atau wanita dengan usia maksimal 35 tahun. memiliki integritas tinggi, jujur, bertanggung jawab, dan berorientasi pada target. memiliki pengalaman kerja minimal 1 tahun di industri perbankan sebagai account officer (ao). bersedia ditempatkan di kantor pusat denpasar, cabang gianyar, atau cabang tabanan.",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!account-officer-636!di!bank-padma-840",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "07 April 2027",
+        "location": "kota denpasar"
+      }
+    },
+    {
+      "id": "job-076a932ea19eab33",
       "title": "Creative Content Creator",
       "company": "PT Yasma Natura Internasional",
-      "location": "kab. blitar",
-      "district": "kab. blitar",
+      "location": "kota batu",
+      "district": "kota batu",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -38,7 +67,7 @@
       "schedule_type": "",
       "salary": "",
       "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-806!di!pt-yasma-natura-internasional-518",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-401!di!pt-yasma-natura-internasional-518",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -47,7 +76,7 @@
       "details": {
         "source": "TopLoker",
         "deadline": "07 April 2027",
-        "location": "kab. blitar"
+        "location": "kota batu"
       }
     },
     {
@@ -79,34 +108,6 @@
       }
     },
     {
-      "id": "job-f8aaa75ce5ceda31",
-      "title": "Creative Content Creator",
-      "company": "PT Yasma Natura Internasional",
-      "location": "kab. ponorogo",
-      "district": "kab. ponorogo",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-07",
-      "expires_at": "07 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-843!di!pt-yasma-natura-internasional-518",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "07 April 2027",
-        "location": "kab. ponorogo"
-      }
-    },
-    {
       "id": "job-a01c4b1d4466ef74",
       "title": "Creative Content Creator",
       "company": "PT Yasma Natura Internasional",
@@ -132,6 +133,62 @@
         "source": "TopLoker",
         "deadline": "07 April 2027",
         "location": "kab. lumajang"
+      }
+    },
+    {
+      "id": "job-1a7cd103dd6788f6",
+      "title": "Creative Content Creator",
+      "company": "PT Yasma Natura Internasional",
+      "location": "kab. blitar",
+      "district": "kab. blitar",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-10-07",
+      "expires_at": "07 April 2027",
+      "schedule_type": "",
+      "salary": "",
+      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-806!di!pt-yasma-natura-internasional-518",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "deadline": "07 April 2027",
+        "location": "kab. blitar"
+      }
+    },
+    {
+      "id": "job-f8aaa75ce5ceda31",
+      "title": "Creative Content Creator",
+      "company": "PT Yasma Natura Internasional",
+      "location": "kab. ponorogo",
+      "district": "kab. ponorogo",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-10-07",
+      "expires_at": "07 April 2027",
+      "schedule_type": "",
+      "salary": "",
+      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-843!di!pt-yasma-natura-internasional-518",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "deadline": "07 April 2027",
+        "location": "kab. ponorogo"
       }
     },
     {
@@ -190,63 +247,6 @@
         "schedule": "Full Time",
         "deadline": "21 Februari 2027",
         "location": "kab. banjarnegara"
-      }
-    },
-    {
-      "id": "job-076a932ea19eab33",
-      "title": "Creative Content Creator",
-      "company": "PT Yasma Natura Internasional",
-      "location": "kota batu",
-      "district": "kota batu",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-07",
-      "expires_at": "07 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-401!di!pt-yasma-natura-internasional-518",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "07 April 2027",
-        "location": "kota batu"
-      }
-    },
-    {
-      "id": "job-fb1c962c948201bb",
-      "title": "Account Officer",
-      "company": "BANK PADMA",
-      "location": "kota denpasar",
-      "district": "kota denpasar",
-      "province": "Bali",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-07",
-      "expires_at": "07 April 2027",
-      "schedule_type": "Full Time",
-      "salary": "",
-      "description": "pt. bank perekonomian rakyat padma membuka lowongan kerja untuk posisi account officer (ao). kandidat bertanggung jawab dalam mengelola portofolio nasabah, memasarkan produk perbankan, dan mencapai target pembiayaan atau pendanaan. penempatan tersedia untuk kantor pusat denpasar, cabang gianyar, dan cabang tabanan.\n\npendidikan minimal s1. pria atau wanita dengan usia maksimal 35 tahun. memiliki integritas tinggi, jujur, bertanggung jawab, dan berorientasi pada target. memiliki pengalaman kerja minimal 1 tahun di industri perbankan sebagai account officer (ao). bersedia ditempatkan di kantor pusat denpasar, cabang gianyar, atau cabang tabanan.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!account-officer-636!di!bank-padma-840",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "schedule": "Full Time",
-        "deadline": "07 April 2027",
-        "location": "kota denpasar"
       }
     },
     {
@@ -366,6 +366,64 @@
       }
     },
     {
+      "id": "job-f2e203194068d8ad",
+      "title": "Merchant Succes Executive (Sales)",
+      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
+      "location": "kab. donggala",
+      "district": "kab. donggala",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-07-07",
+      "expires_at": "09 Januari 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-945!di!pt-buku-usaha-digital-buku-warung-746",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "09 Januari 2027",
+        "location": "kab. donggala"
+      }
+    },
+    {
+      "id": "job-8ec17beb730a5e63",
+      "title": "Merchant Succes Executive (Sales)",
+      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
+      "location": "kab. banggai laut",
+      "district": "kab. banggai laut",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-07-07",
+      "expires_at": "09 Januari 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-103!di!pt-buku-usaha-digital-buku-warung-746",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "09 Januari 2027",
+        "location": "kab. banggai laut"
+      }
+    },
+    {
       "id": "job-79ef8e4e140227e5",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
@@ -424,92 +482,6 @@
       }
     },
     {
-      "id": "job-8ec17beb730a5e63",
-      "title": "Merchant Succes Executive (Sales)",
-      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. banggai laut",
-      "district": "kab. banggai laut",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-07-07",
-      "expires_at": "09 Januari 2027",
-      "schedule_type": "Full Time",
-      "salary": "",
-      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-103!di!pt-buku-usaha-digital-buku-warung-746",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "schedule": "Full Time",
-        "deadline": "09 Januari 2027",
-        "location": "kab. banggai laut"
-      }
-    },
-    {
-      "id": "job-b973fd0bdf4c2dfb",
-      "title": "Driver Management Supervisor",
-      "company": "SPX Express akbar",
-      "location": "kab. tabalong",
-      "district": "kab. tabalong",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-05",
-      "expires_at": "05 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "posisi driver management supervisor bertanggung jawab untuk melakukan evaluasi kehadiran driver sesuai jadwal yang ditetapkan, mengelola pelatihan, penilaian kinerja, serta peningkatan kompetensi driver secara berkala. selain itu, posisi ini bertugas melakukan pembinaan dan berkoordinasi dengan tim hse guna mencegah kecelakaan kerja, proaktif melakukan pemecahan masalah untuk perbaikan kinerja beserta efektivitasnya, serta bertanggung jawab atas pencapaian target dari kinerja dan pengembangan tim di penempatan banjarmasin dc, kab. banjar.\n\npendidikan minimal d3 semua jurusan, namun diutamakan dari jurusan logistik atau supply chain. memiliki pengalaman 3-5 tahun di bidang logistik/ekspres dan driver management. memiliki skill teknis manajemen armada & roster serta memahami standar k3/hse. memiliki kemampuan problem solving, komunikasi, dan kepemimpinan.",
-      "original_url": "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "05 April 2027",
-        "location": "kab. tabalong"
-      }
-    },
-    {
-      "id": "job-f2e203194068d8ad",
-      "title": "Merchant Succes Executive (Sales)",
-      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. donggala",
-      "district": "kab. donggala",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-07-07",
-      "expires_at": "09 Januari 2027",
-      "schedule_type": "Full Time",
-      "salary": "",
-      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-945!di!pt-buku-usaha-digital-buku-warung-746",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "schedule": "Full Time",
-        "deadline": "09 Januari 2027",
-        "location": "kab. donggala"
-      }
-    },
-    {
       "id": "job-2359648f4447e4c2",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
@@ -536,6 +508,35 @@
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
         "location": "kab. banggai"
+      }
+    },
+    {
+      "id": "job-e39dd9bf774b9e55",
+      "title": "Merchant Succes Executive (Sales)",
+      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
+      "location": "kab. banggai kepulauan",
+      "district": "kab. banggai kepulauan",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-07-07",
+      "expires_at": "09 Januari 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-521!di!pt-buku-usaha-digital-buku-warung-746",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "09 Januari 2027",
+        "location": "kab. banggai kepulauan"
       }
     },
     {
@@ -8313,6 +8314,102 @@
       "country_code": ""
     },
     {
+      "id": "job-98b109a12f018e26",
+      "source_job_id": "",
+      "title": "United Nations Secretariat Jobs in Geneva",
+      "company": "United Nations Secretariat",
+      "location": "Geneva, Switzerland",
+      "district": "Geneva, Switzerland",
+      "province": "",
+      "country": "Global",
+      "via": "UN Careers",
+      "source": "UN Careers — P-level",
+      "source_family": "UN Secretariat — Professional",
+      "posted_at": "",
+      "expires_at": "19 Nov 2026",
+      "schedule_type": "P-2",
+      "salary": "",
+      "description": "United Nations Secretariat Jobs in Geneva (2026) — 15 Jobs | unvacancies Skip to main content unvacancies .org unvacancies .org Explore jobs Match my CV Organizations Resources Tools & data Guides Salary UN hiring index About Saved Alerts Home › Explore jobs › United Nations Secretariat Jobs › United Nations Secretariat Jobs in Geneva United Nations Secretariat Jobs in Geneva 15 open · checked 19:15 UTC, 7 Oct Latest openings 15 of 15 All 15 Closing soon 2 Staff 8 Consultancy 6 Internship 1 P-2 3 P-3 2 P-4 2 P-3 Grade P-3 Public Information Officer UN Secretariat · Geneva, Switzerland Closes 19 Nov 2026 43 d left P-4 Grade P-4 Information Management Officer – IIMP UN Secretariat · Geneva, Switzerland Closes 19 Nov 2026 43 d left P-1 Grade P-1 Assistant Analyst (Evidence Reviewer) UN Secretariat · Geneva, Switzerland Closes in 4 days: closes 11 Oct 2026 4 d left CON Consultant Russian Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left CON Consultant Arabic Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left CON Consultant Chinese Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left CON Consultant English Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left CON Consultant French Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left CON Consultant Spanish Language Teacher UN Secretariat · Geneva, Switzerland Closes 18 Oct 2026 11 d left P-2 Grade P-2 Associate Programme Officer (CBRN) – UNICRI Geneva UN Secretariat · Geneva, Switzerland Closes 30 Oct 2026 23 d left P-3 Grade P-3 Programme Officer – UNDRR (Temporary) UN Secretariat · Geneva, Switzerland Closes today, 7 Oct 2026 Today P-2 Grade P-2 Associate Information Analyst – IIIM Geneva UN Secretariat · Geneva, Switzerland Closes 13 Nov 2026 37 d left P-2 Grade P-2 Associate Information Analyst – IIIM Geneva UN Secretariat · Geneva, Switzerland Closes 31 Oct 2026 24 d left P-4 Grade P-4 External Relations Officer – IIIM-Syria Geneva UN Secretariat · Geneva, Switzerland Closes 15 Oct 2026 8 d left INT Internship JIU Research and Analysis Intern – Genève UN Secretariat · Geneva, Switzerland Closes 22 Jan 2027 107 d left See all 15 in Explore Get United Nations Secretariat Jobs in Geneva in your inbox Enter your email and we'll send new roles matching United Nations Secretariat Jobs in Geneva in one email a day. No account needed. Create alert Daily · around 08:00 UTC Or Get these on Telegram Prefer a full account? Sign up to save jobs and manage alerts. About United Nations Secretariat Jobs in Geneva 15 live jobs at United Nations Secretariat in Geneva, Switzerland. Updated daily with direct links to official application portals. Related pages United Nations Secretariat jobs UN Jobs Geneva 2026 - Vacancies, Careers & Apply Links Geneva guide UN interview guide UN cover letter guide unvacancies .org Current vacancies with official application links. Telegram Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Independent platform. unvacancies.org is not affiliated with or endorsed by the United Nations. Every job listing links to an official organization careers portal. Read our public methodology . Terms & privacy Send feedback © 2026 unvacancies.org Explore Saved Alerts Menu",
+      "original_url": "https://unvacancies.org/jobs/organization/un-secretariat/geneva",
+      "search_query": "UN Secretariat P-level / unvacancies",
+      "extensions": [
+        "P-2"
+      ],
+      "remote": true,
+      "status": "current",
+      "contract_level": "P-2",
+      "details": {
+        "source": "UN Careers",
+        "level": "P-2",
+        "duty_station": "Geneva, Switzerland",
+        "deadline": "19 Nov 2026"
+      }
+    },
+    {
+      "id": "job-e5aeb7238b148c54",
+      "source_job_id": "",
+      "title": "United Nations Secretariat Jobs in New York",
+      "company": "United Nations Secretariat",
+      "location": "New York, United States Locally recruited in United States",
+      "district": "New York, United States Locally recruited in United States",
+      "province": "",
+      "country": "Global",
+      "via": "UN Careers",
+      "source": "UN Careers — P-level",
+      "source_family": "UN Secretariat — Professional",
+      "posted_at": "",
+      "expires_at": "21 Oct 2026",
+      "schedule_type": "P-4",
+      "salary": "",
+      "description": "United Nations Secretariat Jobs in New York (2026) — 95 Jobs | unvacancies Skip to main content unvacancies .org unvacancies .org Explore jobs Match my CV Organizations Resources Tools & data Guides Salary UN hiring index About Saved Alerts Home › Explore jobs › United Nations Secretariat Jobs › United Nations Secretariat Jobs in New York United Nations Secretariat Jobs in New York 95 open · checked 19:15 UTC, 7 Oct Latest openings 18 of 95 Latest 18 Closing soon 5 Staff 12 Consultancy 2 Remote 2 Internship 3 G-6 4 P-4 4 New York 16 G-6 Grade G-6 Programme Management Assistant UN Secretariat · New York, United States Locally recruited in United States Closes 21 Oct 2026 14 d left P-2 Grade P-2 Associate Human Resources Officer UN Secretariat · New York, United States Closes 20 Nov 2026 44 d left P-4 Grade P-4 Programme Management Officer – UNJSPF OIM UN Secretariat · New York, United States Closes 30 Oct 2026 23 d left G-6 Grade G-6 Human Resources Assistant UN Secretariat · New York, United States Locally recruited in United States Closes 20 Oct 2026 13 d left – Consultant – Fellowship Training Programme on Conventional UN Secretariat · Remote · New York Closes in 5 days: closes 12 Oct 2026 5 d left P-4 Grade P-4 Political Affairs Officer UN Secretariat · New York, United States Closes in 5 days: closes 12 Oct 2026 5 d left P-4 Grade P-4 Special Assistant UN Secretariat · New York, United States Closes 19 Nov 2026 43 d left G-7 Grade G-7 Senior Human Resources Assistant UN Secretariat · New York, United States Locally recruited in United States Closes 20 Oct 2026 13 d left P-3 Grade P-3 Investigator UN Secretariat · New York, United States Closes 18 Nov 2026 42 d left D-1 Grade D-1 Principal Political Affairs Officer UN Secretariat · New York, United States Closes in 5 days: closes 12 Oct 2026 5 d left INT Internship Training Intern UN Secretariat · New York, United States · Hybrid Closes 22 Oct 2026 15 d left G-5 Grade G-5 Administrative Assistant UN Secretariat · New York, United States Locally recruited in United States Closes 31 Oct 2026 24 d left CON Consultant Consultant – Data Management UN Secretariat · Remote · New York Closes in 6 days: closes 13 Oct 2026 6 d left P-4 Grade P-4 Economic Affairs Officer UN Secretariat · New York, United States Closes 15 Nov 2026 39 d left INT Internship Public Administration Intern UN Secretariat · New York, United States Closes in 7 days: closes 14 Oct 2026 7 d left G-6 Grade G-6 Finance and Budget Assistant UN Secretariat · New York, United States Locally recruited in United States Closes 16 Oct 2026 9 d left INT Internship Strategic Communications Intern UN Secretariat · New York, United States Closes 16 Oct 2026 9 d left G-6 Grade G-6 Programme Management Assistant – UNJSPF UN Secretariat · New York, United States Locally recruited in United States Closes 16 Oct 2026 9 d left See all 95 in Explore Get United Nations Secretariat Jobs in New York in your inbox Enter your email and we'll send new roles matching United Nations Secretariat Jobs in New York in one email a day. No account needed. Create alert Daily · around 08:00 UTC Or Get these on Telegram Prefer a full account? Sign up to save jobs and manage alerts. About United Nations Secretariat Jobs in New York 95 live jobs at United Nations Secretariat in New York, United States. Updated daily with direct links to official application portals. Related pages United Nations Secretariat jobs UN Jobs New York 2026 - Vacancies & Apply Links New York guide UN interview guide UN cover letter guide unvacancies .org Current vacancies with official application links. Telegram Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Independent platform. unvacancies.org is not affiliated with or endorsed by the United Nations. Every job listing links to an official organization careers portal. Read our public methodology . Terms & privacy Send feedback © 2026 unvacancies.org Explore Saved Alerts Menu",
+      "original_url": "https://unvacancies.org/jobs/organization/un-secretariat/new-york",
+      "search_query": "UN Secretariat P-level / unvacancies",
+      "extensions": [
+        "P-4"
+      ],
+      "remote": true,
+      "status": "current",
+      "contract_level": "P-4",
+      "details": {
+        "source": "UN Careers",
+        "level": "P-4",
+        "duty_station": "New York, United States Locally recruited in United States",
+        "deadline": "21 Oct 2026"
+      }
+    },
+    {
+      "id": "job-7c354bb21c306994",
+      "source_job_id": "",
+      "title": "United Nations Secretariat Jobs in Bonn",
+      "company": "United Nations Secretariat",
+      "location": "Remote · Bonn",
+      "district": "Remote · Bonn",
+      "province": "",
+      "country": "Global",
+      "via": "UN Careers",
+      "source": "UN Careers — P-level",
+      "source_family": "UN Secretariat — Professional",
+      "posted_at": "",
+      "expires_at": "20 Oct 2026",
+      "schedule_type": "P-3",
+      "salary": "",
+      "description": "United Nations Secretariat Jobs in Bonn (2026) — 2 Open Roles | unvacancies Skip to main content unvacancies .org unvacancies .org Explore jobs Match my CV Organizations Resources Tools & data Guides Salary UN hiring index About Saved Alerts Home › Explore jobs › United Nations Secretariat Jobs › United Nations Secretariat Jobs in Bonn United Nations Secretariat Jobs in Bonn 2 open · checked 19:15 UTC, 7 Oct Latest openings 2 of 2 All 2 Closing soon 1 Staff 1 Consultancy 1 Remote 1 CON Consultant Resource Mobilization Strategy Consultant – UNCCD UN Secretariat · Remote · Bonn Closes 20 Oct 2026 13 d left P-3 Grade P-3 Programme Officer (Mental Health) UN Secretariat · Bonn, Germany Closes in 2 days: closes 9 Oct 2026 2 d left See all 2 in Explore Get United Nations Secretariat Jobs in Bonn in your inbox Enter your email and we'll send new roles matching United Nations Secretariat Jobs in Bonn in one email a day. No account needed. Create alert Daily · around 08:00 UTC Or Get these on Telegram Prefer a full account? Sign up to save jobs and manage alerts. About United Nations Secretariat Jobs in Bonn 2 live jobs at United Nations Secretariat in Bonn, Germany. Updated daily with direct links to official application portals. Related pages United Nations Secretariat jobs UN Jobs Bonn 2026 - UNFCCC Vacancies & Apply Links UN interview guide UN cover letter guide unvacancies .org Current vacancies with official application links. Telegram Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Browse Explore jobs Organizations Countries & duty stations Grades & career levels Job functions Focus areas Tools & data Tools & data Salary & benefits Career guides Market insights UN Hiring Index Monthly hiring report Official portals Check a job offer Popular Remote UN jobs Jobs in Geneva Jobs in Rome FAO jobs WHO jobs Best UN job boards More popular searches Jobs in Bangkok Jobs in Montreal Jobs in Amman Jobs in Dhaka Jobs in Panama City Jobs in Kyiv G-6 jobs ILO jobs UNODC jobs unvacancies About the service Methodology & reliability For career services & partners Support & corrections Terms & privacy Mobile privacy Delete account Independent platform. unvacancies.org is not affiliated with or endorsed by the United Nations. Every job listing links to an official organization careers portal. Read our public methodology . Terms & privacy Send feedback © 2026 unvacancies.org Explore Saved Alerts Menu",
+      "original_url": "https://unvacancies.org/jobs/organization/un-secretariat/bonn",
+      "search_query": "UN Secretariat P-level / unvacancies",
+      "extensions": [
+        "P-3"
+      ],
+      "remote": true,
+      "status": "current",
+      "contract_level": "P-3",
+      "details": {
+        "source": "UN Careers",
+        "level": "P-3",
+        "duty_station": "Remote · Bonn",
+        "deadline": "20 Oct 2026"
+      }
+    },
+    {
       "id": "job-ce82c5eef185bb72",
       "title": "Project Manager, IPSA11, Dakar, Senegal (UNCDF) [Open to Tier 0, 1 & 2 applicants]",
       "company": "UNDP",
@@ -8391,78 +8488,50 @@
         "posted": "2026-09-30",
         "deadline": "2026-10-08T03:59:00+00:00"
       }
-    },
-    {
-      "id": "job-f5bb2b4c1629ee4a",
-      "title": "Associate Programme Management Officer, P2",
-      "company": "United Nations Secretariat",
-      "location": "Global",
-      "district": "Global",
-      "province": "",
-      "country": "Global",
-      "via": "UN Careers",
-      "source": "UN Careers — P-level",
-      "source_family": "UN Secretariat — Professional",
-      "posted_at": "",
-      "expires_at": "2026-11-06T04:59:59.000Z",
-      "schedule_type": "P-1",
-      "salary": "",
-      "description": "Org. Setting and Reporting The United Nations Environment Programme (UNEP) is the leading global environmental authority that sets the global environmental agenda, promotes the coherent implementation of the environmental dimension of sustainable development within the United Nations system and serves as an authoritative advocate for the global environment. UNEP’s Ecosystem Division drives conservation, restoration and sustainable use of ecosystems to achieve benefits for nature and people: today and future generations. The division works with Member States and partners to strengthen resilience by providing policy and technical support to catalyze sustainable social and economic transformation for biodiversity, people and peace. The Associate Programme Management Officer will operate in the framework of the \"Resilient Mountains” project including its “Adaptation at Altitude\" and “MountainsAdapt” components and other related activities focusing on the nexus between nature and climate action in mountain ecosystems and will contribute in providing assistance in support of the implementation of the aforementioned project (components) and related activities with a particular focus on the South Caucasus region and other mountain ecosystems across the world, also closely liaising with UNEP´s relevant Divisions, Regional Office for Europe and its Vienna Programme office as well as other partners within the UN system. “Adaptation at Altitude” project (component) The overall objective of the Adaptation at Altitude (A@A) programme (led by the Swiss Agency for Development and Cooperation) is to increase understanding on how the climate–land-use interactions are impacting tropical mountain biodiversity and ecosystem functions and appropriate conservation, restoration, sustainable use, adaptation and nature-based solutions in mountains and feed it into science-policy platforms for informed decision-making in national, regional and global policy processes, to increase the resilience and adaptive capacity of mountain communities and ecosystems to land uses and climate change. UNEP has been selected to lead the work under Outcome 2 to support regional policy action in the South Caucasus and East Africa as well as the interregional level. Strengthening South-South and regional cooperation and concrete action is furthermore seen as an effective catalyzer for adequate policy integration of mountain adaptation at national levels. “Mt Adapt” project (component) Further complementing the work on adaptation in mountain areas, the Austrian Federal Ministry for Climate Action decided to support the MountainsADAPT project, coordinated by UNEP, with the aim that innovative mountain adaptation nature-based solutions are widely known among targeted stakeholders and are implemented through a newly established small grants funding scheme to support needs-based and context-specific adaptation financing. Following the successful first phase, a small grants funding scheme for flexible and easily accessible financing of mountain adaptation solutions is rolled-out further supported by targeted capacity-building and training measures. This post is located in the Biodiversity, People and Landscapes Unit in the Biodiversity and Land Branch (BLB), Ecosystems Division, at the Vienna duty station (hosted at Vienna Programme Office). Under overall direction of Branch and Unit Head and direct supervision of the Mountain Team Leader, the incumbent will be responsible for the following duties: Responsibilities • Works with key partners and stakeholders and provides technical and administrative support to the development, implementation, monitoring and evaluation of the assigned project (components); monitors and analyzes specific aspects of project development and implementation; reviews relevant documents and reports; identifies problems and issues to be addressed and recommends corrective actions; liaises with relevant parties; identifies and tracks follow-up actions. • Assists in defining and establishing synergies and cooperation in alignment with the Sustainable Development Goals, the Medium-Term Strategy and the Kunming Montreal-Global Biodiversity Framework, connecting with other activities and initiatives in the assigned thematic fields, closely working with relevant thematic units and wider UNEP network; supporting the development of initiatives and project ideas, including targeted resource mobilization, targeting both horizontal and vertical funding. • Carries out basic research on selected thematic aspects, operations and other activities, related to mountain ecosystems and climate change, including collecting, analyzing and presenting statistical data and other information gathered from diverse sources. • Provides substantive support for policy coordination and evaluation functions, including the review and analysis of emerging development issues and trends in ecosystem degradation, biodiversity loss and climate change in in tropical mountain ecosystems. • Assists in performing consulting assignments, in collaboration with partners, by planning facilitating workshops, through other interactive sessions and assisting in developing the action plan the client will use to manage the change. • Contributes to the preparation of various written outputs, e.g. draft background papers, analytical notes, sections of reports and studies, inputs to publications that relate to mountain ecosystems • Provides administrative and substantive support to consultative and other meetings, conferences, etc., to include proposing agenda topics, identifying and proposed participants, preparation of background documents and presentations, handling logistics, etc. • Undertakes outreach activities related to the global mountains programme, assigned project (components) and topics; participates in the development of training workshops, seminars, etc.; participates in and makes presentations on assigned topics/activities. • Participates in field missions, including provision of substantive and administrative support, data collection, etc. • Coordinates activities related to budget funding (project preparation and submissions, progress reports, financial statements, etc.) and preparation of related documents/reports (pledging, work programme, project budget, etc.). • Contributes to the collection and analysis of data as well as identification of trends or patterns and provides draft insights through graphs, charts, tables and reports using data visualization methods for data-driven planning, decision-making, presentation and reporting • Performs other duties as required. Competencies • PROFESSIONALISM: Knowledge and understanding of concepts and approach relevant to project development and implementation, review of relevant documents, reports and research. Ability to identify issues, analyze and participate in the resolution of issues/problems. Ability to develop sources for data collection. Ability to analyze and interpret data in support of decision-making and convey resulting information to management. Conceptual analytical and evaluative skills to conduct independent research and analysis, including familiarity with and experience in the use of various research sources, including electronic sources on the internet, intranet and other databases. Ability to apply judgment in the context of assignments given, plan own work and manage conflicting priorities. Shows pride in work and in achievements; demonstrates professional competence and mastery of subject matter; is conscientious and efficient in meeting commitments, observing deadlines and achieving results; is motivated by professional rather than personal concerns; shows persistence when faced with difficult problems or challenges; remains calm in stressful situations. Takes responsibility for incorporating gender perspectives and ensuring the equal participation of women and men in all areas of work. •TEAMWORK: Works collaboratively with colleagues to achieve organizational goals; solicits input by genuinely valuing others’ ideas and expertise; is willing to learn from others; places team agenda before personal agenda; supports and acts in accordance with final group decision, even when such decisions may not entirely reflect own position; shares credit for team accomplishments and accepts joint responsibility for team shortcomings. • PLANNING AND ORGANIZING: Develops clear goals that are consistent with agreed strategies; identifies priority activities and assignments; adjusts priorities as required; allocates appropriate amount of time and resources for completing work; foresees risks and allows for contingencies when planning; monitors and adjusts plans and actions as necessary; uses time efficiently. Education Advanced university degree (Master’s degree, equivalent or higher) in a field relevant to mountains, ecosystem management, biodiversity conservation, and restoration, climate change adaptation, regional governance, including environmental sciences, sustainable development or a related field. A first-level university degree in combination with qualifying experience may be accepted in lieu of the advanced university degree. Successful completion of both degree and non-degree programs in data analytics, business analytics or data science programs is desirable. Job - Specific Qualification Not available. Work Experience A minimum of two (2) years of progressively responsible experience in project management, including experience in biodiversity conservation and/or ecosystem-based adaptation is required Work experience in policy mainstreaming and advocacy is required. Working experience in sustainable mountain development, including in the (South) Caucasus region, is required. Working experience with the set-up of small-grants mechanism, benefiting mainly Community Based Organizations (CBOs), is desirable. Experience in developing tools, methodologies, and guidance, preferably with a focus on nature aspects of climate change adaptation is desirable. A minimum of one (1) year of more experience in data analytics or related area is desirable (none if successful YPP or P-1 with a related degree) Languages English and French are the working languages of the United Nations Secretariat. For this job opening, English is required. The table below shows the minimum required level for each skill in these languages, according to the UN Language Framework (please consult https://languages.un.org for details). Required Languages Language Reading Writing Listening Speaking English UN Level II UN Level II UN Level II UN Level II Assessment Evaluation of qualified candidates may include an assessment exercise which may be followed by competency-based interview. Special Notice The appointment against this position is limited to the United Nations Environment Programme. Appointment against this position is for an initial period of one (1) year and may be subject to extension. External candidate selected for this position will be granted a fixed-term appointment limited (\"FTA-limited\") in accordance with section 2.2 (b) of administrative instruction ST/AI/2013/1 on Administration of fixed-term appointments. Renewal of appointment is contingent upon continued existence of mandate and availability of funding. If this position is discontinued, the incumbent will be separated from service. United Nations Secretariat staff members who meet the definition of \"internal candidate\" in staff rule 4.10 who are selected for this position subject to limitation will retain their current appointment status and will be reassigned or transferred to the position, without a lien to their parent position. Pursuant to section 7.11 of ST/AI/2012/2/Rev.1, candidates recruited through the young professionals' programme who have not served for a minimum of two years in the position of their initial assignment are not eligible to apply to this position. Staff members are subject to the authority of the Secretary-General and to assignment by him or her. In this context, all staff are expected to move periodically to new functions in their careers in accordance with established rules and procedures. The United Nations Secretariat is committed to achieving 50/50 gender balance and geographical diversity in its staff. Female candidates are strongly encouraged to apply for this position. When completing the Candidate Profile form, ensure ALL fields, ALL professional experience and contact information are completed and up to date. This information is the basis for the hiring manager to assess your eligibility and suitability for the position and to contact you. Individual Contractors and Consultants who have worked within the UN Secretariat in the last six months, are ineligible to apply for or be appointed to any professional and higher temporary or fixed-term positions, within six months of the end of their current or most recent service. For such positions, at least six months need to have elapsed between the end of a consultancy or individual contract and the time of application and consideration for an appointment as a staff member under the Staff Rules and Regulations of the United Nations. The requirement is not applicable when a person considered for appointment is serving or has previously served as affiliated personnel (for example as a consultant, individual contractor, intern or gratis personnel) with a specialized agency or an Office, Fund or Programme such as UNHCR, UNICEF, UNDP or UNOPS which is separately administered and funded from voluntary contributions At the United Nations, the paramount consideration in the recruitment and employment of staff is the necessity of securing the highest standards of efficiency, competence and integrity, with due regard to geographic diversity. All employment decisions are made on the basis of qualifications and organizational needs. The United Nations is committed to creating a diverse and inclusive environment of mutual respect. The United Nations recruits and employs staff regardless of gender identity, sexual orientation, race, religious, cultural and ethnic backgrounds or disabilities. Reasonable accommodation for applicants with disabilities may be provided to support participation in the recruitment process when requested and indicated in the application. On-line applications will be acknowledged where an email address has been provided. All applicants are strongly encouraged to apply on-line as soon as possible after the job opening has been posted and well before the deadline stated in the job opening. If you do not receive an e-mail acknowledgement within 24 hours of submission, your application may not have been received. If the problem persists, please seek technical assistance through the Inspira \"Contact Us\" link. United Nations Considerations According to article 101, paragraph 3, of the Charter of the United Nations, the paramount consideration in the employment of the staff is the necessity of securing the highest standards of efficiency, competence, and integrity. Candidates will not be considered for employment with the United Nations if they have committed violations of international human rights law, violations of international humanitarian law, sexual exploitation, sexual abuse, or sexual harassment, or if there are reasonable grounds to believe that they have been involved in the commission of any of these acts. The term “sexual exploitation” means any actual or attempted abuse of a position of vulnerability, differential power, or trust, for sexual purposes, including, but not limited to, profiting monetarily, socially or politically from the sexual exploitation of another. The term “sexual abuse” means the actual or threatened physical intrusion of a sexual nature, whether by force or under unequal or coercive conditions. The term “sexual harassment” means any unwelcome conduct of a sexual nature that might reasonably be expected or be perceived to cause offence or humiliation, when such conduct interferes with work, is made a condition of employment or creates an intimidating, hostile or offensive work environment, and when the gravity of the conduct warrants the termination of the perpetrator’s working relationship. Candidates who have committed crimes other than minor traffic offences may not be considered for employment. Due regard will be paid to the importance of recruiting the staff on as wide a geographical basis as possible. The United Nations places no restrictions on the eligibility of men and women to participate in any capacity and under conditions of equality in its principal and subsidiary organs. The United Nations Secretariat is a non-smoking environment. Reasonable accommodation may be provided to applicants with disabilities upon request, to support their participation in the recruitment process. By accepting a letter of appointment, staff members are subject to the authority of the Secretary-General, who may assign them to any of the activities or offices of the United Nations in accordance with staff regulation 1.2 (c). Further, staff members in the Professional and higher category up to and including the D-2 level and the Field Service category are normally required to move periodically to discharge functions in different duty stations under conditions established in ST/AI/2023/3 on Mobility, as may be amended or revised. This condition of service applies to all position specific job openings and does not apply to temporary positions. Applicants are urged to carefully follow all instructions available in the online recruitment platform, inspira, and to refer to the Applicant Guide by clicking on “Manuals” in the “Help” tile of the inspira account-holder homepage. The evaluation of applicants will be conducted on the basis of the information submitted in the application according to the evaluation criteria of the job opening and the applicable internal legislations of the United Nations including the Charter of the United Nations, resolutions of the General Assembly, the Staff Regulations and Rules, administrative issuances and guidelines. Applicants must provide complete and accurate information pertaining to their personal profile and qualifications according to the instructions provided in inspira to be considered for the current job opening. No amendment, addition, deletion, revision or modification shall be made to applications that have been submitted. Candidates under serious consideration for selection will be subject to reference checks to verify the information provided in the application. All external candidates recruited in accordance with section ‎2.2 (a) of ST/AI/2025/3 for a fixed term appointment without limitation and all external candidates recruited in accordance with section 2.2. (c) of ST/AI/2025/3 for a fixed term appointment limited to the entity are subject to an initial probationary period of one year under a fixed-term appointment. Job openings advertised on the Careers Portal will be removed at 11:59 p.m. (New York time) on the deadline date. No Fee THE UNITED NATIONS DOES NOT CHARGE A FEE AT ANY STAGE OF THE RECRUITMENT PROCESS (APPLICATION, INTERVIEW MEETING, PROCESSING, OR TRAINING). THE UNITED NATIONS DOES NOT CONCERN ITSELF WITH INFORMATION ON APPLICANTS’ BANK ACCOUNTS.",
-      "original_url": "https://careers.un.org/jobSearchDescription/284670?language=en",
-      "search_query": "UN global P-level",
-      "extensions": [
-        "P-1"
-      ],
-      "remote": false,
-      "status": "current",
-      "contract_level": "P-1",
-      "details": {
-        "source": "UN Careers",
-        "job_id": "284670",
-        "deadline": "2026-11-06T04:59:59.000Z",
-        "level": "P-1"
-      }
     }
   ],
   "summary": {
     "by_location": {
       "Indonesia": 126,
-      "Global": 65,
+      "Global": 64,
       "Remote": 37,
       "Montreuil": 3,
       "Port Sudan": 2,
       "Papua": 2,
       "Arequipa": 2,
-      "kab. blitar": 1,
+      "kota denpasar": 1,
+      "kota batu": 1,
       "kota madiun": 1,
-      "kab. ponorogo": 1,
       "kab. lumajang": 1,
+      "kab. blitar": 1,
+      "kab. ponorogo": 1,
       "kab. sigi": 1,
       "kab. banjarnegara": 1,
-      "kota batu": 1,
-      "kota denpasar": 1,
       "kab. tojo una una": 1,
       "kota palu": 1,
       "kab. poso": 1,
       "kab. parigi moutong": 1,
+      "kab. donggala": 1,
+      "kab. banggai laut": 1,
       "kab. buol": 1,
       "kab. toli toli": 1,
-      "kab. banggai laut": 1,
-      "kab. tabalong": 1,
-      "kab. donggala": 1,
       "kab. banggai": 1,
+      "kab. banggai kepulauan": 1,
       "Kabul": 1,
-      "Riau": 1
+      "Riau": 1,
+      "Geneva, Switzerland": 1,
+      "New York, United States Locally recruited in United States": 1,
+      "Remote · Bonn": 1
     },
     "by_source": {
       "ReliefWeb": 236,
       "TopLoker": 18,
-      "UNDP — IPSA": 2,
-      "UN Careers — P-level": 1
+      "UN Careers — P-level": 3,
+      "UNDP — IPSA": 2
     },
     "humanitarian_jobs": 236,
-    "un_jobs": 1,
-    "un_p_jobs": 1,
+    "un_jobs": 3,
+    "un_p_jobs": 3,
     "undp_ipsa_jobs": 2
   },
   "sources": {
@@ -8491,29 +8560,29 @@
         "https://toploker.com/loker/aktif-merekrut"
       ],
       "pages_crawled": [
-        "https://toploker.com/loker/aktif-merekrut",
-        "https://toploker.com/loker/daftar"
+        "https://toploker.com/loker/daftar",
+        "https://toploker.com/loker/aktif-merekrut"
       ],
       "proxy_fallback": true,
       "discovered_urls": 34,
       "sample_page_text": "Title: Daftar Loker Website URL Source: https://toploker.com/loker/daftar Markdown Content: [![Image 13: #](https://toploker.com/assets/Logo%20Toploker%20Verifikasi%202.png)](https://toploker.com/) [![Image 14: #](https://toploker.com/assets/winner2.webp)](https://toploker.com/) [![Image 15: #](https://toploker.com/assets/toploker.webp)](https://toploker.com/) [![Image 16: #](https://toploker.com/assets/winner1.png)](https://toploker.com/) * [PENCARI KARIR](https://toploker.com/login_pelamar) [PERUSAHAAN / IKM](https://toploker.com/login_perusahaan) [MENU](https://toploker.com/loker",
       "errors": [
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-521!di!pt-buku-usaha-digital-buku-warung-746: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-521!di!pt-buku-usaha-digital-buku-warung-746",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490"
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490"
       ]
     },
     "ReliefWeb": {
@@ -8568,15 +8637,25 @@
       "discovered_results": 0,
       "errors": []
     },
+    "UN Careers — P-level / unvacancies": {
+      "status": "ok",
+      "count": 3,
+      "discovered_urls": 5,
+      "parsed_details": 3,
+      "errors": [],
+      "source": "unvacancies.org — UN Secretariat mirror with official application links"
+    },
     "UNDP — IPSA / Bing Oracle": {
       "status": "empty",
       "count": 0,
       "queries": [
-        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"Grade IPSA-9\" \"UNDP Careers\"",
-        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"Grade IPSA-10\" \"UNDP Careers\"",
-        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"Grade IPSA-11\" \"UNDP Careers\"",
-        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"Grade IPSA-12\" \"UNDP Careers\"",
-        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"International Personnel Service Agreement\" \"UNDP Careers\""
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"IPSA-8\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"IPSA-9\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"IPSA-10\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"IPSA-11\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"IPSA-12\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"International Personnel Service Agreement\" \"UNDP Careers\"",
+        "site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ \"Vacancy Type\" \"International Personnel Service Agreement\""
       ],
       "discovered_results": 0,
       "bing_results": 0,
@@ -8721,10 +8800,10 @@
     "UNDP — IPSA / Oracle HTML": {
       "status": "empty",
       "count": 0,
-      "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs?keyword=IPSA",
+      "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs",
       "filter": "IPSA keyword",
-      "discovered_urls": 7,
-      "selected_urls": 7,
+      "discovered_urls": 25,
+      "selected_urls": 25,
       "proxy": true,
       "errors": []
     },
@@ -8749,19 +8828,14 @@
       ],
       "parsed_details": 0,
       "failed_detail_samples": [
+        "https://unvacancies.org/jobs/coordinateur-trice-de-projet-open-to-internal-and-external-applicants-DP-37329",
         "https://unvacancies.org/jobs/officier-de-securite-ouvert-aux-candidats-internes-externes-DP-37341",
-        "https://unvacancies.org/jobs/coordinateur-trice-de-projet-open-to-internal-and-external-applicants-DP-37329\\",
-        "https://unvacancies.org/jobs/administrative-finance-associate-moz-lap-open-to-tier-1-2-applicants-DP-37300\\",
-        "https://unvacancies.org/jobs/procurement-and-travel-assistant-open-to-all-applicants-DP-34951",
-        "https://unvacancies.org/jobs/head-of-forests-land-use-food-systems-open-to-all-applicants-DP-36149"
+        "https://unvacancies.org/jobs/chauffeur-pbf-gs3-DP-37291\\",
+        "https://unvacancies.org/jobs/chauffeur-pbf-gs3-DP-37291",
+        "https://unvacancies.org/jobs/internship-operations-and-common-premise-services-DP-37332\\"
       ],
       "errors": [],
       "source": "unvacancies.org (UNDP official application links)"
-    },
-    "UN Careers — P-level / carry-forward": {
-      "status": "carry-forward",
-      "count": 1,
-      "message": "Kept the last known jobs while the live source was unavailable."
     }
   },
   "errors": [
@@ -8771,24 +8845,24 @@
     "Surabaya: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Surabaya",
     "Kalimantan: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Kalimantan",
     "Bali: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bali",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-521!di!pt-buku-usaha-digital-buku-warung-746: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-521!di!pt-buku-usaha-digital-buku-warung-746",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490",
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 30.98
+  "runtime_seconds": 64.97
 }
