@@ -1719,7 +1719,8 @@ def fetch_undp_ipsa_oracle_public():
 
         listed_rows += len(rows)
         if not row_preview:
-            for rid, row in rows[:12]:
+            for row in rows[:12]:
+                rid = clean(row.get("Id") or row.get("RequisitionId") or row.get("SearchId"))
                 row_preview.append({
                     "id": rid,
                     "title": clean(row.get("Title")),
