@@ -298,6 +298,17 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
 
+    def test_undp_bing_result_normalization(self):
+        job = normalize_undp_bing_result({
+            "title": "Country Economist [Open to internal and external applicants] - UNDP Careers",
+            "url": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37241",
+            "snippet": "New Delhi, India Job Info Posting Date 10/01/2026, 11:05 AM Apply Before 10/15/2026, 05:00 AM Grade IPSA-11 Vacancy Type International Personnel Service Agreement",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "UNDP — IPSA")
+        self.assertEqual(job["contract_level"], "IPSA-11")
+        self.assertEqual(job["original_url"], "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37241")
+
     def test_undp_oracle_html_parser(self):
         html = """
         <html><body>
