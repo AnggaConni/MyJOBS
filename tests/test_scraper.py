@@ -11,6 +11,7 @@ from scraper import (
     normalize_un_professional,
     parse_datetime,
     parse_undp_job_anchor,
+    normalize_un_apify,
 )
 
 
@@ -95,6 +96,20 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["source"], "UN Careers — P-level")
         self.assertEqual(job["contract_level"], "P-4")
         self.assertEqual(job["country"], "Global")
+
+    def test_un_apify_normalization(self):
+        job = normalize_un_apify({
+            "title": "Programme Officer",
+            "jobId": "285000",
+            "url": "https://careers.un.org/jobopening",
+            "description": "Professional and Higher Categories, P-4",
+            "level": "P-4",
+            "dutyStation": "Nairobi",
+            "deadline": "2026-11-01",
+        })
+        self.assertEqual(job["source"], "UN Careers — P-level")
+        self.assertEqual(job["contract_level"], "P-4")
+        self.assertEqual(job["location"], "Nairobi")
 
     def test_undp_ipsa_parser(self):
         from bs4 import BeautifulSoup
