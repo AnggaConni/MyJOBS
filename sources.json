@@ -1,22 +1,9 @@
 {
+  "brand": "MyJOBS",
+  "scope": "Indonesia",
   "buttons": [
-    {
-      "id": "reliefweb",
-      "label": "ReliefWeb Jobs",
-      "url": "https://reliefweb.int/jobs",
-      "description": "Humanitarian job listings"
-    },
-    {
-      "id": "un-careers",
-      "label": "UN Careers",
-      "url": "https://careers.un.org/job-openings",
-      "description": "United Nations Secretariat vacancies"
-    },
-    {
-      "id": "ocha",
-      "label": "UN OCHA Vacancies",
-      "url": "https://careers.un.org/job-openings",
-      "description": "OCHA vacancies hosted through the UN Careers portal"
-    }
+    {"id":"reliefweb","label":"ReliefWeb Jobs","url":"https://reliefweb.int/jobs","description":"Humanitarian opportunities"},
+    {"id":"un-careers","label":"UN Careers","url":"https://careers.un.org/job-openings","description":"United Nations Secretariat vacancies"},
+    {"id":"ocha","label":"UN OCHA","url":"https://careers.un.org/job-openings","description":"OCHA vacancies via UN Careers"}
   ]
 }
