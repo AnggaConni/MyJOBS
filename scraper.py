@@ -1370,21 +1370,27 @@ def first_json_item(payload):
     return {}
 
 def fetch_undp_oracle_detail(requisition_id):
-    finder = f'ById;Id="{requisition_id}",siteNumber={UNDP_ORACLE_SITE}'
     url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails"
-    params = {"onlyData": "true", "expand": "all", "finder": finder}
+    finder = f'ByIdNoCache;Id="{requisition_id}",siteNumber={UNDP_ORACLE_SITE}'
+    params = {
+        "onlyData": "true",
+        "expand": "all",
+        "finder": finder,
+    }
     response = requests.get(
         url,
         params=params,
         headers={
-            "User-Agent": "MyJOBS/1.0",
+            "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
             "Accept": "application/json",
             "Ora-Irc-Language": "en",
         },
-        timeout=TIMEOUT,
+        timeout=max(TIMEOUT, 30),
     )
     response.raise_for_status()
     return first_json_item(response.json())
+
+
 
 def normalize_undp_bing_result(item):
     title = clean(item.get("title"))
