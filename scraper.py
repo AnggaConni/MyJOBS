@@ -1,4 +1,5 @@
 import hashlib
+from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
 import re
@@ -901,6 +902,223 @@ def normalize_undp_oracle(item):
         ),
     }
 
+UNDP_ORACLE_BASE = "https://estm.fa.em2.oraclecloud.com"
+UNDP_ORACLE_SITE = "CX_1"
+
+def first_json_item(payload):
+    if isinstance(payload, dict):
+        items = payload.get("items")
+        if isinstance(items, list) and items:
+            return items[0]
+        return payload
+    if isinstance(payload, list) and payload:
+        return payload[0]
+    return {}
+
+def fetch_undp_oracle_detail(requisition_id):
+    finder = f'ById;Id="{requisition_id}",siteNumber={UNDP_ORACLE_SITE}'
+    url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails"
+    params = {"onlyData": "true", "expand": "all", "finder": finder}
+    response = requests.get(
+        url,
+        params=params,
+        headers={
+            "User-Agent": "MyJOBS/1.0",
+            "Accept": "application/json",
+            "Ora-Irc-Language": "en",
+        },
+        timeout=TIMEOUT,
+    )
+    response.raise_for_status()
+    return first_json_item(response.json())
+
+def fetch_undp_ipsa_oracle_public():
+    jobs = []
+    errors = []
+    seen = set()
+    offset = 0
+    page_size = 100
+    max_pages = 5
+
+    list_url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+
+    try:
+        for _ in range(max_pages):
+            finder = (
+                f"findReqs;siteNumber={UNDP_ORACLE_SITE},"
+                "facetsList=LOCATIONS;WORK_LOCATIONS;TITLES;CATEGORIES;"
+                "ORGANIZATIONS;POSTING_DATES"
+            )
+            response = requests.get(
+                list_url,
+                params={
+                    "onlyData": "true",
+                    "expand": "requisitionList.secondaryLocations",
+                    "finder": finder,
+                    "limit": page_size,
+                    "offset": offset,
+                },
+                headers={
+                    "User-Agent": "MyJOBS/1.0",
+                    "Accept": "application/json",
+                    "Ora-Irc-Language": "en",
+                    "Referer": f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs",
+                },
+                timeout=TIMEOUT,
+            )
+            response.raise_for_status()
+            payload = response.json()
+
+            requisitions = []
+            for item in payload.get("items", []) if isinstance(payload, dict) else []:
+                nested = item.get("requisitionList")
+                if isinstance(nested, list):
+                    requisitions.extend(nested)
+                elif isinstance(item, dict) and item.get("Id"):
+                    requisitions.append(item)
+
+            if not requisitions:
+                break
+
+            ids = []
+            for item in requisitions:
+                rid = clean(item.get("Id") or item.get("RequisitionId") or item.get("requisitionId"))
+                if rid and rid not in seen:
+                    seen.add(rid)
+                    ids.append(rid)
+
+            def get_detail(rid):
+                try:
+                    return rid, fetch_undp_oracle_detail(rid), None
+                except Exception as exc:
+                    return rid, None, f"{rid}: {type(exc).__name__}: {exc}"
+
+            with ThreadPoolExecutor(max_workers=6) as executor:
+                futures = [executor.submit(get_detail, rid) for rid in ids]
+                for future in as_completed(futures):
+                    rid, detail, err = future.result()
+                    if err:
+                        errors.append(err)
+                        continue
+                    if not detail:
+                        continue
+
+                    level = clean(detail.get("JobGrade") or detail.get("JobLevel"))
+                    level_match = re.search(r"\b(IPSA-\d+)\b", level, flags=re.I)
+                    if not level_match:
+                        level_match = re.search(
+                            r"\b(IPSA-\d+)\b",
+                            f"{detail.get('Title','')} {detail.get('ExternalDescriptionStr','')}",
+                            flags=re.I,
+                        )
+                    if not level_match:
+                        continue
+
+                    level = level_match.group(1).upper()
+                    title = clean(detail.get("Title"))
+                    location = clean(detail.get("PrimaryLocation") or detail.get("WorkLocation"))
+                    country_code = clean(detail.get("PrimaryLocationCountry"))
+                    description = clean(
+                        detail.get("ExternalDescriptionStr")
+                        or detail.get("ExternalDescription")
+                        or ""
+                    )
+                    qualifications = clean(detail.get("ExternalQualificationsStr"))
+                    responsibilities = clean(detail.get("ExternalResponsibilitiesStr"))
+                    full_description = "\n\n".join(
+                        x for x in [description, qualifications, responsibilities] if x
+                    )
+                    rid_final = clean(detail.get("RequisitionId") or detail.get("Id") or rid)
+
+                    job_url = (
+                        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+                        f"{UNDP_ORACLE_SITE}/job/{rid_final}"
+                    )
+
+                    job = {
+                        "id": make_id("UNDP IPSA", rid_final, title),
+                        "title": title,
+                        "company": clean(detail.get("LegalEmployer") or "UNDP"),
+                        "location": location or "Global",
+                        "district": infer_location(location, fallback=""),
+                        "province": infer_province(location),
+                        "country": infer_country(location, explicit=""),
+                        "via": "UNDP Careers",
+                        "source": "UNDP — IPSA",
+                        "source_family": "UN Development Programme — International",
+                        "posted_at": clean(
+                            detail.get("ExternalPostedStartDate")
+                            or detail.get("PostedDate")
+                            or detail.get("postingDate")
+                        ),
+                        "expires_at": clean(
+                            detail.get("ExternalPostedEndDate")
+                            or detail.get("PostingEndDate")
+                            or detail.get("postingEndDate")
+                        ),
+                        "schedule_type": level,
+                        "salary": "",
+                        "description": full_description,
+                        "original_url": job_url,
+                        "search_query": "UNDP IPSA",
+                        "extensions": [
+                            level,
+                            clean(detail.get("JobType")),
+                            clean(detail.get("JobSchedule")),
+                            clean(detail.get("WorkerType")),
+                            clean(detail.get("WorkplaceType")),
+                        ],
+                        "remote": clean(detail.get("WorkplaceType")).lower() == "remote"
+                            or "home-based" in full_description.lower()
+                            or "home based" in full_description.lower(),
+                        "status": "current",
+                        "contract_level": level,
+                        "details": make_source_details(
+                            "UNDP Careers",
+                            requisition_id=rid_final,
+                            post_level=level,
+                            job_level=clean(detail.get("JobLevel")),
+                            job_grade=clean(detail.get("JobGrade")),
+                            job_type=clean(detail.get("JobType")),
+                            job_schedule=clean(detail.get("JobSchedule")),
+                            worker_type=clean(detail.get("WorkerType")),
+                            workplace_type=clean(detail.get("WorkplaceType")),
+                            primary_location=location,
+                            country_code=country_code,
+                            organization=clean(detail.get("Organization")),
+                            job_function=clean(detail.get("JobFunction")),
+                            study_level=clean(detail.get("StudyLevel")),
+                            number_of_openings=clean(detail.get("NumberOfOpenings")),
+                            international_travel=clean(detail.get("InternationalTravelRequired")),
+                            posted=clean(detail.get("ExternalPostedStartDate")),
+                            deadline=clean(detail.get("ExternalPostedEndDate")),
+                        ),
+                    }
+                    jobs.append(job)
+
+            has_more = bool(payload.get("hasMore")) if isinstance(payload, dict) else False
+            if not has_more:
+                break
+            offset += page_size
+
+        unique = dedupe(jobs)
+        return unique, {
+            "status": "ok" if unique else "empty",
+            "count": len(unique),
+            "endpoint": list_url,
+            "filter": "IPSA only",
+            "site": UNDP_ORACLE_SITE,
+            "errors": errors[:25],
+        }
+    except Exception as exc:
+        return [], {
+            "status": "error",
+            "count": 0,
+            "endpoint": list_url,
+            "filter": "IPSA only",
+            "errors": errors[:20] + [f"{type(exc).__name__}: {exc}"],
+        }
+
 def fetch_undp_ipsa_apify():
     if not APIFY_API_TOKEN:
         return [], {
@@ -1030,6 +1248,10 @@ def main():
 
     # UNDP current vacancies are served from Oracle Recruiting Cloud.
     # Use the dedicated Oracle adapter when direct HTML extraction returns no IPSA jobs.
+    undp_public_jobs, undp_public_health = fetch_undp_ipsa_oracle_public()
+    all_jobs.extend(undp_public_jobs)
+    sources["UNDP — IPSA / Oracle public JSON"] = undp_public_health
+
     if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs) and APIFY_API_TOKEN:
         undp_api_jobs, undp_api_health = fetch_undp_ipsa_apify()
         all_jobs.extend(undp_api_jobs)
