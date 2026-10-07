@@ -2,6 +2,7 @@
   "brand": "MyJOBS",
   "scope": "Indonesia + selected global UN professional opportunities",
   "buttons": [
+    {"id":"karirhub","label":"KarirHub","url":"https://karirhub.kemnaker.go.id/","description":"Official Indonesian government job portal"},
     {"id":"reliefweb","label":"ReliefWeb Jobs","url":"https://reliefweb.int/jobs","description":"Humanitarian opportunities"},
     {"id":"un-careers","label":"UN Careers","url":"https://careers.un.org/job-openings","description":"UN Secretariat vacancies"},
     {"id":"un-p","label":"UN P-Level","url":"https://careers.un.org/job-openings","description":"Global UN Professional and Higher Categories (P-1 to P-7)"},
