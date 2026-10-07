@@ -14,38 +14,47 @@ from bs4 import BeautifulSoup
 
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "").strip()
 RELIEFWEB_APPNAME = os.getenv("RELIEFWEB_APPNAME", "").strip()
-MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "6"))
+MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
 BASE_URL = "https://www.loker.id"
 RELIEFWEB_URL = "https://api.reliefweb.int/v2/jobs"
 UN_RSS_URL = "https://careers.un.org/jobfeed?isPage=true&language=en"
 
-CITIES = [
-    "Ketapang", "Pontianak", "Singkawang", "Kubu Raya", "Sintang",
-    "Sambas", "Sanggau", "Sekadau", "Melawi", "Landak",
-    "Bengkayang", "Kapuas Hulu", "Mempawah"
-]
-
-INDONESIA_TERMS = CITIES + [
-    "Indonesia", "Jakarta", "Surabaya", "Bandung", "Denpasar", "Medan",
-    "Makassar", "Papua", "Jayapura", "Bali"
+INDONESIA_REGIONS = [
+    "Aceh", "Bali", "Banten", "Bengkulu", "Gorontalo", "Jakarta",
+    "Jambi", "Jawa Barat", "Jawa Tengah", "Jawa Timur", "Kalimantan Barat",
+    "Kalimantan Selatan", "Kalimantan Tengah", "Kalimantan Timur",
+    "Kalimantan Utara", "Kepulauan Bangka Belitung", "Kepulauan Riau",
+    "Lampung", "Maluku", "Maluku Utara", "Nusa Tenggara Barat",
+    "Nusa Tenggara Timur", "Papua", "Papua Barat", "Riau", "Sulawesi Barat",
+    "Sulawesi Selatan", "Sulawesi Tengah", "Sulawesi Tenggara",
+    "Sulawesi Utara", "Sumatera Barat", "Sumatera Selatan", "Sumatera Utara",
 ]
 
 QUERIES = [
-    "lowongan kerja Kalimantan Barat",
-    "lowongan kerja Ketapang",
-    "lowongan kerja Pontianak",
-    "lowongan kerja Singkawang",
-    "lowongan kerja Kubu Raya",
-    "lowongan kerja Kalbar",
+    "lowongan kerja Indonesia",
+    "lowongan kerja Jakarta",
+    "lowongan kerja Bandung",
+    "lowongan kerja Surabaya",
+    "lowongan kerja Bali",
+    "lowongan kerja Kalimantan",
+    "lowongan kerja Indonesia remote",
+    "jobs Indonesia",
 ]
 
-ALIASES = {
-    "kabupaten ketapang": "Ketapang",
-    "kab. ketapang": "Ketapang",
-    "ketapang": "Ketapang",
+CITY_ALIASES = {
+    "jakarta": "Jakarta",
+    "bandung": "Bandung",
+    "surabaya": "Surabaya",
+    "semarang": "Semarang",
+    "yogyakarta": "Yogyakarta",
+    "medan": "Medan",
+    "denpasar": "Denpasar",
+    "makassar": "Makassar",
+    "palembang": "Palembang",
     "pontianak": "Pontianak",
+    "ketapang": "Ketapang",
     "singkawang": "Singkawang",
     "kubu raya": "Kubu Raya",
     "sintang": "Sintang",
@@ -59,40 +68,30 @@ ALIASES = {
     "mempawah": "Mempawah",
 }
 
-
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
-
 
 def canon(value):
     return re.sub(r"[^a-z0-9]+", " ", clean(value).lower()).strip()
 
-
 def make_id(*parts):
-    seed = "|".join(canon(part) for part in parts)
-    return "job-" + hashlib.sha1(seed.encode("utf-8")).hexdigest()[:16]
+    return "job-" + hashlib.sha1("|".join(canon(p) for p in parts).encode("utf-8")).hexdigest()[:16]
 
-
-def city_of(text):
-    text = clean(text).lower()
-    for alias, city in ALIASES.items():
-        if alias in text:
+def infer_location(text):
+    blob = clean(text).lower()
+    for alias, city in CITY_ALIASES.items():
+        if alias in blob:
             return city
-    return "Kalimantan Barat"
-
+    for region in INDONESIA_REGIONS:
+        if region.lower() in blob:
+            return region
+    return clean(text) or "Indonesia"
 
 def parse_datetime(value):
     if not value:
         return None
-
     raw = clean(value)
-    candidates = [
-        raw,
-        raw.replace("Z", "+00:00"),
-        raw.replace(" UTC", "+00:00"),
-    ]
-
-    for candidate in candidates:
+    for candidate in (raw, raw.replace("Z", "+00:00"), raw.replace(" UTC", "+00:00")):
         try:
             dt = datetime.fromisoformat(candidate)
             if dt.tzinfo is None:
@@ -100,40 +99,25 @@ def parse_datetime(value):
             return dt.astimezone(timezone.utc)
         except ValueError:
             pass
-
     try:
         dt = parsedate_to_datetime(raw)
         if dt.tzinfo is None:
             dt = dt.replace(tzinfo=timezone.utc)
         return dt.astimezone(timezone.utc)
     except (TypeError, ValueError):
-        pass
-
-    for fmt in ("%b %d, %Y", "%B %d, %Y", "%d %b %Y", "%d %B %Y"):
-        try:
-            return datetime.strptime(raw, fmt).replace(tzinfo=timezone.utc)
-        except ValueError:
-            pass
-
-    return None
-
+        return None
 
 def extract_deadline(text):
     text = clean(text)
-    if not text:
-        return ""
-
-    patterns = [
+    for pattern in [
         r"Deadline\s*:\s*([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})",
         r"Closing\s*Date\s*:\s*([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})",
         r"Application\s+Deadline\s*:\s*([A-Za-z]{3,9}\s+\d{1,2},\s+\d{4})",
-    ]
-    for pattern in patterns:
-        match = re.search(pattern, text, flags=re.IGNORECASE)
+    ]:
+        match = re.search(pattern, text, flags=re.I)
         if match:
             return match.group(1)
     return ""
-
 
 def normalize_google(item, query):
     detected = item.get("detected_extensions") or {}
@@ -147,15 +131,14 @@ def normalize_google(item, query):
     location = clean(item.get("location"))
     description = clean(item.get("description"))
     source_url = apply_url or clean(item.get("share_link")) or clean(item.get("link"))
-    district = city_of(f"{location} {title} {description}")
 
     return {
-        "id": make_id(title, company, district, source_url),
+        "id": make_id(title, company, location, source_url),
         "title": title,
         "company": company or "Unknown company",
-        "location": location or district,
-        "district": district,
-        "province": "West Kalimantan",
+        "location": location or "Indonesia",
+        "district": infer_location(location or description),
+        "province": infer_location(location or description),
         "country": "Indonesia",
         "via": clean(item.get("via") or "Google Jobs"),
         "source": "Google Jobs",
@@ -164,46 +147,33 @@ def normalize_google(item, query):
         "expires_at": "",
         "schedule_type": clean(detected.get("schedule_type")),
         "salary": clean(detected.get("salary")),
-        "description": description[:500],
+        "description": description[:600],
         "original_url": source_url or "#",
         "search_query": query,
         "extensions": [clean(x) for x in (item.get("extensions") or []) if clean(x)],
         "remote": bool(detected.get("work_from_home")),
         "status": "current",
+        "country_code": "ID",
     }
-
 
 def fetch_google():
     if not SERPAPI_KEY:
-        return [], {
-            "status": "skipped",
-            "count": 0,
-            "message": "SERPAPI_KEY not configured",
-        }
+        return [], {"status": "skipped", "count": 0, "message": "SERPAPI_KEY not configured"}
 
     jobs, errors = [], []
-    used_queries = QUERIES[:max(1, MAX_GOOGLE_QUERIES)]
-
-    for query in used_queries:
+    queries = QUERIES[:max(1, MAX_GOOGLE_QUERIES)]
+    for query in queries:
         try:
             response = requests.get(
                 "https://serpapi.com/search.json",
-                params={
-                    "engine": "google_jobs",
-                    "q": query,
-                    "hl": "id",
-                    "gl": "id",
-                    "api_key": SERPAPI_KEY,
-                },
+                params={"engine": "google_jobs", "q": query, "hl": "id", "gl": "id", "api_key": SERPAPI_KEY},
                 timeout=TIMEOUT,
             )
             response.raise_for_status()
             payload = response.json()
-
             if payload.get("error"):
                 errors.append(f"{query}: {payload['error']}")
                 continue
-
             for item in payload.get("jobs_results") or []:
                 job = normalize_google(item, query)
                 if job["title"]:
@@ -211,46 +181,34 @@ def fetch_google():
         except Exception as exc:
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    return jobs, {
-        "status": "ok" if jobs else ("error" if errors else "empty"),
-        "count": len(jobs),
-        "queries": used_queries,
-        "errors": errors,
-    }
-
+    return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "queries": queries, "errors": errors}
 
 def fetch_loker():
     jobs, errors = [], []
-
-    for city in CITIES[:6]:
+    for query in ["Indonesia", "Jakarta", "Bandung", "Surabaya", "Kalimantan", "Bali"]:
         try:
             response = requests.get(
                 f"{BASE_URL}/cari-lowongan-kerja",
-                params={"q": city},
-                headers={"User-Agent": "Mozilla/5.0 (compatible; ketapangJOBS/2.1)"},
+                params={"q": query},
+                headers={"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"},
                 timeout=TIMEOUT,
             )
             response.raise_for_status()
-
             soup = BeautifulSoup(response.text, "html.parser")
             for anchor in soup.select("h2 a, h3 a, h4 a"):
                 title = clean(anchor.get_text(" ", strip=True))
                 href = clean(anchor.get("href"))
                 url = urljoin(BASE_URL, href)
-
-                if not title or not href:
+                if not title or not href or "lowongan-kerja" not in urlparse(url).path.lower():
                     continue
-                if "lowongan-kerja" not in urlparse(url).path.lower():
-                    continue
-
-                district = city_of(f"{city} {title}")
+                location = query if query != "Indonesia" else "Indonesia"
                 jobs.append({
                     "id": make_id("loker.id", title, url),
                     "title": title,
                     "company": "See source page",
-                    "location": city,
-                    "district": district,
-                    "province": "West Kalimantan",
+                    "location": location,
+                    "district": infer_location(f"{location} {title}"),
+                    "province": infer_location(f"{location} {title}"),
                     "country": "Indonesia",
                     "via": "Loker.id",
                     "source": "Loker.id",
@@ -261,91 +219,62 @@ def fetch_loker():
                     "salary": "",
                     "description": "Open the original source for qualification and company details.",
                     "original_url": url,
-                    "search_query": f"loker {city}",
+                    "search_query": query,
                     "extensions": [],
                     "remote": False,
                     "status": "current",
+                    "country_code": "ID",
                 })
         except Exception as exc:
-            errors.append(f"{city}: {type(exc).__name__}: {exc}")
+            errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    return jobs, {
-        "status": "ok" if jobs else ("error" if errors else "empty"),
-        "count": len(jobs),
-        "errors": errors,
-    }
-
-
-def reliefweb_fields(item):
-    return item.get("fields") or {}
-
+    return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "errors": errors}
 
 def normalize_reliefweb(item):
-    fields = reliefweb_fields(item)
-
+    fields = item.get("fields") or {}
     source = fields.get("source") or {}
     country = fields.get("country") or {}
     city = fields.get("city") or {}
-    experience = fields.get("experience") or {}
-    job_type = fields.get("type") or {}
-
     source_name = clean(source.get("name") or source.get("shortname"))
     country_name = clean(country.get("name") or country.get("shortname"))
     city_name = clean(city.get("name"))
     closing_date = clean((fields.get("date") or {}).get("closing"))
-
-    text = " ".join([
-        clean(fields.get("title")),
-        clean(fields.get("body")),
-        city_name,
-        country_name,
-    ])
-    district = city_of(text)
+    blob = f"{fields.get('title','')} {fields.get('body','')} {city_name} {country_name}"
 
     return {
         "id": make_id("reliefweb", fields.get("id") or item.get("id"), fields.get("url")),
         "title": clean(fields.get("title")),
         "company": source_name or "ReliefWeb source",
-        "location": city_name or country_name or district,
-        "district": district,
-        "province": "West Kalimantan",
+        "location": city_name or country_name or "Indonesia",
+        "district": infer_location(blob),
+        "province": infer_location(blob),
         "country": country_name or "Indonesia",
         "via": "ReliefWeb",
         "source": "ReliefWeb",
         "source_family": "Humanitarian / UN ecosystem",
         "posted_at": clean((fields.get("date") or {}).get("created")),
         "expires_at": closing_date,
-        "schedule_type": clean(job_type.get("name")),
+        "schedule_type": clean((fields.get("type") or {}).get("name")),
         "salary": "",
-        "description": clean(fields.get("body"))[:500],
+        "description": clean(fields.get("body"))[:600],
         "original_url": clean(fields.get("url")),
         "search_query": "ReliefWeb jobs",
-        "extensions": [clean(experience.get("name"))] if experience.get("name") else [],
+        "extensions": [],
         "remote": False,
         "status": clean(fields.get("status") or "current"),
         "ocha": "ocha" in canon(source_name),
+        "country_code": "ID" if country_name.lower() == "indonesia" else "",
     }
-
 
 def fetch_reliefweb():
     if not RELIEFWEB_APPNAME:
-        return [], {
-            "status": "skipped",
-            "count": 0,
-            "message": "RELIEFWEB_APPNAME not configured; request a pre-approved ReliefWeb appname first",
-        }
+        return [], {"status": "skipped", "count": 0, "message": "RELIEFWEB_APPNAME not configured"}
 
     payload = {
         "limit": min(max(1, RELIEFWEB_LIMIT), 1000),
         "profile": "full",
         "sort": ["date.created:desc"],
-        "filter": {
-            "operator": "AND",
-            "conditions": [
-                {"field": "status", "value": "current"},
-                {"field": "country", "value": "Indonesia"},
-            ],
-        },
+        "filter": {"operator": "AND", "conditions": [{"field": "status", "value": "current"}]},
     }
 
     try:
@@ -353,73 +282,45 @@ def fetch_reliefweb():
             RELIEFWEB_URL,
             params={"appname": RELIEFWEB_APPNAME},
             json=payload,
-            headers={"User-Agent": "ketapangJOBS/2.1"},
+            headers={"User-Agent": "MyJOBS/1.0"},
             timeout=TIMEOUT,
         )
         response.raise_for_status()
         data = response.json().get("data") or []
-
-        jobs = []
-        for item in data:
-            job = normalize_reliefweb(item)
-            text = canon(
-                f"{job.get('title')} {job.get('description')} "
-                f"{job.get('location')} {job.get('district')}"
-            )
-            if any(canon(term) in text for term in CITIES):
-                jobs.append(job)
-
-        return jobs, {
-            "status": "ok",
-            "count": len(jobs),
-            "api_results": len(data),
-            "errors": [],
-        }
+        jobs = [normalize_reliefweb(item) for item in data]
+        return jobs, {"status": "ok", "count": len(jobs), "api_results": len(data), "errors": []}
     except Exception as exc:
-        return [], {
-            "status": "error",
-            "count": 0,
-            "errors": [f"{type(exc).__name__}: {exc}"],
-        }
+        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
 
-
-def text_from_xml(element):
+def xml_text(element):
     return clean(" ".join(element.itertext())) if element is not None else ""
-
 
 def fetch_un_careers():
     try:
-        response = requests.get(
-            UN_RSS_URL,
-            headers={"User-Agent": "ketapangJOBS/2.1"},
-            timeout=TIMEOUT,
-        )
+        response = requests.get(UN_RSS_URL, headers={"User-Agent": "MyJOBS/1.0"}, timeout=TIMEOUT)
         response.raise_for_status()
-
         root = ET.fromstring(response.content)
         jobs = []
 
         for item in root.findall(".//item"):
-            title = clean(text_from_xml(item.find("title")))
-            link = clean(text_from_xml(item.find("link")))
-            description = clean(text_from_xml(item.find("description")))
-            guid = clean(text_from_xml(item.find("guid")))
-
+            title = xml_text(item.find("title"))
+            link = xml_text(item.find("link"))
+            description = xml_text(item.find("description"))
+            guid = xml_text(item.find("guid"))
             blob = f"{title} {description}"
-            kalbar_blob = canon(blob)
-            if not any(canon(term) in kalbar_blob for term in CITIES):
+            if "indonesia" not in blob.lower() and not any(name.lower() in blob.lower() for name in CITY_ALIASES):
                 continue
 
             deadline = extract_deadline(description)
-            ocha = "office for the coordination of humanitarian affairs" in blob.lower() or re.search(r"\bocha\b", blob, re.I)
+            ocha = bool(re.search(r"\bocha\b|office for the coordination of humanitarian affairs", blob, flags=re.I))
 
             jobs.append({
                 "id": make_id("UN Careers", guid or link, title),
                 "title": title,
                 "company": "United Nations Secretariat",
-                "location": city_of(blob),
-                "district": city_of(blob),
-                "province": "West Kalimantan",
+                "location": infer_location(blob),
+                "district": infer_location(blob),
+                "province": infer_location(blob),
                 "country": "Indonesia",
                 "via": "UN Careers",
                 "source": "UN Careers",
@@ -428,167 +329,89 @@ def fetch_un_careers():
                 "expires_at": deadline,
                 "schedule_type": "",
                 "salary": "",
-                "description": description[:500],
+                "description": description[:600],
                 "original_url": link or guid or "https://careers.un.org/job-openings",
                 "search_query": "UN Careers RSS",
                 "extensions": ["OCHA"] if ocha else [],
                 "remote": False,
                 "status": "current",
-                "ocha": bool(ocha),
+                "ocha": ocha,
+                "country_code": "ID",
             })
 
-        return jobs, {
-            "status": "ok",
-            "count": len(jobs),
-            "feed": UN_RSS_URL,
-            "errors": [],
-        }
+        return jobs, {"status": "ok", "count": len(jobs), "feed": UN_RSS_URL, "errors": []}
     except Exception as exc:
-        return [], {
-            "status": "error",
-            "count": 0,
-            "errors": [f"{type(exc).__name__}: {exc}"],
-        }
-
+        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
 
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
-    active = []
-    expired = 0
-
+    active, expired = [], 0
     for job in jobs:
-        status = canon(job.get("status"))
-        if status in {"past", "closed", "expired", "inactive"}:
+        if canon(job.get("status")) in {"past", "closed", "expired", "inactive"}:
             expired += 1
             continue
-
         expires_at = parse_datetime(job.get("expires_at"))
         if expires_at and expires_at <= now:
             expired += 1
             continue
-
         active.append(job)
-
     return active, expired
-
 
 def dedupe(jobs):
     unique = {}
-
     for job in jobs:
         url = canon(job.get("original_url"))
         title = canon(job.get("title"))
-        company = canon(job.get("company"))
-        district = canon(job.get("district"))
-
-        key = (
-            f"url:{url}"
-            if url and url != "#"
-            else f"text:{title}|{company}|{district}"
-        )
-
+        key = f"url:{url}" if url and url != "#" else f"text:{title}|{canon(job.get('company'))}|{canon(job.get('location'))}"
         if key not in unique:
             unique[key] = job
-
     return list(unique.values())
-
 
 def summary(jobs):
     return {
-        "by_district": dict(
-            Counter(j.get("district", "Unknown") for j in jobs).most_common()
-        ),
-        "by_source": dict(
-            Counter(j.get("source", "Unknown") for j in jobs).most_common()
-        ),
-        "ocha_jobs": sum(bool(j.get("ocha")) for j in jobs),
+        "by_location": dict(Counter(j.get("district", "Indonesia") for j in jobs).most_common()),
+        "by_source": dict(Counter(j.get("source", "Unknown") for j in jobs).most_common()),
+        "humanitarian_jobs": sum("humanitarian" in canon(j.get("source_family")) or j.get("source") == "ReliefWeb" for j in jobs),
+        "un_jobs": sum(j.get("source") == "UN Careers" for j in jobs),
     }
 
-
 def main():
-    start = time.time()
-    all_jobs = []
-    sources = {}
+    started = time.time()
+    all_jobs, sources = [], {}
 
-    google, google_health = fetch_google()
-    loker, loker_health = fetch_loker()
-    reliefweb, reliefweb_health = fetch_reliefweb()
-    un_careers, un_health = fetch_un_careers()
-
-    all_jobs.extend(google)
-    all_jobs.extend(loker)
-    all_jobs.extend(reliefweb)
-    all_jobs.extend(un_careers)
-
-    sources["Google Jobs"] = google_health
-    sources["Loker.id"] = loker_health
-    sources["ReliefWeb"] = reliefweb_health
-    sources["UN Careers"] = un_health
+    for fetcher, name in [
+        (fetch_google, "Google Jobs"),
+        (fetch_loker, "Loker.id"),
+        (fetch_reliefweb, "ReliefWeb"),
+        (fetch_un_careers, "UN Careers"),
+    ]:
+        jobs, health = fetcher()
+        all_jobs.extend(jobs)
+        sources[name] = health
 
     unique_jobs = dedupe(all_jobs)
     active_jobs, expired_count = filter_expired(unique_jobs)
-
-    errors = sum(
-        (source.get("errors", []) for source in sources.values()),
-        [],
-    )
+    errors = sum((s.get("errors", []) for s in sources.values()), [])
 
     output = {
-        "schema_version": 3,
-        "last_updated": datetime.now(timezone.utc).astimezone().strftime(
-            "%Y-%m-%d %H:%M %Z"
-        ),
+        "schema_version": 4,
+        "last_updated": datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M %Z"),
         "total": len(active_jobs),
         "expired_removed": expired_count,
         "status": "ok" if active_jobs else ("error" if errors else "empty"),
-        "region": "West Kalimantan, Indonesia",
-        "coverage": CITIES,
-        "external_links": {
-            "reliefweb_jobs": "https://reliefweb.int/jobs",
-            "un_careers": "https://careers.un.org/job-openings",
-            "un_ocha_vacancies": "https://careers.un.org/job-openings",
-        },
+        "region": "Indonesia",
+        "scope": "Indonesia-first job aggregator",
         "jobs": active_jobs,
         "summary": summary(active_jobs),
         "sources": sources,
         "errors": errors[:50],
-        "runtime_seconds": round(time.time() - start, 2),
+        "runtime_seconds": round(time.time() - started, 2),
     }
 
     with open("vacancy.json", "w", encoding="utf-8") as handle:
         json.dump(output, handle, ensure_ascii=False, indent=2)
 
-    with open("sources.json", "w", encoding="utf-8") as handle:
-        json.dump(
-            {
-                "buttons": [
-                    {
-                        "id": "reliefweb",
-                        "label": "ReliefWeb Jobs",
-                        "url": "https://reliefweb.int/jobs",
-                    },
-                    {
-                        "id": "un-careers",
-                        "label": "UN Careers",
-                        "url": "https://careers.un.org/job-openings",
-                    },
-                    {
-                        "id": "ocha",
-                        "label": "UN OCHA Vacancies",
-                        "url": "https://careers.un.org/job-openings",
-                    },
-                ]
-            },
-            handle,
-            ensure_ascii=False,
-            indent=2,
-        )
-
-    print(
-        f"Collected {len(active_jobs)} active jobs; "
-        f"expired removed={expired_count}; status={output['status']}."
-    )
-
+    print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; status={output['status']}")
 
 if __name__ == "__main__":
     main()
