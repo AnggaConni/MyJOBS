@@ -2870,20 +2870,27 @@ def main():
         json.dump(output, handle, ensure_ascii=False, indent=2)
 
     print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
-    for source_name in (
-        "UN Careers — P-level",
-        "UN Careers — P-level / Apify",
-        "UN Careers — P-level / Search",
-        "UN Careers — P-level / unvacancies",
-        "UNDP — IPSA",
-        "UNDP — IPSA / Bing Oracle",
-        "UNDP — IPSA / Oracle REST",
-        "UNDP — IPSA / Oracle HTML",
-        "UNDP — IPSA / unvacancies",
-    ):
-        if source_name in sources:
-            health = sources[source_name]
-            print(f"MyJOBS source: {source_name} count={health.get('count', 0)} status={health.get('status', '')}")
+    # Coverage diagnostics: classification is now metadata-driven, so log
+    # both broad source counts and detected contract-grade counts.
+    for source_name, health in sources.items():
+        print(
+            f"MyJOBS source: {source_name} "
+            f"count={health.get('count', 0)} status={health.get('status', '')}"
+        )
+
+    p_counts = Counter()
+    ipsa_counts = Counter()
+    for job in active_jobs:
+        level = clean(job.get("contract_level"))
+        if re.fullmatch(r"P\s*[-–—.]?\s*[1-7]", level, flags=re.I):
+            normalized = "P-" + re.search(r"([1-7])", level).group(1)
+            p_counts[normalized] += 1
+        elif re.fullmatch(r"IPSA\s*[-–—.]?\s*\d+", level, flags=re.I):
+            normalized = "IPSA-" + re.search(r"(\d+)", level).group(1)
+            ipsa_counts[normalized] += 1
+
+    print(f"MyJOBS detected UN P-Level: {sum(p_counts.values())} {dict(sorted(p_counts.items()))}")
+    print(f"MyJOBS detected UNDP IPSA: {sum(ipsa_counts.values())} {dict(sorted(ipsa_counts.items()))}")
 
 if __name__ == "__main__":
     main()
