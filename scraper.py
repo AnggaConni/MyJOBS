@@ -1642,7 +1642,7 @@ def looks_like_undp_ipsa(row):
 def fetch_undp_ipsa_oracle_public():
     list_url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
     page_size = 100
-    max_pages = 5
+    max_pages = 2
     offset = 0
     seen = set()
     jobs = []
@@ -1714,13 +1714,11 @@ def fetch_undp_ipsa_oracle_public():
             if not rid or rid in seen:
                 continue
             seen.add(rid)
-            if looks_like_undp_ipsa(row):
-                unique_rows.append((rid, row))
+            unique_rows.append((rid, row))
 
-        listed_rows += len(rows)
+        listed_rows += len(unique_rows)
         if not row_preview:
-            for row in rows[:12]:
-                rid = clean(row.get("Id") or row.get("RequisitionId") or row.get("SearchId"))
+            for rid, row in unique_rows[:12]:
                 row_preview.append({
                     "id": rid,
                     "title": clean(row.get("Title")),
@@ -1734,14 +1732,28 @@ def fetch_undp_ipsa_oracle_public():
 
         def get_detail(pair):
             rid, row = pair
-            try:
-                return rid, row, fetch_undp_oracle_detail(rid), None
-            except Exception as exc:
-                return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
+            for attempt in range(3):
+                try:
+                    return rid, row, fetch_undp_oracle_detail(rid), None
+                except requests.HTTPError as exc:
+                    status_code = getattr(exc.response, "status_code", None)
+                    if status_code in {429, 500, 502, 503, 504} and attempt < 2:
+                        time.sleep(1.5 * (attempt + 1))
+                        continue
+                    return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
+                except Exception as exc:
+                    if attempt < 2:
+                        time.sleep(1.0 * (attempt + 1))
+                        continue
+                    return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
+            return rid, row, None, f"{rid}: detail fetch failed"
 
-        detail_attempts += len(unique_rows)
+        # The live Oracle list is roughly 100–150 current jobs. Enrich that
+        # bounded current set instead of probing hundreds of historical rows.
+        detail_batch = unique_rows[:150]
+        detail_attempts += len(detail_batch)
         with ThreadPoolExecutor(max_workers=6) as executor:
-            futures = [executor.submit(get_detail, pair) for pair in unique_rows]
+            futures = [executor.submit(get_detail, pair) for pair in detail_batch]
             for future in as_completed(futures):
                 rid, row, detail, err = future.result()
                 merged = dict(row)
@@ -2424,7 +2436,14 @@ def fetch_un_professional_unvacancies():
     page_urls = [
         "https://unvacancies.org/jobs/organization/un-secretariat",
         "https://unvacancies.org/organizations/un-secretariat",
-    ]
+        "https://unvacancies.org/jobs/grade/p-1",
+        "https://unvacancies.org/jobs/grade/p-2",
+        "https://unvacancies.org/jobs/grade/p-3",
+        "https://unvacancies.org/jobs/grade/p-4",
+        "https://unvacancies.org/jobs/grade/p-5",
+        "https://unvacancies.org/jobs/grade/p-6",
+        "https://unvacancies.org/jobs/grade/p-7",
+
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
         "Accept": "text/html,application/xhtml+xml",
@@ -2484,7 +2503,7 @@ def fetch_un_professional_unvacancies():
         except Exception as exc:
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    detail_urls = detail_urls[:150]
+    detail_urls = detail_urls[:250]
     jobs = []
     parsed = 0
 
