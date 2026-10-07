@@ -1653,7 +1653,7 @@ def fetch_undp_oracle_detail(requisition_id):
             "Accept":"application/json",
             "Ora-Irc-Language":"en",
         },
-        timeout=max(TIMEOUT,30),
+        timeout=max(TIMEOUT,35),
     )
     response.raise_for_status()
     return first_json_item(response.json())
@@ -2268,43 +2268,32 @@ def fetch_undp_ipsa_unvacancies():
         "https://unvacancies.org/jobs/organization/undp",
         "https://unvacancies.org/organizations/undp",
     ]
+    # Unvacancies renders a bounded page of results. Generate pagination URLs
+    # so current UNDP roles beyond the first page can be discovered.
+    for page in range(2, 16):
+        page_queue.append(f"https://unvacancies.org/jobs/organization/undp?page={page}")
+        page_queue.append(f"https://unvacancies.org/organizations/undp?page={page}")
+
     seen_pages = set()
-    country_pages = set()
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
         "Accept": "text/html,application/xhtml+xml",
     }
 
-    def collect_page_links(text):
-        soup = BeautifulSoup(text, "html.parser")
-        for anchor in soup.select('a[href*="/jobs/"]'):
-            href = clean(anchor.get("href"))
-            if not href:
-                continue
+    def deep_context(anchor):
+        pieces = [anchor.get_text(" ", strip=True)]
+        node = anchor
+        for _ in range(6):
+            node = node.parent if node else None
+            if not node:
+                break
+            pieces.append(node.get_text(" ", strip=True))
+        return clean(" ".join(pieces))
 
-            candidate_url = urljoin("https://unvacancies.org", href).split("#", 1)[0]
-            path = urlparse(candidate_url).path
-
-            if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", path, flags=re.I):
-                detail_urls.add(candidate_url)
-                context = clean(" ".join([
-                    anchor.get_text(" ", strip=True),
-                    anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
-                    anchor.parent.parent.get_text(" ", strip=True)
-                    if anchor.parent and anchor.parent.parent else "",
-                ]))
-                if re.search(r"IPSA\s*[-–—.]?\s*\d+", context, flags=re.I):
-                    preferred_detail_urls.add(candidate_url)
-
-            if re.match(r"^/jobs/organization/undp/[a-z0-9-]+/?$", path, flags=re.I):
-                country_pages.add(candidate_url)
-
-    while page_queue and len(seen_pages) < 70:
-        page_url = page_queue.pop(0)
+    for page_url in page_queue[:32]:
         if page_url in seen_pages:
             continue
         seen_pages.add(page_url)
-
         try:
             text, _ = fetch_public_text(
                 page_url,
@@ -2312,33 +2301,44 @@ def fetch_undp_ipsa_unvacancies():
                 jina_fallback=True,
                 jina_first=False,
             )
-            before_countries = len(country_pages)
-            collect_page_links(text)
-            if len(country_pages) > before_countries:
-                for country_url in sorted(country_pages):
-                    if country_url not in seen_pages and country_url not in page_queue:
-                        page_queue.append(country_url)
+            soup = BeautifulSoup(text, "html.parser")
+            for anchor in soup.select('a[href*="/jobs/"]'):
+                href = clean(anchor.get("href"))
+                if not href:
+                    continue
+
+                candidate_url = urljoin("https://unvacancies.org", href).split("#", 1)[0]
+                if not re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", urlparse(candidate_url).path, flags=re.I):
+                    continue
+
+                detail_urls.add(candidate_url)
+                context = deep_context(anchor)
+                if re.search(r"IPSA\s*[-–—.]?\s*\d+", context, flags=re.I):
+                    preferred_detail_urls.add(candidate_url)
+
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-    # Search-engine fallback supplements country discovery when the organization
-    # index is rendered client-side.
-    for grade_query in (
-        'site:unvacancies.org/jobs/ "UNDP" "IPSA-9"',
-        'site:unvacancies.org/jobs/ "UNDP" "IPSA-10"',
-        'site:unvacancies.org/jobs/ "UNDP" "IPSA-11"',
-        'site:unvacancies.org/jobs/ "UNDP" "IPSA-12"',
+    # Search-engine fallback, using broad phrases that match the live mirror.
+    for query in (
+        'site:unvacancies.org/jobs/ UNDP "International PSA"',
+        'site:unvacancies.org/jobs/ UNDP "IPSA-9"',
+        'site:unvacancies.org/jobs/ UNDP "IPSA-10"',
+        'site:unvacancies.org/jobs/ UNDP "IPSA-11"',
+        'site:unvacancies.org/jobs/ UNDP "IPSA-12"',
     ):
         try:
             for candidate in search_duckduckgo_links(
-                grade_query,
+                query,
                 r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
             ):
                 candidate = clean(candidate).split("#", 1)[0]
-                detail_urls.add(candidate)
-                preferred_detail_urls.add(candidate)
+                if candidate:
+                    detail_urls.add(candidate)
+                    preferred_detail_urls.add(candidate)
+
             for result in search_bing_results(
-                grade_query,
+                query,
                 r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
             ):
                 candidate = clean(result.get("url")).split("#", 1)[0]
@@ -2346,9 +2346,13 @@ def fetch_undp_ipsa_unvacancies():
                     detail_urls.add(candidate)
                     preferred_detail_urls.add(candidate)
         except Exception as exc:
-            errors.append(f"{grade_query}: {type(exc).__name__}: {exc}")
+            errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    selected = list(dict.fromkeys(list(preferred_detail_urls) + list(detail_urls)))[:250]
+    # Prefer cards that explicitly identify IPSA; keep a small non-preferred
+    # tail as a safety net when the mirror omits contract metadata on the card.
+    selected = list(dict.fromkeys(
+        list(preferred_detail_urls) + list(detail_urls - preferred_detail_urls)[:60]
+    ))[:140]
     detail_urls = set(selected)
 
     def fetch_detail(source_url):
@@ -2366,7 +2370,7 @@ def fetch_undp_ipsa_unvacancies():
     parsed_details = 0
     failed_detail_samples = []
     if detail_urls:
-        with ThreadPoolExecutor(max_workers=6) as executor:
+        with ThreadPoolExecutor(max_workers=8) as executor:
             future_map = {
                 executor.submit(fetch_detail, url): url
                 for url in detail_urls
@@ -2392,13 +2396,12 @@ def fetch_undp_ipsa_unvacancies():
         "status": "ok" if unique else ("error" if errors else "empty"),
         "count": len(unique),
         "pages_crawled": len(seen_pages),
-        "country_pages_discovered": len(country_pages),
         "detail_urls": len(detail_urls),
         "preferred_detail_urls": len(preferred_detail_urls),
         "parsed_details": parsed_details,
         "failed_detail_samples": failed_detail_samples,
         "errors": errors[:25],
-        "source": "unvacancies.org (UNDP organization + country mirrors with official application links)",
+        "source": "unvacancies.org (UNDP paginated organization mirror + official links)",
     }
 
 
@@ -2484,27 +2487,44 @@ def parse_unvacancies_un_professional_detail(text, source_url):
 
 
 def fetch_un_professional_unvacancies():
-    page_urls = [
+    errors = []
+    jobs = []
+    detail_urls = set()
+    preferred_detail_urls = set()
+    page_queue = [
         "https://unvacancies.org/jobs/organization/un-secretariat",
         "https://unvacancies.org/organizations/un-secretariat",
-        "https://unvacancies.org/jobs/grade/p-1",
-        "https://unvacancies.org/jobs/grade/p-2",
-        "https://unvacancies.org/jobs/grade/p-3",
-        "https://unvacancies.org/jobs/grade/p-4",
-        "https://unvacancies.org/jobs/grade/p-5",
-        "https://unvacancies.org/jobs/grade/p-6",
-        "https://unvacancies.org/jobs/grade/p-7",
     ]
+    for page in range(2, 14):
+        page_queue.append(f"https://unvacancies.org/jobs/organization/un-secretariat?page={page}")
+        page_queue.append(f"https://unvacancies.org/organizations/un-secretariat?page={page}")
 
+    # Grade-specific pages give another discovery path when organization-page
+    # pagination is rendered differently.
+    for grade in range(1, 8):
+        page_queue.append(f"https://unvacancies.org/jobs/grade/p-{grade}")
+
+    seen_pages = set()
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
         "Accept": "text/html,application/xhtml+xml",
     }
-    detail_urls = []
-    seen = set()
-    errors = []
 
-    for page_url in page_urls:
+    def deep_context(anchor):
+        pieces = [anchor.get_text(" ", strip=True)]
+        node = anchor
+        for _ in range(6):
+            node = node.parent if node else None
+            if not node:
+                break
+            pieces.append(node.get_text(" ", strip=True))
+        return clean(" ".join(pieces))
+
+    for page_url in page_queue:
+        if page_url in seen_pages:
+            continue
+        seen_pages.add(page_url)
+
         try:
             text, _ = fetch_public_text(
                 page_url,
@@ -2518,39 +2538,47 @@ def fetch_un_professional_unvacancies():
                 href = clean(anchor.get("href"))
                 if not href:
                     continue
+
                 candidate = urljoin("https://unvacancies.org", href).split("#", 1)[0]
-                if candidate in seen:
+                if not re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", urlparse(candidate).path, flags=re.I):
                     continue
 
-                # Do not rely on card context for grade/organization:
-                # some rendered variants omit those fields from the anchor's
-                # immediate parent. Let the detail parser make the authoritative
-                # P-level + UN Secretariat decision.
-                seen.add(candidate)
-                detail_urls.append(candidate)
+                detail_urls.add(candidate)
+                context = deep_context(anchor)
+                if extract_un_p_level(context):
+                    preferred_detail_urls.add(candidate)
 
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-    # Search-engine discovery supplements the organization page when pagination
-    # is rendered client-side or the mirror returns only the first page.
+    # Search-engine supplement for grades with current indexed listings.
     for grade in range(1, 8):
         query = f'site:unvacancies.org/jobs/ "UN Secretariat" "P-{grade}"'
         try:
             for candidate in search_duckduckgo_links(
                 query,
-                r"unvacancies\.org/jobs/[^/]+",
+                r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
             ):
                 candidate = clean(candidate).split("#", 1)[0]
-                if candidate not in seen:
-                    seen.add(candidate)
-                    detail_urls.append(candidate)
+                if candidate:
+                    detail_urls.add(candidate)
+                    preferred_detail_urls.add(candidate)
+
+            for result in search_bing_results(
+                query,
+                r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
+            ):
+                candidate = clean(result.get("url")).split("#", 1)[0]
+                if candidate:
+                    detail_urls.add(candidate)
+                    preferred_detail_urls.add(candidate)
         except Exception as exc:
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
-    detail_urls = detail_urls[:250]
-    jobs = []
-    parsed = 0
+    selected = list(dict.fromkeys(
+        list(preferred_detail_urls) + list(detail_urls - preferred_detail_urls)[:120]
+    ))[:280]
+    detail_urls = set(selected)
 
     def fetch_detail(url):
         try:
@@ -2564,7 +2592,8 @@ def fetch_un_professional_unvacancies():
         except Exception as exc:
             return None, f"{url}: {type(exc).__name__}: {exc}"
 
-    with ThreadPoolExecutor(max_workers=6) as executor:
+    parsed = 0
+    with ThreadPoolExecutor(max_workers=10) as executor:
         futures = {executor.submit(fetch_detail, url): url for url in detail_urls}
         for future in as_completed(futures):
             job, error = future.result()
@@ -2578,11 +2607,14 @@ def fetch_un_professional_unvacancies():
     return unique, {
         "status": "ok" if unique else ("error" if errors else "empty"),
         "count": len(unique),
+        "pages_crawled": len(seen_pages),
         "discovered_urls": len(detail_urls),
+        "preferred_detail_urls": len(preferred_detail_urls),
         "parsed_details": parsed,
         "errors": errors[:25],
-        "source": "unvacancies.org — UN Secretariat mirror with official application links",
+        "source": "unvacancies.org — paginated UN Secretariat mirror with official application links",
     }
+
 
 
 def load_historical_source_jobs(source_name, max_commits=20):
