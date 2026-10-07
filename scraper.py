@@ -560,6 +560,7 @@ def fetch_toploker():
     detail_urls = []
     seen_urls = set()
     seen_pages = set()
+    sample_page_text = ""
     page_queue = list(TOPLOKER_LIST_URLS)
     headers = {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
 
@@ -571,6 +572,8 @@ def fetch_toploker():
 
         try:
             text, proxied = fetch_public_text(page, headers=headers, jina_fallback=True, jina_first=True)
+            if not sample_page_text:
+                sample_page_text = clean(text[:600])
             soup = BeautifulSoup(text, "html.parser")
 
             for href in re.findall(
@@ -657,6 +660,7 @@ def fetch_toploker():
         "pages_crawled": list(seen_pages),
         "proxy_fallback": True,
         "discovered_urls": len(detail_urls),
+        "sample_page_text": sample_page_text,
         "errors": errors[:25],
     }
 
@@ -1413,6 +1417,8 @@ def fetch_undp_ipsa_oracle_html():
 
         urls = sorted(urls)[:80]
         jobs = []
+        sample_urls = urls[:10]
+        parsed_jobs = 0
         errors = []
 
         def fetch_detail(job_url):
@@ -1441,6 +1447,7 @@ def fetch_undp_ipsa_oracle_html():
                     errors.append(error)
                 elif job:
                     jobs.append(job)
+                    parsed_jobs += 1
 
         jobs = dedupe(jobs)
         return jobs, {
@@ -1449,6 +1456,8 @@ def fetch_undp_ipsa_oracle_html():
             "endpoint": search_url,
             "filter": "IPSA keyword",
             "discovered_urls": len(urls),
+            "parsed_jobs": parsed_jobs,
+            "sample_urls": sample_urls,
             "proxy": proxied,
             "errors": errors[:25],
         }
