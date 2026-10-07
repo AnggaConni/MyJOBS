@@ -14,6 +14,7 @@ from scraper import (
     normalize_un_apify,
     normalize_undp_oracle,
     parse_undp_oracle_job_html,
+    normalize_undp_bing_result,
     normalize_toploker,
     parse_toploker_detail,
 )
@@ -197,6 +198,17 @@ class ScraperTests(unittest.TestCase):
     def test_indonesian_date_parser(self):
         parsed = parse_datetime("31 Oktober 2026")
         self.assertEqual(parsed, datetime(2026, 10, 31, tzinfo=timezone.utc))
+
+    def test_undp_bing_normalization(self):
+        job = normalize_undp_bing_result({
+            "title": "Chief Engineering Specialist [Open to candidates] - UNDP Careers",
+            "url": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37266",
+            "snippet": "Libreville, Gabon Be the First to Apply Job Info Job Identification 37266 Posting Date 10/05/2026, 12:22 PM Apply Before 10/20/2026, 03:59 AM Job Schedule Full time Locations Libreville, Gabon Agency UNDP Grade IPSA-11 Vacancy Type International Personnel Service Agreement",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-11")
+        self.assertEqual(job["location"], "Libreville, Gabon")
+        self.assertIn("/job/37266", job["original_url"])
 
     def test_undp_oracle_html_parser(self):
         html = """
