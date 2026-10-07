@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 15:33 UTC",
+  "last_updated": "2026-10-07 15:35 UTC",
   "total": 247,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -8187,11 +8187,12 @@
         "https://toploker.com/loker/aktif-merekrut"
       ],
       "pages_crawled": [
-        "https://toploker.com/loker/daftar",
-        "https://toploker.com/loker/aktif-merekrut"
+        "https://toploker.com/loker/aktif-merekrut",
+        "https://toploker.com/loker/daftar"
       ],
       "proxy_fallback": true,
       "discovered_urls": 0,
+      "sample_page_text": "Title: Daftar Loker Website URL Source: https://toploker.com/loker/daftar Markdown Content: [![Image 13: #](https://toploker.com/assets/Logo%20Toploker%20Verifikasi%202.png)](https://toploker.com/) [![Image 14: #](https://toploker.com/assets/winner2.webp)](https://toploker.com/) [![Image 15: #](https://toploker.com/assets/toploker.webp)](https://toploker.com/) [![Image 16: #](https://toploker.com/assets/winner1.png)](https://toploker.com/) * [PENCARI KARIR](https://toploker.com/login_pelamar) [PERUSAHAAN / IKM](https://toploker.com/login_perusahaan) [MENU](https://toploker.com/loker",
       "errors": []
     },
     "ReliefWeb": {
@@ -8237,6 +8238,16 @@
       "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs?keyword=IPSA",
       "filter": "IPSA keyword",
       "discovered_urls": 7,
+      "parsed_jobs": 0,
+      "sample_urls": [
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/35948/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/36061/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37016/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37090/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37118/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37218/?keyword=IPSA",
+        "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37266/?keyword=IPSA"
+      ],
       "proxy": true,
       "errors": []
     },
@@ -8271,5 +8282,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 51.97
+  "runtime_seconds": 25.61
 }
