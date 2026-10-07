@@ -131,8 +131,9 @@ def fetch_public_text(url, headers=None, jina_fallback=False, jina_first=False):
     headers = headers or {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
 
     def via_jina():
-        target = "http://" + url[len("https://"):] if url.startswith("https://") else url
-        proxy = "https://r.jina.ai/" + target
+        # Jina's HTTPS reader handles JS-heavy pages more reliably than the
+        # HTTP-origin form for Oracle Candidate Experience and TopLoker.
+        proxy = "https://r.jina.ai/" + url
         proxy_response = requests.get(
             proxy,
             headers={"User-Agent": "MyJOBS/1.0"},
