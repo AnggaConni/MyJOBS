@@ -3,238 +3,210 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="MyJOBS — discover jobs across Indonesia, including local, humanitarian, UN and OCHA opportunities.">
+<meta name="description" content="MyJOBS — Indonesia-first job discovery with local, humanitarian, UN and global professional opportunities.">
 <meta name="theme-color" content="#0b1220">
-<title>MyJOBS — Indonesia Job Aggregator</title>
+<title>MyJOBS — Find your next opportunity</title>
 <style>
-:root{--bg:#f5f7fb;--card:#fff;--ink:#0b1220;--muted:#687386;--line:#e7ebf2;--brand:#ff5d3a;--green:#16986f;--blue:#356ae6;--navy:#0b1220;--shadow:0 18px 45px rgba(11,18,32,.08)}
-*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 12% -8%,rgba(255,93,58,.34),transparent 30%),radial-gradient(circle at 100% 0,rgba(53,106,230,.10),transparent 28%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}.container{width:min(1220px,calc(100% - 32px));margin:auto}
-.nav{position:sticky;top:0;z-index:50;background:rgba(245,247,251,.82);backdrop-filter:blur(18px);border-bottom:1px solid rgba(231,235,242,.8)}.nav-inner{height:72px;display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:-.04em}.brand-mark{display:grid;place-items:center;width:38px;height:38px;border-radius:12px;background:var(--navy);color:#fff;box-shadow:0 8px 20px rgba(11,18,32,.16)}.brand-name span{color:var(--brand)}.nav-actions{display:flex;gap:8px}.btn,.outline{border-radius:12px;padding:10px 14px;border:1px solid var(--line);font-weight:800;background:#fff}.btn{background:var(--navy);color:#fff;border-color:var(--navy)}.btn:hover,.outline:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
-.hero{padding:66px 0 30px}.location-main:hover,.location-gps:hover{transform:translateY(-1px);box-shadow:var(--shadow)}.eyebrow{display:inline-flex;align-items:center;gap:8px;padding:8px 12px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 5px rgba(22,152,111,.12)}h1{font-size:clamp(42px,6vw,72px);line-height:.98;letter-spacing:-.06em;max-width:880px;margin:20px 0 15px}h1 em{font-style:normal;color:var(--brand)}.hero-copy{max-width:760px;color:var(--muted);font-size:18px}
-.search{max-width:880px;margin-top:28px;padding:9px;background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow);display:flex;gap:9px}.search-icon{width:26px;display:grid;place-items:center;color:var(--muted);font-size:22px}.search input{flex:1;min-width:0;border:0;outline:0;background:transparent;font-size:17px}.search button{border:0;background:var(--brand);color:#fff;font-weight:900;border-radius:12px;padding:34px 19px}.hero-tags{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}.chip{padding:7px 10px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--muted);font-size:12px;font-weight:800}.location-bar{display:flex;flex-wrap:wrap;align-items:center;gap:9px;margin-top:15px}.location-main{display:flex;align-items:center;gap:10px;border:1px solid #ffd7cd;background:#fff8f5;border-radius:14px;padding:11px 34px;color:var(--ink);text-align:left}.location-main span:nth-child(1){font-size:18px}.location-main span:nth-child(2){display:flex;flex-direction:column;line-height:1.15}.location-main small{font-size:10px;color:var(--muted);font-weight:700;margin-top:3px}.location-main b{margin-left:3px;color:var(--brand)}.location-gps{border:1px solid var(--line);background:#fff;border-radius:12px;padding:10px 12px;font-weight:800;color:var(--ink)}.location-status{font-size:11px;color:var(--muted)}.location-main:disabled,.location-gps:disabled{opacity:.6;cursor:wait}
-.quick{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0 30px}.quick a{display:flex;align-items:center;gap:11px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:34px;transition:.2s}.quick a:hover{transform:translateY(-2px);box-shadow:var(--shadow)}.qicon{width:34px;height:34px;border-radius:10px;background:#f3f5f9;display:grid;place-items:center}.quick small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
-.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:34px}.stat{padding:19px;border-radius:18px;background:rgba(255,255,255,.88);border:1px solid var(--line)}.stat-label{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:900}.stat-value{font-size:29px;font-weight:900;letter-spacing:-.05em;margin-top:6px}.stat-hint{font-size:12px;color:var(--muted);margin-top:3px}
-.workspace{display:grid;grid-template-columns:260px 1fr;gap:20px;align-items:start}.side{position:sticky;top:92px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:20px;padding:17px}.side-title{font-weight:900}.group{margin-top:20px}.group h3{margin:0 0 8px;color:var(--muted);font-size:11px;text-transform:uppercase;letter-spacing:.08em}.stack{display:flex;flex-direction:column;gap:5px}.filter{width:100%;text-align:left;background:transparent;border:1px solid transparent;border-radius:10px;padding:9px 10px;font-weight:800;color:var(--ink)}.filter:hover{background:#f6f8fb}.filter.active{background:#fff1ed;border-color:#ffd7cd;color:var(--brand)}
-.results-head{display:flex;justify-content:space-between;align-items:end;gap:12px;margin-bottom:34px}.results-title{font-weight:900;font-size:21px;letter-spacing:-.03em}.results-meta{font-size:34px;color:var(--muted);margin-top:2px}.sort{border:1px solid var(--line);border-radius:11px;padding:9px 11px;background:#fff;font-weight:800;outline:0}.jobs{display:flex;flex-direction:column;gap:11px}
-.job{background:rgba(255,255,255,.93);border:1px solid var(--line);border-radius:19px;padding:17px;transition:.2s}.job:hover{transform:translateY(-2px);box-shadow:var(--shadow);border-color:#dbe1ea}.job-top{display:grid;grid-template-columns:52px 1fr auto;gap:34px}.logo{display:grid;place-items:center;width:52px;height:52px;border-radius:15px;background:#f0f3f8;color:#5d697c;font-weight:900}.title{font-size:18px;font-weight:900;letter-spacing:-.02em;margin:0 0 4px}.company{font-weight:750;color:#4a5669;margin-bottom:8px}.line{display:flex;flex-wrap:wrap;gap:9px;font-size:12px;color:var(--muted)}.actions{display:flex;flex-direction:column;align-items:end;gap:7px}.apply{border:0;border-radius:10px;background:var(--navy);color:#fff;padding:10px 34px;font-weight:900}.save{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:#fff;font-size:18px}.save.active{color:var(--brand);background:#fff4f1;border-color:#ffd7cd}.job-bottom{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid #eef1f5;margin-top:12px;padding-top:11px}.badges{display:flex;flex-wrap:wrap;gap:6px}.badge{padding:6px 8px;border-radius:999px;background:#f4f6fa;color:#5d697c;font-size:10px;font-weight:900}.badge.source{background:#eef5ff;color:var(--blue)}.badge.human{background:#edf9f5;color:var(--green)}.badge.urgent{background:#fff1ed;color:var(--brand)}.fresh{font-size:11px;color:var(--muted);white-space:nowrap}
-.mobile-tabs{display:none;gap:7px;overflow:auto;margin-bottom:12px}.mobile-tabs button{flex:0 0 auto}
-.empty{background:#fff;border:1px dashed #cdd5e1;border-radius:20px;padding:36px 22px;text-align:center}.empty-icon{font-size:39px}.empty h3{margin:8px 0 5px;font-size:20px}.empty p{max-width:600px;margin:0 auto 16px;color:var(--muted)}.skeleton{height:342px;border-radius:19px;background:linear-gradient(90deg,#edf0f4 25%,#f8f9fb 37%,#edf0f4 63%);background-size:400% 100%;animation:shimmer 1.5s infinite}@keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-footer{padding:50px 0 70px;color:var(--muted);font-size:12px}.footer-line{border-top:1px solid var(--line);padding-top:18px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;pointer-events:none;background:var(--navy);color:#fff;border-radius:11px;padding:10px 34px;font-weight:800;font-size:12px;transition:.2s;z-index:80}.toast.show{opacity:1;transform:translate(-50%,0)}
-@media(max-width:960px){.workspace{grid-template-columns:1fr}.side{display:none}.mobile-tabs{display:flex}.stats{grid-template-columns:repeat(2,1fr)}}
-@media(max-width:680px){.location-main{flex:1;min-width:250px}.location-status{width:100%}.container{width:calc(100% - 20px)}.nav{position:static}.nav-actions .outline{display:none}.hero{padding-top:40px}h1{font-size:46px}.search{flex-wrap:wrap}.search-icon{margin-left:3px}.search input{flex-basis:calc(100% - 40px)}.search button{width:100%}.quick{grid-template-columns:1fr}.stats{gap:9px}.stat{padding:14px}.stat-value{font-size:24px}.job-top{grid-template-columns:44px 1fr}.logo{width:44px;height:44px}.actions{grid-column:2;flex-direction:row;align-items:center}.job-bottom{flex-direction:column;align-items:flex-start}.fresh{white-space:normal}}
+:root{
+  --bg:#f4f6f8;--card:#fff;--ink:#111827;--muted:#667085;--line:#dfe3e8;
+  --navy:#0b1220;--brand:#ff5d3a;--blue:#0a66c2;--green:#14866a;
+  --shadow:0 2px 8px rgba(16,24,40,.06);--shadow2:0 10px 28px rgba(16,24,40,.08);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}
+a{text-decoration:none;color:inherit}
+button,input,select{font:inherit}
+button{cursor:pointer}
+.container{width:min(1180px,calc(100% - 28px));margin:auto}
+.topbar{position:sticky;top:0;z-index:60;background:#fff;border-bottom:1px solid var(--line)}
+.top-inner{height:68px;display:flex;align-items:center;gap:20px}
+.brand{display:flex;align-items:center;gap:9px;font-weight:900;letter-spacing:-.035em;flex:0 0 auto}
+.brand-mark{width:36px;height:36px;border-radius:9px;background:var(--navy);color:#fff;display:grid;place-items:center;font-weight:900}
+.brand-name{font-size:19px}.brand-name span{color:var(--brand)}
+.nav-search{height:42px;flex:1;max-width:530px;display:flex;align-items:center;gap:8px;background:#eef3f8;border-radius:8px;padding:0 12px;color:#7a8796}
+.nav-search input{border:0;outline:0;background:transparent;flex:1;min-width:0;color:var(--ink)}
+.nav-links{display:flex;align-items:center;gap:5px;margin-left:auto}
+.nav-link{min-width:68px;padding:8px 10px;border-radius:7px;text-align:center;color:#596579;font-size:12px;font-weight:800}
+.nav-link.active{color:var(--ink)}
+.nav-link:hover{background:#f5f7fa}
+.nav-icon{display:block;font-size:17px;margin-bottom:2px}
+.nav-actions{display:flex;align-items:center;gap:8px}
+.nav-btn{border:1px solid var(--line);background:#fff;padding:9px 11px;border-radius:8px;font-weight:800;font-size:12px}
+.nav-btn.primary{background:var(--navy);border-color:var(--navy);color:#fff}
+
+.page{padding:22px 0 50px}
+.location-banner{display:flex;justify-content:space-between;align-items:center;gap:16px;background:#fff;border:1px solid var(--line);border-radius:10px;padding:13px 16px;box-shadow:var(--shadow);margin-bottom:17px}
+.location-copy{display:flex;align-items:center;gap:10px;font-size:13px}.location-copy strong{display:block}.location-copy small{display:block;color:var(--muted);margin-top:2px}
+.location-buttons{display:flex;gap:7px;flex-wrap:wrap}.loc-btn{border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:8px;font-size:12px;font-weight:800}.loc-btn.accent{border-color:#ffd2c8;background:#fff6f3;color:#d9492d}
+.layout{display:grid;grid-template-columns:225px minmax(0,1fr) 285px;gap:17px;align-items:start}
+.side-card,.right-card,.feed-card{background:var(--card);border:1px solid var(--line);border-radius:10px;box-shadow:var(--shadow)}
+.side-card{padding:14px;position:sticky;top:86px}
+.side-title{font-size:13px;font-weight:900;margin-bottom:9px}
+.profile-mini{display:flex;gap:10px;align-items:center;padding-bottom:13px;border-bottom:1px solid var(--line);margin-bottom:11px}
+.avatar{width:42px;height:42px;border-radius:50%;background:#e9eef4;display:grid;place-items:center;font-size:17px;font-weight:900;color:#5b6878}
+.profile-mini strong{font-size:13px}.profile-mini small{display:block;color:var(--muted);font-size:11px;margin-top:2px}
+.side-link{display:flex;justify-content:space-between;align-items:center;padding:9px 8px;border-radius:7px;font-size:12px;font-weight:800;color:#465266}
+.side-link:hover{background:#f4f7fa}.side-link.active{background:#eef5ff;color:var(--blue)}
+.side-section{margin-top:17px}.side-section h4{margin:0 0 7px;font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:#8a95a5}
+.filter{width:100%;border:0;background:transparent;text-align:left;padding:8px;border-radius:7px;font-size:12px;font-weight:700;color:#4a5568}
+.filter:hover{background:#f5f7fa}.filter.active{background:#fff4f1;color:var(--brand)}
+.count{color:#98a2b3;font-size:11px;float:right}
+.reset{width:100%;border:1px solid var(--line);background:#fff;border-radius:7px;padding:8px;margin-top:9px;font-size:11px;font-weight:800}
+.main-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:11px}
+.main-head h1{font-size:18px;margin:0;letter-spacing:-.02em}.main-head p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.sort{border:1px solid var(--line);background:#fff;padding:8px 10px;border-radius:7px;font-size:11px;font-weight:800;outline:0}
+.feed-card{padding:15px;margin-bottom:10px}
+.job-top{display:grid;grid-template-columns:48px 1fr auto;gap:11px}
+.logo{width:48px;height:48px;border-radius:8px;background:#edf1f5;display:grid;place-items:center;color:#536174;font-weight:900;font-size:15px}
+.job-title{font-size:15px;font-weight:900;letter-spacing:-.01em;margin:0 0 3px}
+.job-company{font-size:12px;font-weight:750;color:#3f4b5d}
+.job-meta{display:flex;flex-wrap:wrap;gap:8px;color:#707c8d;font-size:11px;margin-top:5px}
+.job-actions{display:flex;align-items:flex-start;gap:6px}
+.save{width:33px;height:33px;background:#fff;border:1px solid var(--line);border-radius:7px;font-size:16px}
+.save.active{color:var(--brand);background:#fff4f1;border-color:#ffd2c8}
+.view-btn{background:var(--navy);color:#fff;border:0;border-radius:7px;padding:8px 10px;font-size:11px;font-weight:900}
+.job-foot{border-top:1px solid #edf0f3;margin-top:11px;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.badges{display:flex;flex-wrap:wrap;gap:5px}.badge{font-size:9px;font-weight:900;padding:5px 7px;border-radius:999px;background:#f4f6f8;color:#5d6878}.badge.source{background:#eef5ff;color:#356ae6}.badge.green{background:#eef9f5;color:#14866a}.badge.orange{background:#fff1ed;color:#d94d31}
+.fresh{font-size:10px;color:#98a2b3;white-space:nowrap}
+.empty{background:#fff;border:1px dashed #cbd5e1;border-radius:10px;text-align:center;padding:30px 20px;color:var(--muted)}.empty h3{margin:7px 0;color:var(--ink);font-size:16px}.empty p{font-size:12px;max-width:520px;margin:0 auto 13px}
+.right-card{padding:15px;margin-bottom:10px}.right-title{font-size:13px;font-weight:900;margin-bottom:10px}
+.source-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #edf0f3}.source-item:last-child{border-bottom:0}.source-icon{width:33px;height:33px;border-radius:8px;background:#f2f4f7;display:grid;place-items:center;font-size:15px}.source-item strong{display:block;font-size:12px}.source-item small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
+.source-item .go{margin-left:auto;color:#98a2b3;font-size:14px}
+.stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf0f3;font-size:12px}.stat-row:last-child{border-bottom:0}.stat-row span:last-child{font-weight:900}
+.note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:9px}
+.mobile-tools{display:none}
+.toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;background:var(--navy);color:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:800;pointer-events:none;transition:.2s;z-index:90}.toast.show{opacity:1;transform:translate(-50%,0)}
+@media(max-width:1050px){.layout{grid-template-columns:200px minmax(0,1fr)}.right{display:none}}
+@media(max-width:780px){.top-inner{height:auto;min-height:64px;flex-wrap:wrap;padding:9px 0}.nav-search{order:3;max-width:none;flex-basis:100%}.nav-links{display:none}.location-banner{align-items:flex-start;flex-direction:column}.layout{grid-template-columns:1fr}.left{display:none}.mobile-tools{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.mobile-tools .filter{flex:0 0 auto;width:auto;background:#fff;border:1px solid var(--line)}.mobile-tools .filter.active{border-color:#ffd2c8;background:#fff4f1}.container{width:calc(100% - 18px)}}
+@media(max-width:520px){.job-top{grid-template-columns:42px 1fr}.logo{width:42px;height:42px}.job-actions{grid-column:2}.job-foot{align-items:flex-start;flex-direction:column}.fresh{white-space:normal}.brand-name{font-size:17px}.nav-actions{display:none}}
 </style>
 </head>
 <body>
-<header class="nav">
-  <div class="container nav-inner">
-    <a class="brand" href="#"><span class="brand-mark">K</span><span class="brand-name">ketapang<span>JOBS</span></span></a>
-    <div class="nav-actions">
-      <a class="outline" href="#jobs">Browse jobs</a>
-      <a class="btn" href="#sources">UN / NGO jobs</a>
-    </div>
+<header class="topbar">
+  <div class="container top-inner">
+    <a class="brand" href="#"><span class="brand-mark">M</span><span class="brand-name">My<span>JOBS</span></span></a>
+    <form class="nav-search" id="searchForm">
+      <span>⌕</span>
+      <input id="searchInput" type="search" placeholder="Search jobs by title, company, skill or location" autocomplete="off">
+    </form>
+    <nav class="nav-links">
+      <a class="nav-link" href="#"><span class="nav-icon">⌂</span>Home</a>
+      <a class="nav-link active" href="#jobs"><span class="nav-icon">💼</span>Jobs</a>
+      <a class="nav-link" href="#sources"><span class="nav-icon">🌐</span>UN / NGO</a>
+    </nav>
+    <div class="nav-actions"><button class="nav-btn" id="savedTop">♡ Saved</button></div>
   </div>
 </header>
 
-<main class="container">
-<section class="hero">
-  <span class="eyebrow"><span class="dot"></span> Indonesia job intelligence</span>
-  <h1>Find your next <em>opportunity.</em></h1>
-  <p class="hero-copy">Discover opportunities across Indonesia. Local employers, humanitarian organisations, UN careers and OCHA-related vacancies — in one place.</p>
-  <form class="search" id="searchForm">
-    <div class="search-icon">⌕</div>
-    <input id="searchInput" type="search" autocomplete="off" placeholder="Search role, company, skill or location…" aria-label="Search jobs">
-    <button type="submit">Search jobs</button>
-  </form>
-  <div class="hero-tags">
-    <span class="chip">🇮🇩 Indonesia first</span><span class="chip">📍 Nationwide</span><span class="chip">🔄 Automated updates</span><span class="chip">🔗 Original source links</span>
-  </div>
-  <div class="location-bar">
-    <button class="location-main" id="detectIpBtn" type="button"><span>📍</span><span><strong>Auto-detect my area</strong><small>Approximate location via internet connection</small></span><b>→</b></button>
-    <button class="location-gps" id="detectGpsBtn" type="button">◎ Use precise GPS</button>
-    <span class="location-status" id="locationStatus">Showing jobs across Indonesia by default. Location is used only for filtering in your browser.</span>
-  </div>
-
-  <div class="quick" id="sources">
-    <a id="reliefwebLink" href="https://reliefweb.int/jobs" target="_blank" rel="noopener"><span class="qicon">🌐</span><span><strong>ReliefWeb</strong><small>Humanitarian jobs</small></span></a>
-    <a id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🇺🇳</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span></a>
-    <a id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🧑‍💼</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span></a>
-    <a id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="qicon">🌍</span><span><strong>UNDP IPSA</strong><small>International roles</small></span></a>
-    <a id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="qicon">🕊️</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span></a>
-  </div>
-
-  <section class="stats">
-    <div class="stat"><div class="stat-label">Active jobs</div><div class="stat-value" id="statJobs">—</div><div class="stat-hint">Current indexed vacancies</div></div>
-    <div class="stat"><div class="stat-label">Areas</div><div class="stat-value" id="statAreas">34</div><div class="stat-hint">Indonesia coverage</div></div>
-    <div class="stat"><div class="stat-label">Sources</div><div class="stat-value" id="statSources">—</div><div class="stat-hint">Healthy indexed sources</div></div>
-    <div class="stat"><div class="stat-label">Updated</div><div class="stat-value" id="statUpdated">—</div><div class="stat-hint" id="statHint">Latest data refresh</div></div>
+<main class="container page">
+  <section class="location-banner">
+    <div class="location-copy"><span style="font-size:19px">📍</span><div><strong id="locationTitle">Jobs across Indonesia</strong><small id="locationStatus">Location is used only to filter opportunities in your browser.</small></div></div>
+    <div class="location-buttons"><button class="loc-btn accent" id="detectIpBtn">Auto-detect my area</button><button class="loc-btn" id="detectGpsBtn">◎ Use precise GPS</button></div>
   </section>
-</section>
 
-<section id="jobs">
-  <div class="mobile-tabs">
-    <button class="outline tab active" data-filter="all">All</button>
-    <button class="outline tab" data-filter="local">Local</button>
-    <button class="outline tab" data-filter="humanitarian">Humanitarian</button>
-    <button class="outline tab" data-filter="un">UN / OCHA</button><button class="outline tab" data-filter="un-p">UN P-Level</button><button class="outline tab" data-filter="undp-ipsa">UNDP IPSA</button>
+  <div class="mobile-tools">
+    <button class="filter active" data-filter="all">All</button>
+    <button class="filter" data-filter="local">Local</button>
+    <button class="filter" data-filter="humanitarian">Humanitarian</button>
+    <button class="filter" data-filter="un">UN</button>
+    <button class="filter" data-filter="un-p">UN P</button>
+    <button class="filter" data-filter="undp-ipsa">UNDP IPSA</button>
   </div>
 
-  <div class="workspace">
-    <aside class="side">
-      <div class="side-title">Filter jobs</div>
-      <div class="group">
-        <h3>Opportunity type</h3>
-        <div class="stack" id="typeFilters">
-          <button class="filter active" data-filter="all">All opportunities</button>
-          <button class="filter" data-filter="local">Local jobs</button>
-          <button class="filter" data-filter="humanitarian">Humanitarian</button>
-          <button class="filter" data-filter="un">UN / OCHA</button>
-          <button class="filter" data-filter="un-p">UN P-Level</button>
-          <button class="filter" data-filter="undp-ipsa">UNDP IPSA</button>
-        </div>
+  <div class="layout">
+    <aside class="left">
+      <div class="side-card">
+        <div class="profile-mini"><div class="avatar">M</div><div><strong>MyJOBS</strong><small>Indonesia-first job discovery</small></div></div>
+        <div class="side-title">Job preferences</div>
+        <div class="side-link active" id="allLink">All opportunities <span>›</span></div>
+        <div class="side-link" data-filter="local">Local jobs <span>›</span></div>
+        <div class="side-link" data-filter="humanitarian">Humanitarian <span>›</span></div>
+        <div class="side-link" data-filter="un">UN / OCHA <span>›</span></div>
+        <div class="side-link" data-filter="un-p">UN P-Level <span>›</span></div>
+        <div class="side-link" data-filter="undp-ipsa">UNDP IPSA <span>›</span></div>
+
+        <div class="side-section"><h4>Location</h4><div id="locationFilters"></div><button class="reset" id="resetFilters">Reset filters</button></div>
       </div>
-      <div class="group">
-        <h3>Location</h3>
-        <div class="stack" id="locationFilters"></div>
-      </div>
-      <button class="outline" id="resetFilters" style="width:100%;margin-top:16px">Reset filters</button>
     </aside>
 
-    <section>
-      <div class="results-head">
-        <div><div class="results-title">Latest opportunities</div><div class="results-meta" id="resultsMeta">Loading live vacancy data…</div></div>
-        <select class="sort" id="sortSelect" aria-label="Sort jobs">
-          <option value="newest">Newest</option><option value="relevance">Relevance</option><option value="company">Company A–Z</option><option value="location">Location A–Z</option>
-        </select>
+    <section id="jobs">
+      <div class="main-head">
+        <div><h1>Recommended jobs</h1><p id="resultsMeta">Loading opportunities…</p></div>
+        <select class="sort" id="sortSelect"><option value="newest">Newest</option><option value="relevance">Relevance</option><option value="company">Company A–Z</option><option value="location">Location A–Z</option></select>
       </div>
-      <div class="jobs" id="jobsList"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>
+      <div id="jobsList">
+        <div class="feed-card" style="height:132px"></div>
+        <div class="feed-card" style="height:132px"></div>
+        <div class="feed-card" style="height:132px"></div>
+      </div>
     </section>
+
+    <aside class="right">
+      <div class="right-card" id="sources">
+        <div class="right-title">Explore trusted sources</div>
+        <a class="source-item" id="reliefwebLink" href="https://reliefweb.int/jobs" target="_blank" rel="noopener"><span class="source-icon">🌐</span><span><strong>ReliefWeb</strong><small>Humanitarian jobs</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">🇺🇳</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">🧑‍💼</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="source-icon">🌍</span><span><strong>UNDP IPSA</strong><small>International roles</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">🕊️</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span><span class="go">↗</span></a>
+      </div>
+      <div class="right-card">
+        <div class="right-title">MyJOBS today</div>
+        <div class="stat-row"><span>Active jobs</span><span id="statJobs">—</span></div>
+        <div class="stat-row"><span>Sources</span><span id="statSources">—</span></div>
+        <div class="stat-row"><span>Expired removed</span><span id="statExpired">—</span></div>
+        <div class="stat-row"><span>Last update</span><span id="statUpdated">—</span></div>
+        <div class="note">Listings link back to the original source. MyJOBS does not collect applications.</div>
+      </div>
+    </aside>
   </div>
-</section>
 </main>
 
-<footer>
-<div class="container footer-line"><div><strong>MyJOBS</strong> · Indonesia-first job aggregator.</div><div id="footerStatus">Automated source indexing · direct links open original listings.</div></div>
-</footer>
-
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="toast" id="toast"></div>
 
 <script>
 (function(){
-  var state={jobs:[],query:"",type:"all",location:"all",sort:"newest",saved:JSON.parse(localStorage.getItem("ketapangjobs:saved")||"[]")};
-var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112.75],Semarang:[-6.97,110.42],Yogyakarta:[-7.8,110.37],Medan:[3.59,98.67],Denpasar:[-8.65,115.22],Makassar:[-5.15,119.43],Palembang:[-2.99,104.76],Pontianak:[-0.03,109.34],Ketapang:[-1.85,109.97],Singkawang:[0.91,108.98]};
-  function $(s){return document.querySelector(s)}
-  function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
+  var state={jobs:[],query:"",type:"all",location:"all",sort:"newest",saved:JSON.parse(localStorage.getItem("myjobs:saved")||"[]")};
+  var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112.75],Semarang:[-6.97,110.42],Yogyakarta:[-7.8,110.37],Medan:[3.59,98.67],Denpasar:[-8.65,115.22],Makassar:[-5.15,119.43],Palembang:[-2.99,104.76],Pontianak:[-0.03,109.34],Ketapang:[-1.85,109.97],Singkawang:[0.91,108.98],Balikpapan:[-1.27,116.83],Banjarmasin:[-3.32,114.59]};
+  function $(s){return document.querySelector(s)} function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]})}
   function norm(v){return String(v||"").toLowerCase().normalize("NFKC")}
-  function initials(v){var p=String(v||"?").trim().split(/\s+/).slice(0,2);return p.map(function(x){return x[0]}).join("").toUpperCase()||"?"}
+  function initials(v){return String(v||"?").trim().split(/\s+/).slice(0,2).map(function(x){return x[0]}).join("").toUpperCase()||"?"}
+  function isUNP(j){return j.source==="UN Careers — P-level"} function isIPSA(j){return j.source==="UNDP — IPSA"}
   function isUN(j){var t=norm([j.source,j.company,j.title,j.description].join(" "));return t.indexOf("un careers")>=0||t.indexOf("united nations")>=0||t.indexOf(" ocha")>=0||t.indexOf("ocha ")>=0}
-  function isUNP(j){return String(j.source||"")==="UN Careers — P-level"}
-  function isUNDPIPSA(j){return String(j.source||"")==="UNDP — IPSA"}
-  function isHuman(j){var t=norm([j.source,j.source_family,j.company,j.title,j.description].join(" "));return t.indexOf("reliefweb")>=0||t.indexOf("humanitarian")>=0||t.indexOf("ngo")>=0||isUN(j)}
-  function typeOf(j){return isUNP(j)?"un-p":(isUNDPIPSA(j)?"undp-ipsa":(isUN(j)?"un":(isHuman(j)?"humanitarian":"local")))}
-  function matches(j){
-    if(state.type!=="all"&&typeOf(j)!==state.type)return false;
-    if(state.location!=="all"&&j.district!==state.location)return false;
-    var q=norm(state.query).trim();if(!q)return true;
-    var h=norm([j.title,j.company,j.location,j.district,j.description,j.source].join(" "));
-    return q.split(/\s+/).filter(Boolean).every(function(x){return h.indexOf(x)>=0})
-  }
-  function score(j){
-    var q=norm(state.query),h=norm([j.title,j.company,j.location,j.description,j.source].join(" ")),s=0;
-    if(q)q.split(/\s+/).filter(Boolean).forEach(function(x){if(h.indexOf(x)>=0)s+=3});
-    if(j.source==="ReliefWeb"||j.source==="UN Careers")s++;
-    return s
-  }
-  function sorted(list){
-    return list.slice().sort(function(a,b){
-      if(state.sort==="company")return String(a.company||"").localeCompare(String(b.company||""));
-      if(state.sort==="location")return String(a.district||a.location||"").localeCompare(String(b.district||b.location||""));
-      if(state.sort==="relevance")return score(b)-score(a);
-      return String(b.posted_at||"").localeCompare(String(a.posted_at||""))
-    })
-  }
+  function isHuman(j){var t=norm([j.source_family,j.source,j.company,j.title,j.description].join(" "));return t.indexOf("reliefweb")>=0||t.indexOf("humanitarian")>=0||isUN(j)||isIPSA(j)}
+  function typeOf(j){return isUNP(j)?"un-p":(isIPSA(j)?"undp-ipsa":(isUN(j)?"un":(isHuman(j)?"humanitarian":"local")))}
+  function matches(j){if(state.type!=="all"&&typeOf(j)!==state.type)return false;if(state.location!=="all"&&j.district!==state.location)return false;var q=norm(state.query).trim();if(!q)return true;var hay=norm([j.title,j.company,j.location,j.district,j.description,j.source].join(" "));return q.split(/\s+/).filter(Boolean).every(function(x){return hay.indexOf(x)>=0})}
+  function score(j){var q=norm(state.query),h=norm([j.title,j.company,j.location,j.description,j.source].join(" ")),s=0;if(q)q.split(/\s+/).filter(Boolean).forEach(function(x){if(h.indexOf(x)>=0)s+=3});if(isUNP(j)||isIPSA(j))s++;return s}
+  function sorted(a){return a.slice().sort(function(x,y){if(state.sort==="company")return String(x.company||"").localeCompare(String(y.company||""));if(state.sort==="location")return String(x.location||x.district||"").localeCompare(String(y.location||y.district||""));if(state.sort==="relevance")return score(y)-score(x);return String(y.posted_at||"").localeCompare(String(x.posted_at||""))})}
   function card(j){
-    var saved=state.saved.indexOf(j.id)>=0,t=typeOf(j);
-    var cls=t==="local"?"source":"human";
-    var href=j.original_url&&j.original_url!=="#"?esc(j.original_url):"";
-    var meta="";
+    var t=typeOf(j),saved=state.saved.indexOf(j.id)>=0,href=j.original_url&&j.original_url!=="#"?esc(j.original_url):"";
+    var badgeClass=(t==="local"?"source":(t==="humanitarian"?"green":"orange"));
+    var label=t==="un-p"?"UN P-Level":(t==="undp-ipsa"?"UNDP IPSA":(t==="un"?"UN / OCHA":j.source||"Source"));
+    var meta="<span>📍 "+esc(j.location||j.district||j.country||"Indonesia")+"</span>";
     if(j.salary)meta+="<span>💰 "+esc(j.salary)+"</span>";
     if(j.schedule_type)meta+="<span>◷ "+esc(j.schedule_type)+"</span>";
-    return "<article class='job'><div class='job-top'>"+
-      "<div class='logo'>"+esc(initials(j.company))+"</div><div>"+
-      "<h3 class='title'>"+esc(j.title||"Untitled opportunity")+"</h3>"+
-      "<div class='company'>"+esc(j.company||"Unknown company")+"</div>"+
-      "<div class='line'><span>📍 "+esc(j.location||j.district||"Indonesia")+"</span>"+meta+"</div></div>"+
-      "<div class='actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"' aria-label='"+(saved?"Unsave":"Save")+" job'>"+(saved?"♥":"♡")+"</button>"+
-      (href?"<a class='apply' href='"+href+"' target='_blank' rel='noopener'>View job ↗</a>":"")+"</div></div>"+
-      "<div class='job-bottom'><div class='badges'><span class='badge "+cls+"'>"+esc(j.source||"Source")+"</span>"+
-      (t==="un"?"<span class='badge urgent'>UN / OCHA</span>":"")+(t==="un-p"?"<span class='badge urgent'>UN P-Level</span>":"")+(t==="undp-ipsa"?"<span class='badge urgent'>UNDP IPSA</span>":"")+(j.remote?"<span class='badge'>Remote</span>":"")+
-      (j.expires_at?"<span class='badge'>Deadline "+esc(j.expires_at)+"</span>":"")+
-      "</div><div class='fresh'>"+esc(j.posted_at||"Source date unavailable")+"</div></div></article>"
+    return "<article class='feed-card'><div class='job-top'><div class='logo'>"+esc(initials(j.company))+"</div><div><h3 class='job-title'>"+esc(j.title||"Untitled opportunity")+"</h3><div class='job-company'>"+esc(j.company||"Unknown company")+"</div><div class='job-meta'>"+meta+"</div></div><div class='job-actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"'>"+(saved?"♥":"♡")+"</button>"+(href?"<a class='view-btn' href='"+href+"' target='_blank' rel='noopener'>View ↗</a>":"")+"</div></div><div class='job-foot'><div class='badges'><span class='badge "+badgeClass+"'>"+esc(label)+"</span>"+(j.remote?"<span class='badge'>Remote</span>":"")+(j.expires_at?"<span class='badge'>Deadline "+esc(j.expires_at)+"</span>":"")+"</div><div class='fresh'>"+esc(j.posted_at||"Source date unavailable")+"</div></div></article>"
   }
-  function render(){
-    var list=sorted(state.jobs.filter(matches));
-    $("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown";
-    if(!list.length){
-      $("#jobsList").innerHTML="<div class='empty'><div class='empty-icon'>🔎</div><h3>No matching opportunities</h3><p>Try another keyword, location, or opportunity type. You can also jump directly to ReliefWeb or UN Careers above.</p><button class='btn' id='emptyReset'>Clear filters</button></div>";
-      $("#emptyReset").onclick=reset;
-      return
-    }
-    $("#jobsList").innerHTML=list.map(card).join("");
-    $$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}})
-  }
-  function locations(){
-    var c={};state.jobs.forEach(function(j){var d=j.district||j.location||"Indonesia";c[d]=(c[d]||0)+1});
-    var entries=Object.keys(c).sort(function(a,b){return c[b]-c[a]}).slice(0,8);
-    var html="<button class='filter "+(state.location==="all"?"active":"")+"' data-location='all'>All areas</button>";
-    entries.forEach(function(d){html+="<button class='filter "+(state.location===d?"active":"")+"' data-location='"+esc(d)+"'>"+esc(d)+" <span style='float:right;color:#97a0af'>"+c[d]+"</span></button>"});
-    $("#locationFilters").innerHTML=html;
-    $$("#locationFilters [data-location]").forEach(function(b){b.onclick=function(){state.location=b.getAttribute("data-location");sync();render();locations()}})
-  }
-  function sync(){
-    $$("#typeFilters [data-filter],.tab").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})
-    $$("#locationFilters [data-location]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-location")===state.location)})
-  }
+  function render(){var list=sorted(state.jobs.filter(matches));$("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown";if(!list.length){$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>🔎</div><h3>No matching opportunities</h3><p>Try a different keyword or filter. You can also explore the official sources on the right.</p><button class='nav-btn primary' id='emptyReset'>Clear filters</button></div>";$("#emptyReset").onclick=reset;return}$("#jobsList").innerHTML=list.map(card).join("");$$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}})}
+  function locations(){var counts={};state.jobs.forEach(function(j){var d=j.district||j.location||j.country||"Indonesia";counts[d]=(counts[d]||0)+1});var e=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]}).slice(0,8);var h="<button class='filter "+(state.location==="all"?"active":"")+"' data-location='all'>All locations</button>";e.forEach(function(d){h+="<button class='filter "+(state.location===d?"active":"")+"' data-location='"+esc(d)+"'>"+esc(d)+" <span class='count'>"+counts[d]+"</span></button>"});$("#locationFilters").innerHTML=h;$$("[data-location]").forEach(function(b){b.onclick=function(){state.location=b.getAttribute("data-location");sync();locations();render()}})}
+  function sync(){$$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
   function reset(){state.query="";state.type="all";state.location="all";$("#searchInput").value="";sync();locations();render()}
-  function toggleSave(id){
-    var i=state.saved.indexOf(id);
-    if(i>=0)state.saved.splice(i,1);else state.saved.push(id);
-    localStorage.setItem("ketapangjobs:saved",JSON.stringify(state.saved));render();
-    var t=$("#toast");t.textContent=i>=0?"Job removed":"Job saved";t.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(function(){t.classList.remove("show")},1500)
-  }
-  function nearestCity(lat,lon){var best="Jakarta",bestKm=Infinity;Object.keys(CITY_COORDS).forEach(function(name){var c=CITY_COORDS[name],r=6371,rad=Math.PI/180,dLat=(c[0]-lat)*rad,dLon=(c[1]-lon)*rad,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*rad)*Math.cos(c[0]*rad)*Math.sin(dLon/2)*Math.sin(dLon/2),km=2*r*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(km<bestKm){bestKm=km;best=name}});return {city:best,km:bestKm}}
-  function setDetectedLocation(city,mode,message){state.location=city;sync();locations();render();$("#locationStatus").textContent=message||("Showing "+city+" jobs · "+mode);}
-  async function detectByIP(){var btn=$("#detectIpBtn"),gps=$("#detectGpsBtn");btn.disabled=true;gps.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var res=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!res.ok)throw new Error("IP lookup failed");var d=await res.json();var country=String(d.country_code||"").toUpperCase();if(country&&country!=="ID"){state.location="all";sync();locations();render();$("#locationStatus").textContent="Outside current Indonesia-first coverage · showing indexed jobs.";return}var city=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(!city){var blob=String((d.city||"")+" "+(d.region||"")).toLowerCase();city=Object.keys(CITY_COORDS).find(function(x){return blob.indexOf(x.toLowerCase())>=0})}if(city)setDetectedLocation(city,"IP","Approximate IP location: "+city+" · coordinates are not saved.");else{state.location="all";sync();locations();render();$("#locationStatus").textContent="Indonesia detected, but this city is outside current indexed areas."}}catch(e){$("#locationStatus").textContent="Approximate detection unavailable · try precise GPS or choose a location.";showToast("Could not detect location")}finally{btn.disabled=false;gps.disabled=false}}
-  function detectByGPS(){var btn=$("#detectGpsBtn"),ip=$("#detectIpBtn");if(!navigator.geolocation){showToast("GPS / browser geolocation is not available");return}btn.disabled=true;ip.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(pos){var n=nearestCity(pos.coords.latitude,pos.coords.longitude);if(n.km<=180){setDetectedLocation(n.city,"GPS","GPS selected: "+n.city+" · accuracy ±"+Math.round(pos.coords.accuracy||0)+"m · not saved")}else{state.location="all";sync();locations();render();$("#locationStatus").textContent="GPS location is outside current Indonesia coverage · showing indexed jobs."}btn.disabled=false;ip.disabled=false},function(err){btn.disabled=false;ip.disabled=false;$("#locationStatus").textContent=err.code===1?"GPS permission was not granted · approximate IP detection is still available.":"GPS detection failed · try again or use approximate detection.";showToast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
-  function updateStats(d){
-    $("#statJobs").textContent=Number(d.total||d.jobs&&d.jobs.length||0).toLocaleString();
-    $("#statAreas").textContent=Array.isArray(d.coverage)?d.coverage.length:"34";
-    var sc=d.sources?Object.keys(d.sources).length:0;$("#statSources").textContent=sc||"—";
-    $("#statUpdated").textContent=d.last_updated?String(d.last_updated).split(" ")[0]:"—";
-    $("#statHint").textContent=d.expired_removed?d.expired_removed+" expired jobs removed":"Latest data refresh"
-  }
-  function showToast(message){var t=$("#toast");t.textContent=message;t.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(function(){t.classList.remove("show")},1500)}
-  function load(){
-    Promise.all([fetch("vacancy.json?ts="+Date.now(),{cache:"no-store"}),fetch("sources.json?ts="+Date.now(),{cache:"no-store"})])
-      .then(function(r){return Promise.all([r[0].json(),r[1].ok?r[1].json():Promise.resolve({})])})
-      .then(function(v){
-        var d=v[0],s=v[1];state.jobs=Array.isArray(d.jobs)?d.jobs:[];updateStats(d);locations();render();
-        (s.buttons||[]).forEach(function(x){if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="un-p")$("#unPLink").href=x.url;if(x.id==="undp-ipsa")$("#undpLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});
-        $("#footerStatus").textContent=d.status==="error"?"Latest source refresh reported an error. Official source links remain available.":"Automated source indexing · direct links open original listings."
-      })
-      .catch(function(){
-        state.jobs=[];$("#resultsMeta").textContent="Dataset unavailable";$("#footerStatus").textContent="Frontend loaded; vacancy dataset unavailable.";
-        $("#jobsList").innerHTML="<div class='empty'><div class='empty-icon'>⚠️</div><h3>Vacancy data is temporarily unavailable</h3><p>The interface is ready, but the latest dataset could not be loaded. Try again or use the official source links above.</p><button class='btn' onclick='location.reload()'>Refresh</button></div>"
-      })
-  }
-  $("#detectIpBtn").onclick=detectByIP;
-  $("#detectGpsBtn").onclick=detectByGPS;
-  $("#searchForm").onsubmit=function(e){e.preventDefault();state.query=$("#searchInput").value.trim();state.sort="relevance";$("#sortSelect").value="relevance";render()};
-  $("#searchInput").oninput=function(e){state.query=e.target.value.trim();render()};
-  $("#sortSelect").onchange=function(e){state.sort=e.target.value;render()};
-  $$("#typeFilters [data-filter],.tab").forEach(function(b){b.onclick=function(){state.type=b.getAttribute("data-filter");sync();render()}});
-  $("#resetFilters").onclick=reset;
+  function toggleSave(id){var i=state.saved.indexOf(id);if(i>=0)state.saved.splice(i,1);else state.saved.push(id);localStorage.setItem("myjobs:saved",JSON.stringify(state.saved));render();toast(i>=0?"Removed from saved jobs":"Saved job")}
+  function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(function(){t.classList.remove("show")},1400)}
+  function nearestCity(lat,lon){var best="Indonesia",bestKm=Infinity,r=6371,rad=Math.PI/180;Object.keys(CITY_COORDS).forEach(function(name){var c=CITY_COORDS[name],dLat=(c[0]-lat)*rad,dLon=(c[1]-lon)*rad,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*rad)*Math.cos(c[0]*rad)*Math.sin(dLon/2)*Math.sin(dLon/2),km=2*r*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(km<bestKm){bestKm=km;best=name}});return{city:best,km:bestKm}}
+  function setLocation(city,message){state.location=city;$("#locationTitle").textContent=city==="all"?"Jobs across Indonesia":"Jobs near "+city;$("#locationStatus").textContent=message||"Location is used only to filter opportunities in your browser.";sync();locations();render()}
+  async function detectIP(){var b=$("#detectIpBtn"),g=$("#detectGpsBtn");b.disabled=true;g.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var r=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!r.ok)throw Error();var d=await r.json();if(String(d.country_code||"").toUpperCase()!=="ID"){setLocation("all","Outside current Indonesia-first coverage · showing Indonesia-wide jobs.");return}var c=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(c)setLocation(c,"Approximate IP location: "+c+" · not saved.");else setLocation("all","Indonesia detected · choose a city manually for a more specific view.")}catch(e){toast("Approximate location unavailable")}finally{b.disabled=false;g.disabled=false}}
+  function detectGPS(){if(!navigator.geolocation){toast("Browser geolocation is unavailable");return}var b=$("#detectGpsBtn"),i=$("#detectIpBtn");b.disabled=true;i.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(p){var n=nearestCity(p.coords.latitude,p.coords.longitude);setLocation(n.city,"GPS selected: "+n.city+" · precise coordinates are not saved.");b.disabled=false;i.disabled=false},function(){b.disabled=false;i.disabled=false;$("#locationStatus").textContent="GPS permission was not granted · approximate detection is still available.";toast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+  function load(){Promise.all([fetch("vacancy.json?ts="+Date.now(),{cache:"no-store"}),fetch("sources.json?ts="+Date.now(),{cache:"no-store"})]).then(function(rs){return Promise.all([rs[0].json(),rs[1].ok?rs[1].json():Promise.resolve({})])}).then(function(v){var d=v[0],s=v[1];state.jobs=Array.isArray(d.jobs)?d.jobs:[];$("#statJobs").textContent=Number(d.total||state.jobs.length).toLocaleString();$("#statSources").textContent=d.sources?Object.keys(d.sources).length:"—";$("#statExpired").textContent=Number(d.expired_removed||0).toLocaleString();$("#statUpdated").textContent=d.last_updated?String(d.last_updated).split(" ")[0]:"—";(s.buttons||[]).forEach(function(x){if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="un-p")$("#unPLink").href=x.url;if(x.id==="undp-ipsa")$("#undpLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});locations();render()}).catch(function(){$("#resultsMeta").textContent="Dataset unavailable";$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>⚠️</div><h3>Job data is temporarily unavailable</h3><p>The interface is ready, but the latest dataset could not be loaded. Try again shortly.</p><button class='nav-btn primary' onclick='location.reload()'>Refresh</button></div>"})}
+  $("#searchForm").onsubmit=function(e){e.preventDefault();state.query=$("#searchInput").value.trim();state.sort="relevance";$("#sortSelect").value="relevance";render()}
+  $("#searchInput").oninput=function(e){state.query=e.target.value.trim();render()}
+  $("#sortSelect").onchange=function(e){state.sort=e.target.value;render()}
+  $$("[data-filter]").forEach(function(b){b.onclick=function(){state.type=b.getAttribute("data-filter");sync();render()}})
+  $("#resetFilters").onclick=reset;$("#allLink").onclick=reset;$("#detectIpBtn").onclick=detectIP;$("#detectGpsBtn").onclick=detectGPS;
+  $("#savedTop").onclick=function(){state.query="";state.type="all";state.location="all";render();$("#resultsMeta").textContent=state.saved.length+" saved "+(state.saved.length===1?"job":"jobs")+" · saved locally in this browser";$("#jobsList").innerHTML=state.jobs.filter(function(j){return state.saved.indexOf(j.id)>=0}).map(card).join("")||"<div class='empty'><div style='font-size:34px'>♡</div><h3>No saved jobs yet</h3><p>Use the heart button on a job to save it for later.</p></div>"}
+  $$(".side-link[data-filter]").forEach(function(b){b.onclick=function(){state.type=b.getAttribute("data-filter");sync();render()}})
   load();
 })();
 </script>
