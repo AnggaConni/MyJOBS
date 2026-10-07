@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 15:28 UTC",
+  "last_updated": "2026-10-07 15:29 UTC",
   "total": 247,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -8187,8 +8187,8 @@
         "https://toploker.com/loker/aktif-merekrut"
       ],
       "pages_crawled": [
-        "https://toploker.com/loker/aktif-merekrut",
-        "https://toploker.com/loker/daftar"
+        "https://toploker.com/loker/daftar",
+        "https://toploker.com/loker/aktif-merekrut"
       ],
       "proxy_fallback": true,
       "discovered_urls": 0,
@@ -8271,5 +8271,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 53.63
+  "runtime_seconds": 21.28
 }
