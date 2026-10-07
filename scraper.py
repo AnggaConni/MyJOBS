@@ -944,19 +944,15 @@ def fetch_undp_ipsa_oracle_public():
 
     try:
         for _ in range(max_pages):
-            finder = (
-                f"findReqs;siteNumber={UNDP_ORACLE_SITE},"
-                "facetsList=LOCATIONS;WORK_LOCATIONS;TITLES;CATEGORIES;"
-                "ORGANIZATIONS;POSTING_DATES"
-            )
             response = requests.get(
                 list_url,
                 params={
                     "onlyData": "true",
                     "expand": "requisitionList.secondaryLocations",
-                    "finder": finder,
+                    "siteNumber": UNDP_ORACLE_SITE,
                     "limit": page_size,
                     "offset": offset,
+                    "sortBy": "POSTING_DATES_DESC",
                 },
                 headers={
                     "User-Agent": "MyJOBS/1.0",
