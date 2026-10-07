@@ -40,8 +40,8 @@ QUERIES = [
     "lowongan kerja Surabaya",
     "lowongan kerja Bali",
     "lowongan kerja Kalimantan",
-    "lowongan kerja Indonesia remote",
-    "jobs Indonesia",
+    "lowongan kerja Ketapang",
+    "lowongan kerja Pontianak",
 ]
 
 INDONESIA_PROVINCE_BY_CITY = {
@@ -118,6 +118,21 @@ def infer_location(text, fallback="Indonesia"):
     if "global" in blob:
         return "Global"
     return fallback or "Indonesia"
+
+def infer_country(text, explicit=""):
+    explicit = clean(explicit)
+    if explicit:
+        return explicit
+    blob = clean(text).lower()
+    if "indonesia" in blob:
+        return "Indonesia"
+    for city in CITY_ALIASES:
+        if city in blob:
+            return "Indonesia"
+    for province in INDONESIA_REGIONS:
+        if province.lower() in blob:
+            return "Indonesia"
+    return "Global"
 
 def infer_province(text, explicit=""):
     explicit = clean(explicit)
@@ -311,7 +326,8 @@ def normalize_reliefweb(item):
     blob = f"{fields.get('title','')} {fields.get('body','')} {city_name} {country_name}"
     state_info = first_reliefweb_value(fields.get("state") or fields.get("admin1") or fields.get("region") or fields.get("province"))
     state_name = clean(state_info.get("name"))
-    location_fallback = country_name or "Global"
+    country_final = infer_country(blob, explicit=country_name)
+    location_fallback = country_final
     district_name = city_name or infer_location(blob, fallback="")
     province_name = infer_province(blob, explicit=state_name)
     return {
@@ -321,7 +337,7 @@ def normalize_reliefweb(item):
         "location": city_name or country_name or "Indonesia",
         "district": district_name,
         "province": province_name,
-        "country": country_name or "Indonesia",
+        "country": country_final,
         "via": "ReliefWeb",
         "source": "ReliefWeb",
         "source_family": "Humanitarian / UN ecosystem",
@@ -336,7 +352,7 @@ def normalize_reliefweb(item):
         "remote": False,
         "status": clean(fields.get("status") or "current"),
         "ocha": "ocha" in canon(source_name),
-        "country_code": "ID" if country_name.lower() == "indonesia" else "",
+        "country_code": "ID" if country_final == "Indonesia" else "",
     }
 
 def fetch_reliefweb():
