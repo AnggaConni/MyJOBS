@@ -17,6 +17,7 @@ RELIEFWEB_APPNAME = os.getenv("RELIEFWEB_APPNAME", "").strip()
 MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
+STALE_DAYS = int(os.getenv("STALE_DAYS", "7"))
 BASE_URL = "https://www.loker.id"
 RELIEFWEB_URL = "https://api.reliefweb.int/v2/jobs"
 UN_RSS_URL = "https://careers.un.org/jobfeed?isPage=true&language=en"
@@ -85,7 +86,11 @@ def infer_location(text):
     for region in INDONESIA_REGIONS:
         if region.lower() in blob:
             return region
-    return clean(text) or "Indonesia"
+    if any(term in blob for term in ("remote", "home based", "home-based")):
+        return "Remote"
+    if "global" in blob:
+        return "Global"
+    return "Indonesia"
 
 def parse_datetime(value):
     if not value:
@@ -301,10 +306,16 @@ def extract_un_field(text, label, next_labels):
     return clean(match.group(1)) if match else ""
 
 def normalize_un_professional(item):
-    title = xml_text(item.find("title"))
-    link = xml_text(item.find("link"))
-    description = xml_text(item.find("description"))
-    guid = xml_text(item.find("guid"))
+    if isinstance(item, dict):
+        title = clean(item.get("title"))
+        link = clean(item.get("link"))
+        description = clean(item.get("description"))
+        guid = clean(item.get("guid"))
+    else:
+        title = xml_text(item.find("title"))
+        link = xml_text(item.find("link"))
+        description = xml_text(item.find("description"))
+        guid = xml_text(item.find("guid"))
     level_match = re.search(r"\bP-([1-7])\b", description, flags=re.I)
     level = f"P-{level_match.group(1)}" if level_match else ""
     duty_station = extract_un_field(description, "Duty Station", "Staffing Exercise|Date Posted|Deadline")
@@ -456,17 +467,30 @@ def fetch_undp_ipsa_global():
 
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
-    active, expired = [], 0
+    active, expired, stale = [], 0, 0
+
     for job in jobs:
-        if canon(job.get("status")) in {"past", "closed", "expired", "inactive"}:
+        status = canon(job.get("status"))
+        if status in {"past", "closed", "expired", "inactive"}:
             expired += 1
             continue
+
         expires_at = parse_datetime(job.get("expires_at"))
         if expires_at and expires_at <= now:
             expired += 1
             continue
+
+        # Sources without a closing date get a seven-day stale cleanup
+        # only when they provide a parseable posted_at value.
+        if not job.get("expires_at"):
+            posted_at = parse_datetime(job.get("posted_at"))
+            if posted_at and (now - posted_at).days >= STALE_DAYS:
+                stale += 1
+                continue
+
         active.append(job)
-    return active, expired
+
+    return active, expired, stale
 
 def dedupe(jobs):
     unique = {}
@@ -505,7 +529,7 @@ def main():
         sources[name] = health
 
     unique_jobs = dedupe(all_jobs)
-    active_jobs, expired_count = filter_expired(unique_jobs)
+    active_jobs, expired_count, stale_count = filter_expired(unique_jobs)
     errors = sum((s.get("errors", []) for s in sources.values()), [])
 
     output = {
@@ -513,6 +537,8 @@ def main():
         "last_updated": datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M %Z"),
         "total": len(active_jobs),
         "expired_removed": expired_count,
+        "stale_removed": stale_count,
+        "stale_days": STALE_DAYS,
         "status": "ok" if active_jobs else ("error" if errors else "empty"),
         "region": "Indonesia",
         "scope": "Indonesia-first job aggregator",
@@ -526,7 +552,7 @@ def main():
     with open("vacancy.json", "w", encoding="utf-8") as handle:
         json.dump(output, handle, ensure_ascii=False, indent=2)
 
-    print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; status={output['status']}")
+    print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
 
 if __name__ == "__main__":
     main()
