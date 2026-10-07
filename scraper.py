@@ -251,11 +251,16 @@ def fetch_loker():
 
     return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "errors": errors}
 
+def first_reliefweb_value(value):
+    if isinstance(value, list):
+        return value[0] if value else {}
+    return value or {}
+
 def normalize_reliefweb(item):
     fields = item.get("fields") or {}
-    source = fields.get("source") or {}
-    country = fields.get("country") or {}
-    city = fields.get("city") or {}
+    source = first_reliefweb_value(fields.get("source"))
+    country = first_reliefweb_value(fields.get("country"))
+    city = first_reliefweb_value(fields.get("city"))
     source_name = clean(source.get("name") or source.get("shortname"))
     country_name = clean(country.get("name") or country.get("shortname"))
     city_name = clean(city.get("name"))
@@ -379,7 +384,12 @@ def fetch_un_professional_global():
             jobs.append(normalize_un_professional(item))
         return jobs, {"status": "ok", "count": len(jobs), "feed": UN_RSS_URL, "filter": "P-1 through P-7 only", "errors": []}
     except Exception as exc:
-        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
+        message = f"{type(exc).__name__}: {exc}"
+        if isinstance(exc, requests.HTTPError) and getattr(exc.response, "status_code", None) in {401, 403, 404}:
+            return [], {"status": "skipped", "count": 0, "message": "UN Careers feed is not accessible to automated requests", "errors": [message]}
+        if isinstance(exc, ET.ParseError):
+            return [], {"status": "skipped", "count": 0, "message": "UN Careers feed no longer returns parseable XML from this endpoint", "errors": [message]}
+        return [], {"status": "error", "count": 0, "errors": [message]}
 
 def fetch_un_careers():
     try:
