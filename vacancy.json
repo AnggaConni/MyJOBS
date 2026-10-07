@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 12:13 UTC",
-  "total": 238,
+  "last_updated": "2026-10-07 12:47 UTC",
+  "total": 237,
   "expired_removed": 1,
   "stale_removed": 0,
   "stale_days": 7,
@@ -9,6 +9,30 @@
   "region": "Indonesia",
   "scope": "Indonesia-first job aggregator",
   "jobs": [
+    {
+      "id": "job-e9edfd7e92ab1d17",
+      "title": "ICT Systems Integration Technician EFMS/CARLOG",
+      "company": "CTG (Committed To Good)",
+      "location": "Central African Republic",
+      "district": "Central African Republic",
+      "province": "Central African Republic",
+      "country": "Central African Republic",
+      "via": "ReliefWeb",
+      "source": "ReliefWeb",
+      "source_family": "Humanitarian / UN ecosystem",
+      "posted_at": "2026-10-07T12:35:34+00:00",
+      "expires_at": "2026-10-18T00:00:00+00:00",
+      "schedule_type": "Job",
+      "salary": "",
+      "description": "Overview of position CTG is looking for an ICT Systems Integration Technician EFMS/CARLOG to support its client operation, administration, integration, maintenance, and modernization of the UN mission Electronic Fleet Management System (EFMS) utilizing the CARLOG platform. The incumbent will be responsible for the administration and operational support of fleet technology systems, fuel monitoring systems, SQL databases, GPS tracking infrastructure, CAN Bus integrations, and related transport technology solutions. The objective of the assignment is to ensure the reliable, secure, and efficient ",
+      "original_url": "https://reliefweb.int/node/4233034",
+      "search_query": "ReliefWeb jobs",
+      "extensions": [],
+      "remote": false,
+      "status": "published",
+      "ocha": false,
+      "country_code": ""
+    },
     {
       "id": "job-0ea6e45238a978e8",
       "title": "NTD Project Officer - Reaching the Last Mile Fund",
@@ -5672,60 +5696,12 @@
       "status": "published",
       "ocha": false,
       "country_code": ""
-    },
-    {
-      "id": "job-747646b2807a5e25",
-      "title": "Partnerships and Private Sector Engagement Manager Ethiopia",
-      "company": "Norwegian Refugee Council",
-      "location": "Ethiopia",
-      "district": "Global",
-      "province": "Ethiopia",
-      "country": "Ethiopia",
-      "via": "ReliefWeb",
-      "source": "ReliefWeb",
-      "source_family": "Humanitarian / UN ecosystem",
-      "posted_at": "2026-10-02T07:15:32+00:00",
-      "expires_at": "2026-10-18T00:00:00+00:00",
-      "schedule_type": "Job",
-      "salary": "",
-      "description": "**What we’re looking for:** NRC Ethiopia is looking for an experienced **Partnerships and Private Sector Engagement Manager** to lead and strengthen how we build, manage, and grow meaningful partnerships. In this role, you will play a key part in developing and implementing NRC Ethiopia’s Partnership Strategy and related SOPs, ensuring that our partnership approach is aligned with NRC’s vision, strategic priorities, policies, and commitment to localisation. You will help create a consistent and coordinated approach to partnerships across the Country Office and, where needed, Area Offices. You ",
-      "original_url": "https://reliefweb.int/node/4232334",
-      "search_query": "ReliefWeb jobs",
-      "extensions": [],
-      "remote": false,
-      "status": "published",
-      "ocha": false,
-      "country_code": ""
-    },
-    {
-      "id": "job-adff6c6071ba6541",
-      "title": "International Development & Humanitarian Assistance Internship",
-      "company": "Effaced Inc",
-      "location": "Indonesia",
-      "district": "Remote",
-      "province": "",
-      "country": "Indonesia",
-      "via": "ReliefWeb",
-      "source": "ReliefWeb",
-      "source_family": "Humanitarian / UN ecosystem",
-      "posted_at": "2026-10-02T06:26:58+00:00",
-      "expires_at": "2026-10-09T00:00:00+00:00",
-      "schedule_type": "Internship",
-      "salary": "",
-      "description": "**Introduction** Do you enjoy building meaningful relationships with colleagues and partners across the globe? Are you motivated by the opportunity to help shape a growing company from an early stage? Would you like to learn from evaluators, researchers, and management consultants with decades of experience in low- and middle-income countries and a shared commitment to the common good? If so, Effaced may be the right place for you. Effaced is offering two to three internships for entry-level professionals interested in business development, research, and operational support within our internat",
-      "original_url": "https://reliefweb.int/node/4232279",
-      "search_query": "ReliefWeb jobs",
-      "extensions": [],
-      "remote": false,
-      "status": "published",
-      "ocha": false,
-      "country_code": ""
     }
   ],
   "summary": {
     "by_location": {
-      "Global": 77,
-      "Remote": 40,
+      "Global": 76,
+      "Remote": 39,
       "Venezuela (Bolivarian Republic of)": 11,
       "Syrian Arab Republic": 10,
       "France": 7,
@@ -5739,6 +5715,7 @@
       "Sudan": 3,
       "Togo": 3,
       "Sierra Leone": 3,
+      "Central African Republic": 2,
       "Libya": 2,
       "Afghanistan": 2,
       "Senegal": 2,
@@ -5772,7 +5749,6 @@
       "Somalia": 1,
       "Algeria": 1,
       "Zimbabwe": 1,
-      "Central African Republic": 1,
       "South Africa": 1,
       "Burkina Faso": 1,
       "Bangladesh": 1,
@@ -5781,9 +5757,9 @@
       "Egypt": 1
     },
     "by_source": {
-      "ReliefWeb": 238
+      "ReliefWeb": 237
     },
-    "humanitarian_jobs": 238,
+    "humanitarian_jobs": 237,
     "un_jobs": 0,
     "un_p_jobs": 0,
     "undp_ipsa_jobs": 0
@@ -5808,9 +5784,9 @@
     },
     "ReliefWeb": {
       "status": "ok",
-      "count": 239,
+      "count": 238,
       "api_results": 250,
-      "excluded_non_job": 11,
+      "excluded_non_job": 12,
       "errors": []
     },
     "UN Careers — P-level": {
@@ -5847,5 +5823,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 3.83
+  "runtime_seconds": 3.17
 }
