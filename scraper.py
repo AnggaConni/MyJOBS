@@ -2443,6 +2443,7 @@ def fetch_un_professional_unvacancies():
         "https://unvacancies.org/jobs/grade/p-5",
         "https://unvacancies.org/jobs/grade/p-6",
         "https://unvacancies.org/jobs/grade/p-7",
+    ]
 
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
