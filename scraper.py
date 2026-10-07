@@ -1473,7 +1473,7 @@ def parse_unvacancies_undp_card(anchor):
     grade = grade_match.group(1).upper()
 
     location_match = re.search(
-        r"UNDP\s*[·|]\s*(.+?)(?=\s+UNDP Tiers\b|\s+Nationals\b|\s+Locally recruited\b|\s+Closes\b|\s+Posted\b|$)",
+        r"UNDP\s*[·|]\s*(.+?)(?=\s+UNDP Tiers\b|\s+Nationals\b|\s+Locally recruited\b|\s+Grade\b|\s+Closes\b|\s+Posted\b|$)",
         context,
         flags=re.I,
     )
