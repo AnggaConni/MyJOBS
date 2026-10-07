@@ -1478,15 +1478,15 @@ def fetch_undp_ipsa_oracle_public():
     seen = set()
     jobs = []
     errors = []
-    candidate_rows = 0
+    listed_rows = 0
+    detail_attempts = 0
+    row_preview = []
 
-    # Oracle's public Candidate Experience finder is more reliable when we
-    # retrieve the current job list and filter IPSA locally. The public API
-    # documents Keyword as a finder variable, but CI responses for keyword=IPSA
-    # can be empty even while the live site exposes International PSA jobs.
-    # The live site currently exposes International Personnel Service Agreement
-    # as a vacancy type, so use that as the discovery gate and inspect the
-    # requisition details for the authoritative grade.
+    # The public Oracle finder reliably returns the current job list when we
+    # do not inject the keyword filter. We therefore inspect current rows and
+    # let the authoritative requisition detail decide whether a vacancy is
+    # actually IPSA. This avoids losing IPSA posts when Oracle's finder search
+    # semantics differ between environments.
     facets_list = (
         "LOCATIONS;WORK_LOCATIONS;WORKPLACE_TYPES;TITLES;"
         "CATEGORIES;ORGANIZATIONS;POSTING_DATES;FLEX_FIELDS"
@@ -1534,7 +1534,7 @@ def fetch_undp_ipsa_oracle_public():
         if not rows:
             break
 
-        candidates = []
+        unique_rows = []
         for row in rows:
             rid = clean(
                 row.get("Id")
@@ -1544,34 +1544,21 @@ def fetch_undp_ipsa_oracle_public():
             if not rid or rid in seen:
                 continue
             seen.add(rid)
+            unique_rows.append((rid, row))
 
-            row_blob = " ".join(
-                clean(row.get(key))
-                for key in (
-                    "Title",
-                    "ShortDescriptionStr",
-                    "ContractType",
-                    "JobType",
-                    "WorkerType",
-                    "VacancyType",
-                    "CategoryAndLevel",
-                    "JobGrade",
-                    "JobLevel",
-                )
-                if clean(row.get(key))
-            )
-            contract_type = canon(
-                row.get("ContractType")
-                or row.get("JobType")
-                or row.get("VacancyType")
-            )
-            looks_international_psa = (
-                "international personnel service agreement" in contract_type
-                or bool(re.search(r"\bIPSA\s*-?\d+\b", row_blob, flags=re.I))
-            )
-            if looks_international_psa:
-                candidates.append((rid, row))
-        candidate_rows += len(candidates)
+        listed_rows += len(unique_rows)
+
+        if not row_preview:
+            for rid, row in unique_rows[:12]:
+                row_preview.append({
+                    "id": rid,
+                    "title": clean(row.get("Title")),
+                    "contract_type": clean(row.get("ContractType")),
+                    "job_type": clean(row.get("JobType")),
+                    "worker_type": clean(row.get("WorkerType")),
+                    "vacancy_type": clean(row.get("VacancyType")),
+                    "short_description": clean(row.get("ShortDescriptionStr"))[:180],
+                })
 
         def get_detail(pair):
             rid, row = pair
@@ -1580,8 +1567,9 @@ def fetch_undp_ipsa_oracle_public():
             except Exception as exc:
                 return rid, row, None, f"{rid}: {type(exc).__name__}: {exc}"
 
-        with ThreadPoolExecutor(max_workers=6) as executor:
-            futures = [executor.submit(get_detail, pair) for pair in candidates]
+        detail_attempts += len(unique_rows)
+        with ThreadPoolExecutor(max_workers=12) as executor:
+            futures = [executor.submit(get_detail, pair) for pair in unique_rows]
             for future in as_completed(futures):
                 rid, row, detail, err = future.result()
                 if err:
@@ -1605,11 +1593,13 @@ def fetch_undp_ipsa_oracle_public():
     return jobs, {
         "status": "ok" if jobs else ("error" if errors else "empty"),
         "count": len(jobs),
-        "candidate_rows": candidate_rows,
+        "listed_rows": listed_rows,
+        "detail_attempts": detail_attempts,
         "endpoint": list_url,
-        "filter": "International Personnel Service Agreement / IPSA grade",
+        "filter": "authoritative IPSA grade from current Oracle requisition details",
         "finder": "findReqs;siteNumber=CX_1;current-job-list",
         "site": UNDP_ORACLE_SITE,
+        "row_preview": row_preview,
         "errors": errors[:25],
     }
 
