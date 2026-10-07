@@ -295,6 +295,65 @@ def fetch_reliefweb():
 def xml_text(element):
     return clean(" ".join(element.itertext())) if element is not None else ""
 
+def extract_un_field(text, label, next_labels):
+    pattern = rf"{re.escape(label)}\s*:\s*(.+?)(?=\s+(?:{next_labels})\s*:|$)"
+    match = re.search(pattern, text, flags=re.I)
+    return clean(match.group(1)) if match else ""
+
+def normalize_un_professional(item):
+    title = xml_text(item.find("title"))
+    link = xml_text(item.find("link"))
+    description = xml_text(item.find("description"))
+    guid = xml_text(item.find("guid"))
+    level_match = re.search(r"\bP-([1-7])\b", description, flags=re.I)
+    level = f"P-{level_match.group(1)}" if level_match else ""
+    duty_station = extract_un_field(description, "Duty Station", "Staffing Exercise|Date Posted|Deadline")
+    posted = extract_un_field(description, "Date Posted", "Deadline|Job ID|Job Network")
+    deadline = extract_un_field(description, "Deadline", "Job ID|Job Network|Job Family|Category")
+    office = extract_un_field(description, "Department/Office", "Duty Station|Staffing Exercise|Date Posted|Deadline")
+    network = extract_un_field(description, "Job Network", "Job Family|Category|Recruitment Type|Department/Office")
+    family = extract_un_field(description, "Job Family", "Category|Recruitment Type|Department/Office")
+    return {
+        "id": make_id("UN P", guid or link, title),
+        "title": title,
+        "company": "United Nations Secretariat",
+        "location": duty_station or "Global",
+        "district": duty_station or "Global",
+        "province": "",
+        "country": "Global",
+        "via": "UN Careers",
+        "source": "UN Careers — P-level",
+        "source_family": "UN Secretariat — Professional",
+        "posted_at": posted,
+        "expires_at": deadline,
+        "schedule_type": level,
+        "salary": "",
+        "description": description[:700],
+        "original_url": link or guid or "https://careers.un.org/job-openings",
+        "search_query": "UN global P-level",
+        "extensions": [x for x in [level, network, family, office] if x],
+        "remote": "home-based" in description.lower(),
+        "status": "current",
+        "contract_level": level,
+    }
+
+def fetch_un_professional_global():
+    try:
+        response = requests.get(UN_RSS_URL, headers={"User-Agent": "MyJOBS/1.0"}, timeout=TIMEOUT)
+        response.raise_for_status()
+        root = ET.fromstring(response.content)
+        jobs = []
+        for item in root.findall(".//item"):
+            description = xml_text(item.find("description"))
+            category_ok = "Professional and Higher Categories" in description
+            level_ok = bool(re.search(r"\bP-[1-7]\b", description, flags=re.I))
+            if not (category_ok and level_ok):
+                continue
+            jobs.append(normalize_un_professional(item))
+        return jobs, {"status": "ok", "count": len(jobs), "feed": UN_RSS_URL, "filter": "P-1 through P-7 only", "errors": []}
+    except Exception as exc:
+        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
+
 def fetch_un_careers():
     try:
         response = requests.get(UN_RSS_URL, headers={"User-Agent": "MyJOBS/1.0"}, timeout=TIMEOUT)
@@ -343,6 +402,58 @@ def fetch_un_careers():
     except Exception as exc:
         return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
 
+UNDP_URL = "https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100"
+
+def parse_undp_job_anchor(anchor):
+    title_text = clean(anchor.get_text(" ", strip=True))
+    href = urljoin("https://jobs.undp.org/", clean(anchor.get("href")))
+    level = re.search(r"\b(IPSA-\d+)\b", title_text, flags=re.I)
+    if not level:
+        return None
+    apply_by = re.search(r"Apply by\s+([A-Z][a-z]{2}-\d{1,2}-\d{2})", title_text, flags=re.I)
+    agency = re.search(r"Agency\s+(.+?)\s+Location\s+", title_text, flags=re.I)
+    location = re.search(r"Location\s+(.+)$", title_text, flags=re.I)
+    job_title = re.sub(r"^Job Title\s*", "", title_text, flags=re.I)
+    job_title = re.split(r"\s+Post level\s+", job_title, flags=re.I)[0]
+    return {
+        "id": make_id("UNDP IPSA", href, job_title),
+        "title": job_title,
+        "company": clean(agency.group(1)) if agency else "UNDP",
+        "location": clean(location.group(1)) if location else "Global",
+        "district": clean(location.group(1)) if location else "Global",
+        "province": "",
+        "country": "Global",
+        "via": "UNDP Careers",
+        "source": "UNDP — IPSA",
+        "source_family": "UN Development Programme — International",
+        "posted_at": "",
+        "expires_at": clean(apply_by.group(1)) if apply_by else "",
+        "schedule_type": clean(level.group(1)).upper(),
+        "salary": "",
+        "description": title_text[:700],
+        "original_url": href,
+        "search_query": "UNDP IPSA global",
+        "extensions": [clean(level.group(1)).upper()],
+        "remote": "home based" in title_text.lower(),
+        "status": "current",
+        "contract_level": clean(level.group(1)).upper(),
+    }
+
+def fetch_undp_ipsa_global():
+    try:
+        response = requests.get(UNDP_URL, headers={"User-Agent": "MyJOBS/1.0"}, timeout=TIMEOUT)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        jobs = []
+        for anchor in soup.select('a[href*="cj_view_job.cfm"]'):
+            job = parse_undp_job_anchor(anchor)
+            if job:
+                jobs.append(job)
+        unique = dedupe(jobs)
+        return unique, {"status": "ok" if unique else "empty", "count": len(unique), "url": UNDP_URL, "filter": "IPSA only", "errors": []}
+    except Exception as exc:
+        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
+
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
     active, expired = [], 0
@@ -372,7 +483,9 @@ def summary(jobs):
         "by_location": dict(Counter(j.get("district", "Indonesia") for j in jobs).most_common()),
         "by_source": dict(Counter(j.get("source", "Unknown") for j in jobs).most_common()),
         "humanitarian_jobs": sum("humanitarian" in canon(j.get("source_family")) or j.get("source") == "ReliefWeb" for j in jobs),
-        "un_jobs": sum(j.get("source") == "UN Careers" for j in jobs),
+        "un_jobs": sum(str(j.get("source", "")).startswith("UN Careers") for j in jobs),
+        "un_p_jobs": sum(j.get("source") == "UN Careers — P-level" for j in jobs),
+        "undp_ipsa_jobs": sum(j.get("source") == "UNDP — IPSA" for j in jobs),
     }
 
 def main():
@@ -383,7 +496,9 @@ def main():
         (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
         (fetch_reliefweb, "ReliefWeb"),
-        (fetch_un_careers, "UN Careers"),
+        (fetch_un_professional_global, "UN Careers — P-level"),
+        (fetch_undp_ipsa_global, "UNDP — IPSA"),
+        (fetch_un_careers, "UN Careers — Indonesia"),
     ]:
         jobs, health = fetcher()
         all_jobs.extend(jobs)
