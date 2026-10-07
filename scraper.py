@@ -2215,19 +2215,47 @@ def fetch_undp_ipsa_unvacancies():
     jobs = []
     detail_urls = set()
     preferred_detail_urls = set()
-    page_urls = [
+    page_queue = [
+        "https://unvacancies.org/jobs/organization/undp",
         "https://unvacancies.org/organizations/undp",
-        "https://unvacancies.org/explore?organization=UNDP&q=IPSA",
-        "https://unvacancies.org/explore?organization=UNDP&query=IPSA",
-        "https://unvacancies.org/explore?organization=UNDP&keyword=IPSA",
-        "https://unvacancies.org/explore?organization=UNDP&contract=International%20PSA",
     ]
+    seen_pages = set()
+    country_pages = set()
     headers = {
         "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
         "Accept": "text/html,application/xhtml+xml",
     }
 
-    for page_url in page_urls:
+    def collect_page_links(text):
+        soup = BeautifulSoup(text, "html.parser")
+        for anchor in soup.select('a[href*="/jobs/"]'):
+            href = clean(anchor.get("href"))
+            if not href:
+                continue
+
+            candidate_url = urljoin("https://unvacancies.org", href).split("#", 1)[0]
+            path = urlparse(candidate_url).path
+
+            if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", path, flags=re.I):
+                detail_urls.add(candidate_url)
+                context = clean(" ".join([
+                    anchor.get_text(" ", strip=True),
+                    anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
+                    anchor.parent.parent.get_text(" ", strip=True)
+                    if anchor.parent and anchor.parent.parent else "",
+                ]))
+                if re.search(r"IPSA\s*[-–—.]?\s*\d+", context, flags=re.I):
+                    preferred_detail_urls.add(candidate_url)
+
+            if re.match(r"^/jobs/organization/undp/[a-z0-9-]+/?$", path, flags=re.I):
+                country_pages.add(candidate_url)
+
+    while page_queue and len(seen_pages) < 70:
+        page_url = page_queue.pop(0)
+        if page_url in seen_pages:
+            continue
+        seen_pages.add(page_url)
+
         try:
             text, _ = fetch_public_text(
                 page_url,
@@ -2235,69 +2263,43 @@ def fetch_undp_ipsa_unvacancies():
                 jina_fallback=True,
                 jina_first=False,
             )
-            soup = BeautifulSoup(text, "html.parser")
-
-            for anchor in soup.select('a[href*="/jobs/"]'):
-                href = clean(anchor.get("href"))
-                if href:
-                    candidate_url = urljoin("https://unvacancies.org", href)
-                    if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", candidate_url, flags=re.I):
-                        detail_urls.add(candidate_url)
-                        context = clean(
-                            " ".join([
-                                anchor.get_text(" ", strip=True),
-                                anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
-                                anchor.parent.parent.get_text(" ", strip=True)
-                                if anchor.parent and anchor.parent.parent else "",
-                            ])
-                        )
-                        if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
-                            preferred_detail_urls.add(candidate_url)
-
-                job = parse_unvacancies_undp_card(anchor)
-                if job:
-                    jobs.append(job)
-
-            # Jina often returns Markdown. Select links whose surrounding lines
-            # explicitly mention an IPSA grade.
-            raw_lines = [clean(x) for x in text.splitlines() if clean(x)]
-            for idx, line in enumerate(raw_lines):
-                found_urls = re.findall(
-                    r'https?://unvacancies\.org/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*|/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*',
-                    line,
-                    flags=re.I,
-                )
-                if not found_urls:
-                    continue
-                context = " ".join(raw_lines[max(0, idx-2):min(len(raw_lines), idx+6)])
-                for href in found_urls:
-                    candidate_url = urljoin("https://unvacancies.org", href)
-                    detail_urls.add(candidate_url)
-                    if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
-                        preferred_detail_urls.add(candidate_url)
-
+            before_countries = len(country_pages)
+            collect_page_links(text)
+            if len(country_pages) > before_countries:
+                for country_url in sorted(country_pages):
+                    if country_url not in seen_pages and country_url not in page_queue:
+                        page_queue.append(country_url)
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-    # Search-engine fallback: unvacancies' own filter pages can be
-    # incomplete when rendered through a text proxy. DDG gives us fresh
-    # detail URLs without requiring a paid API.
-    ddg_queries = [
+    # Search-engine fallback supplements country discovery when the organization
+    # index is rendered client-side.
+    for grade_query in (
+        'site:unvacancies.org/jobs/ "UNDP" "IPSA-9"',
         'site:unvacancies.org/jobs/ "UNDP" "IPSA-10"',
         'site:unvacancies.org/jobs/ "UNDP" "IPSA-11"',
         'site:unvacancies.org/jobs/ "UNDP" "IPSA-12"',
-        'site:unvacancies.org/jobs/ "UNDP" "IPSA-9"',
-    ]
-    for query in ddg_queries:
-        for candidate in search_duckduckgo_links(
-            query,
-            r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
-        ):
-            normalized_url = candidate.split("#", 1)[0]
-            detail_urls.add(normalized_url)
-            preferred_detail_urls.add(normalized_url)
+    ):
+        try:
+            for candidate in search_duckduckgo_links(
+                grade_query,
+                r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
+            ):
+                candidate = clean(candidate).split("#", 1)[0]
+                detail_urls.add(candidate)
+                preferred_detail_urls.add(candidate)
+            for result in search_bing_results(
+                grade_query,
+                r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
+            ):
+                candidate = clean(result.get("url")).split("#", 1)[0]
+                if candidate:
+                    detail_urls.add(candidate)
+                    preferred_detail_urls.add(candidate)
+        except Exception as exc:
+            errors.append(f"{grade_query}: {type(exc).__name__}: {exc}")
 
-    selected = list(dict.fromkeys(list(preferred_detail_urls) + list(detail_urls)))[:120]
+    selected = list(dict.fromkeys(list(preferred_detail_urls) + list(detail_urls)))[:250]
     detail_urls = set(selected)
 
     def fetch_detail(source_url):
@@ -2340,16 +2342,16 @@ def fetch_undp_ipsa_unvacancies():
     return unique, {
         "status": "ok" if unique else ("error" if errors else "empty"),
         "count": len(unique),
-        "queries": page_urls,
-        "card_jobs": len(jobs),
+        "pages_crawled": len(seen_pages),
+        "country_pages_discovered": len(country_pages),
         "detail_urls": len(detail_urls),
         "preferred_detail_urls": len(preferred_detail_urls),
-        "ddg_queries": ddg_queries,
         "parsed_details": parsed_details,
         "failed_detail_samples": failed_detail_samples,
         "errors": errors[:25],
-        "source": "unvacancies.org (UNDP official application links)",
+        "source": "unvacancies.org (UNDP organization + country mirrors with official application links)",
     }
+
 
 
 def parse_unvacancies_un_professional_detail(text, source_url):
@@ -2471,17 +2473,10 @@ def fetch_un_professional_unvacancies():
                 if candidate in seen:
                     continue
 
-                context = clean(" ".join([
-                    anchor.get_text(" ", strip=True),
-                    anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
-                    anchor.parent.parent.get_text(" ", strip=True)
-                    if anchor.parent and anchor.parent.parent else "",
-                ]))
-                if not extract_un_p_level(context):
-                    continue
-                if not re.search(r"UN Secretariat|United Nations Secretariat", context, flags=re.I):
-                    continue
-
+                # Do not rely on card context for grade/organization:
+                # some rendered variants omit those fields from the anchor's
+                # immediate parent. Let the detail parser make the authoritative
+                # P-level + UN Secretariat decision.
                 seen.add(candidate)
                 detail_urls.append(candidate)
 
