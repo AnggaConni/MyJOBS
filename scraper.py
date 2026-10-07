@@ -2733,6 +2733,20 @@ def main():
         json.dump(output, handle, ensure_ascii=False, indent=2)
 
     print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
+    for source_name in (
+        "UN Careers — P-level",
+        "UN Careers — P-level / Apify",
+        "UN Careers — P-level / Search",
+        "UN Careers — P-level / unvacancies",
+        "UNDP — IPSA",
+        "UNDP — IPSA / Bing Oracle",
+        "UNDP — IPSA / Oracle REST",
+        "UNDP — IPSA / Oracle HTML",
+        "UNDP — IPSA / unvacancies",
+    ):
+        if source_name in sources:
+            health = sources[source_name]
+            print(f"MyJOBS source: {source_name} count={health.get('count', 0)} status={health.get('status', '')}")
 
 if __name__ == "__main__":
     main()
