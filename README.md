@@ -20,6 +20,8 @@ The aggregator is **Indonesia-first**. Location detection in the frontend helps 
 
 Jobs are filtered out when the source provides an explicit expired/closed/past/inactive status or when an explicit closing date has passed.
 
+For sources without an explicit closing date, MyJOBS removes a listing after **7 days** when a trustworthy `posted_at` date/age is available. Listings with no parseable date are retained rather than silently discarded.
+
 MyJOBS does not invent deadlines for sources that do not provide one.
 
 ## Location UX
