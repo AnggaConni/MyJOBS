@@ -1,6 +1,15 @@
 import unittest
+from datetime import datetime, timezone
 
-from scraper import canon, city_of, dedupe, make_id, normalize_google
+from scraper import (
+    canon,
+    city_of,
+    dedupe,
+    filter_expired,
+    make_id,
+    normalize_google,
+    parse_datetime,
+)
 
 
 class ScraperTests(unittest.TestCase):
@@ -14,6 +23,18 @@ class ScraperTests(unittest.TestCase):
 
     def test_stable_id(self):
         self.assertEqual(make_id("A", "B"), make_id("A", "B"))
+
+    def test_date_parser(self):
+        parsed = parse_datetime("2026-10-01T00:00:00Z")
+        self.assertEqual(parsed, datetime(2026, 10, 1, tzinfo=timezone.utc))
+
+    def test_expiry_filter(self):
+        active, expired = filter_expired([
+            {"title": "Expired", "status": "current", "expires_at": "2020-01-01"},
+            {"title": "Active", "status": "current", "expires_at": ""},
+        ])
+        self.assertEqual(expired, 1)
+        self.assertEqual([job["title"] for job in active], ["Active"])
 
     def test_google_normalization(self):
         job = normalize_google(
