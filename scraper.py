@@ -464,6 +464,27 @@ def extract_un_field(text, label, next_labels):
     match = re.search(pattern, text, flags=re.I)
     return clean(match.group(1)) if match else ""
 
+def parse_key_value_fields(text):
+    text = clean(text)
+    fields = {}
+    labels = [
+        "Job ID", "Job Network", "Job Family", "Category and Level",
+        "Recruitment Type", "Duty Station", "Department/Office",
+        "Date Posted", "Deadline", "Post level", "Apply by", "Agency",
+        "Location", "Country", "City", "Experience", "Type"
+    ]
+    for index, label in enumerate(labels):
+        next_labels = "|".join(re.escape(x) for x in labels[index + 1:])
+        if next_labels:
+            pattern = rf"{re.escape(label)}\s*:\s*(.+?)\s+(?:{next_labels})\s*:|{re.escape(label)}\s*:\s*(.+)$"
+        else:
+            pattern = rf"{re.escape(label)}\s*:\s*(.+)$"
+        match = re.search(pattern, text, flags=re.I)
+        if match:
+            value = match.group(1) or (match.group(2) if match.lastindex and match.lastindex >= 2 else "")
+            fields[label] = clean(value)
+    return fields
+
 def normalize_un_professional(item):
     if isinstance(item, dict):
         title = clean(item.get("title"))
@@ -483,6 +504,9 @@ def normalize_un_professional(item):
     office = extract_un_field(description, "Department/Office", "Duty Station|Staffing Exercise|Date Posted|Deadline")
     network = extract_un_field(description, "Job Network", "Job Family|Category|Recruitment Type|Department/Office")
     family = extract_un_field(description, "Job Family", "Category|Recruitment Type|Department/Office")
+    fields = parse_key_value_fields(description)
+    level_match = re.search(r"\bP-([1-7])\b", description, flags=re.I)
+    level = f"P-{level_match.group(1)}" if level_match else clean(fields.get("Category and Level"))
     return {
         "id": make_id("UN P", guid or link, title),
         "title": title,
@@ -498,7 +522,20 @@ def normalize_un_professional(item):
         "expires_at": deadline,
         "schedule_type": level,
         "salary": "",
-        "description": description[:700],
+        "description": description,
+        "details": make_source_details(
+            "UN Careers",
+            job_id=fields.get("Job ID"),
+            job_network=fields.get("Job Network"),
+            job_family=fields.get("Job Family"),
+            category_level=fields.get("Category and Level"),
+            recruitment_type=fields.get("Recruitment Type"),
+            duty_station=fields.get("Duty Station"),
+            department_office=fields.get("Department/Office"),
+            date_posted=fields.get("Date Posted"),
+            deadline=fields.get("Deadline"),
+            level=level,
+        ),
         "original_url": link or guid or "https://careers.un.org/job-openings",
         "search_query": "UN global P-level",
         "extensions": [x for x in [level, network, family, office] if x],
