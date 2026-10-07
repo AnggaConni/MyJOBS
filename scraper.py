@@ -22,7 +22,15 @@ MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
 STALE_DAYS = int(os.getenv("STALE_DAYS", "7"))
+TOPLOKER_PAGE_OFFSETS = [
+    int(value.strip())
+    for value in os.getenv("TOPLOKER_PAGE_OFFSETS", "0,12,24,36").split(",")
+    if value.strip().isdigit()
+]
+TOPLOKER_MAX_JOBS = int(os.getenv("TOPLOKER_MAX_JOBS", "80"))
 BASE_URL = "https://www.loker.id"
+TOPLOKER_BASE = "https://toploker.com"
+TOPLOKER_LIST_URL = f"{TOPLOKER_BASE}/loker/daftar"
 RELIEFWEB_URL = "https://api.reliefweb.int/v2/jobs"
 UN_RSS_URL = "https://careers.un.org/jobfeed?isPage=true&language=en"
 
@@ -369,6 +377,182 @@ def fetch_loker():
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
     return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "errors": errors}
+
+
+def normalize_toploker(item):
+    title = clean(item.get("title"))
+    company = clean(item.get("company")) or "TopLoker employer"
+    location = clean(item.get("location"))
+    posted_at = clean(item.get("posted_at"))
+    expires_at = clean(item.get("expires_at"))
+    description = clean(item.get("description"))
+    requirements = clean(item.get("requirements"))
+    status_type = clean(item.get("schedule_type"))
+    url = clean(item.get("url"))
+
+    full_description = "\n\n".join(
+        part for part in [description, requirements] if part
+    )
+
+    return {
+        "id": make_id("TopLoker", title, company, location, url),
+        "title": title,
+        "company": company,
+        "location": location or "Indonesia",
+        "district": infer_location(location or title, fallback=""),
+        "province": infer_province(location or title),
+        "country": "Indonesia",
+        "via": "TopLoker",
+        "source": "TopLoker",
+        "source_family": "Job Portal — Indonesia",
+        "posted_at": posted_at or "Unknown",
+        "expires_at": expires_at,
+        "schedule_type": status_type,
+        "salary": clean(item.get("salary")),
+        "description": full_description or "Open the original source for full job details.",
+        "original_url": url or "#",
+        "search_query": "TopLoker",
+        "extensions": [clean(x) for x in (item.get("extensions") or []) if clean(x)],
+        "remote": "remote" in canon(location) or "remote" in canon(full_description),
+        "status": "current",
+        "country_code": "ID",
+        "details": make_source_details(
+            "TopLoker",
+            education=clean(item.get("education")),
+            schedule=status_type,
+            deadline=expires_at,
+            location=location,
+        ),
+    }
+
+
+def parse_toploker_detail(html, url):
+    soup = BeautifulSoup(html, "html.parser")
+    lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
+
+    def next_nonempty(start_index):
+        for idx in range(start_index + 1, min(len(lines), start_index + 8)):
+            value = clean(lines[idx])
+            if value and value not in {":", "-", "—"}:
+                return value
+        return ""
+
+    company = ""
+    title = ""
+    marker = next((idx for idx, value in enumerate(lines) if canon(value) == "membuka lowongan"), -1)
+    if marker >= 0:
+        title = next_nonempty(marker)
+        if marker > 0:
+            company = clean(lines[marker - 1])
+    if not title:
+        h1 = soup.find("h1")
+        title = clean(h1.get_text(" ", strip=True)) if h1 else ""
+
+    text_blob = " ".join(lines)
+    deadline_match = re.search(
+        r"Batas\s+Lamaran\s*:?\s*([0-9]{1,2}\s+[A-Za-z]+\s+[0-9]{4})",
+        text_blob,
+        flags=re.I,
+    )
+    location_match = re.search(
+        r"Lokasi\s+Kerja\s*:?\s*(.+?)(?=\s+Deskripsi\s+Pekerjaan\b)",
+        text_blob,
+        flags=re.I,
+    )
+    schedule_match = re.search(
+        r"Status\s+Kerja\s*:?\s*(.+?)(?=\s+Batas\s+Lamaran\b)",
+        text_blob,
+        flags=re.I,
+    )
+
+    def section_between(start_label, end_label):
+        try:
+            start = next(i for i, value in enumerate(lines) if canon(value) == canon(start_label))
+        except StopIteration:
+            return ""
+        try:
+            end = next(i for i in range(start + 1, len(lines)) if canon(lines[i]) == canon(end_label))
+        except StopIteration:
+            end = len(lines)
+        return clean(" ".join(lines[start + 1:end]))
+
+    description = section_between("Deskripsi Pekerjaan", "Syarat Pekerjaan")
+    requirements = section_between("Syarat Pekerjaan", "Kirim Lamaran")
+
+    posted = ""
+    date_match = re.match(r"https?://[^/]+/lowongan/(\d{4}-\d{2}-\d{2})!", url)
+    if date_match:
+        posted = date_match.group(1)
+
+    return normalize_toploker({
+        "title": title,
+        "company": company,
+        "location": clean(location_match.group(1)) if location_match else "",
+        "posted_at": posted,
+        "expires_at": clean(deadline_match.group(1)) if deadline_match else "",
+        "description": description,
+        "requirements": requirements,
+        "schedule_type": clean(schedule_match.group(1)) if schedule_match else "",
+        "url": url,
+    })
+
+
+def fetch_toploker():
+    errors = []
+    detail_urls = []
+    seen_urls = set()
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
+
+    try:
+        for offset in TOPLOKER_PAGE_OFFSETS:
+            url = TOPLOKER_LIST_URL if offset == 0 else f"{TOPLOKER_LIST_URL}/{offset}"
+            response = requests.get(url, headers=headers, timeout=TIMEOUT)
+            response.raise_for_status()
+            soup = BeautifulSoup(response.text, "html.parser")
+            for anchor in soup.select('a[href*="/lowongan/"]'):
+                href = clean(anchor.get("href"))
+                if not href:
+                    continue
+                job_url = urljoin(TOPLOKER_BASE, href).split("#", 1)[0]
+                if "/lowongan/" not in urlparse(job_url).path:
+                    continue
+                if job_url not in seen_urls:
+                    seen_urls.add(job_url)
+                    detail_urls.append(job_url)
+                if len(detail_urls) >= TOPLOKER_MAX_JOBS:
+                    break
+            if len(detail_urls) >= TOPLOKER_MAX_JOBS:
+                break
+    except Exception as exc:
+        errors.append(f"list discovery: {type(exc).__name__}: {exc}")
+
+    jobs = []
+
+    def fetch_detail(job_url):
+        try:
+            response = requests.get(job_url, headers=headers, timeout=TIMEOUT)
+            response.raise_for_status()
+            return parse_toploker_detail(response.text, job_url), None
+        except Exception as exc:
+            return None, f"{job_url}: {type(exc).__name__}: {exc}"
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        futures = [executor.submit(fetch_detail, job_url) for job_url in detail_urls]
+        for future in as_completed(futures):
+            job, error = future.result()
+            if error:
+                errors.append(error)
+            elif job and job.get("title"):
+                jobs.append(job)
+
+    unique = dedupe(jobs)
+    return unique, {
+        "status": "ok" if unique else ("error" if errors else "empty"),
+        "count": len(unique),
+        "pages": TOPLOKER_PAGE_OFFSETS,
+        "discovered_urls": len(detail_urls),
+        "errors": errors[:25],
+    }
 
 def first_reliefweb_value(value):
     if isinstance(value, list):
@@ -831,19 +1015,66 @@ def fetch_un_professional_apify():
         }
 
 def normalize_undp_oracle(item):
-    title = clean(item.get("title"))
-    description = clean(item.get("descriptionText") or item.get("shortDescription"))
-    req_id = clean(item.get("requisitionId"))
-    url = clean(item.get("url"))
-    location = clean(item.get("primaryLocation"))
-    country_code = clean(item.get("primaryLocationCountry"))
-    posting_date = clean(item.get("postingDate"))
-    closing_date = clean(item.get("postingEndDate"))
-    salary_text = clean(item.get("salaryText"))
-    qualifications = clean(item.get("qualificationsText"))
-    responsibilities = clean(item.get("responsibilitiesText"))
+    title = clean(item.get("title") or item.get("Title") or item.get("name"))
+    description = clean(
+        item.get("descriptionText")
+        or item.get("shortDescription")
+        or item.get("ExternalDescriptionStr")
+        or item.get("ExternalDescription")
+    )
+    req_id = clean(
+        item.get("requisitionId")
+        or item.get("RequisitionId")
+        or item.get("SearchId")
+        or item.get("Id")
+    )
+    url = clean(item.get("url") or item.get("ExternalUrl") or item.get("ExternalUrlSeo"))
+    location = clean(
+        item.get("primaryLocation")
+        or item.get("PrimaryLocation")
+        or item.get("WorkLocation")
+    )
+    country_code = clean(
+        item.get("primaryLocationCountry")
+        or item.get("PrimaryLocationCountry")
+    )
+    posting_date = clean(
+        item.get("postingDate")
+        or item.get("PostedDate")
+        or item.get("ExternalPostedStartDate")
+        or item.get("PostedDateStr")
+    )
+    closing_date = clean(
+        item.get("postingEndDate")
+        or item.get("ExternalPostedEndDate")
+        or item.get("PostingEndDate")
+    )
+    salary_text = clean(item.get("salaryText") or item.get("SalaryText"))
+    qualifications = clean(
+        item.get("qualificationsText")
+        or item.get("ExternalQualificationsStr")
+    )
+    responsibilities = clean(
+        item.get("responsibilitiesText")
+        or item.get("ExternalResponsibilitiesStr")
+    )
 
-    level_match = re.search(r"\b(IPSA-\d+)\b", f"{title} {description}", flags=re.I)
+    level_blob = " ".join(
+        clean(item.get(key))
+        for key in (
+            "JobGrade",
+            "JobLevel",
+            "CategoryAndLevel",
+            "categoryAndLevel",
+            "contractLevel",
+            "title",
+            "Title",
+            "descriptionText",
+            "ExternalDescriptionStr",
+        )
+        if clean(item.get(key))
+    )
+    level_match = re.search(r"\b(IPSA-\d+)\b", level_blob, flags=re.I)
     if not level_match:
         return None
 
@@ -851,11 +1082,20 @@ def normalize_undp_oracle(item):
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
+    job_url = url or (
+        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+        f"{UNDP_ORACLE_SITE}/job/{req_id}"
+    )
 
     return {
-        "id": make_id("UNDP IPSA", req_id or url, title),
+        "id": make_id("UNDP IPSA", req_id or job_url, title),
         "title": title,
-        "company": clean(item.get("employer") or "UNDP"),
+        "company": clean(
+            item.get("employer")
+            or item.get("EmployerName")
+            or item.get("LegalEmployer")
+            or "UNDP"
+        ),
         "location": location or "Global",
         "district": infer_location(location, fallback=""),
         "province": infer_province(location),
@@ -867,18 +1107,18 @@ def normalize_undp_oracle(item):
         "expires_at": closing_date,
         "schedule_type": level,
         "salary": salary_text,
-        "description": full_description,
-        "original_url": url or "https://jobs.undp.org/",
+        "description": full_description or "Open the original UNDP source for full job details.",
+        "original_url": job_url or "https://jobs.undp.org/",
         "search_query": "UNDP IPSA",
         "extensions": [
             level,
-            clean(item.get("category")),
-            clean(item.get("jobFunction")),
-            clean(item.get("jobSchedule")),
-            clean(item.get("workplaceType")),
+            clean(item.get("JobType") or item.get("jobType")),
+            clean(item.get("JobSchedule") or item.get("jobSchedule")),
+            clean(item.get("WorkerType") or item.get("workerType")),
+            clean(item.get("WorkplaceType") or item.get("workplaceType")),
         ],
         "remote": (
-            clean(item.get("workplaceType")).lower() == "remote"
+            clean(item.get("WorkplaceType") or item.get("workplaceType")).lower() == "remote"
             or "home-based" in full_description.lower()
             or "home based" in full_description.lower()
         ),
@@ -888,19 +1128,25 @@ def normalize_undp_oracle(item):
             "UNDP Careers",
             requisition_id=req_id,
             post_level=level,
-            category=clean(item.get("category")),
-            job_function=clean(item.get("jobFunction")),
-            schedule=clean(item.get("jobSchedule")),
-            workplace=clean(item.get("workplaceType")),
+            job_level=clean(item.get("JobLevel")),
+            job_grade=clean(item.get("JobGrade")),
+            job_type=clean(item.get("JobType") or item.get("jobType")),
+            schedule=clean(item.get("JobSchedule") or item.get("jobSchedule")),
+            worker_type=clean(item.get("WorkerType") or item.get("workerType")),
+            workplace_type=clean(item.get("WorkplaceType") or item.get("workplaceType")),
             primary_location=location,
             country_code=country_code,
-            secondary_locations=item.get("secondaryLocations") or [],
-            posting_date=posting_date,
-            closing_date=closing_date,
-            salary=salary_text,
-            detail_fetched=item.get("detailFetched"),
+            organization=clean(item.get("Organization") or item.get("DepartmentName")),
+            job_function=clean(item.get("JobFunction") or item.get("Function")),
+            study_level=clean(item.get("StudyLevel")),
+            number_of_openings=clean(item.get("NumberOfOpenings")),
+            international_travel=clean(item.get("InternationalTravelRequired")),
+            posted=posting_date,
+            deadline=closing_date,
+            external_url=clean(item.get("ExternalUrl") or item.get("ExternalUrlSeo")),
         ),
     }
+
 
 UNDP_ORACLE_BASE = "https://estm.fa.em2.oraclecloud.com"
 UNDP_ORACLE_SITE = "CX_1"
@@ -949,10 +1195,10 @@ def fetch_undp_ipsa_oracle_public():
                 params={
                     "onlyData": "true",
                     "expand": "requisitionList.secondaryLocations",
-                    "siteNumber": UNDP_ORACLE_SITE,
-                    "limit": page_size,
-                    "offset": offset,
-                    "sortBy": "POSTING_DATES_DESC",
+                    "finder": (
+                        f"findReqs;siteNumber={UNDP_ORACLE_SITE},"
+                        f"limit={page_size},offset={offset},sortBy=POSTING_DATES_DESC"
+                    ),
                 },
                 headers={
                     "User-Agent": "MyJOBS/1.0",
@@ -993,105 +1239,21 @@ def fetch_undp_ipsa_oracle_public():
                 futures = [executor.submit(get_detail, rid) for rid in ids]
                 for future in as_completed(futures):
                     rid, detail, err = future.result()
+                    base_item = dict(next(
+                        (
+                            row for row in requisitions
+                            if clean(row.get("Id") or row.get("RequisitionId") or row.get("requisitionId")) == rid
+                        ),
+                        {}
+                    ))
                     if err:
                         errors.append(err)
-                        continue
-                    if not detail:
-                        continue
+                    if detail:
+                        base_item.update(detail)
 
-                    level = clean(detail.get("JobGrade") or detail.get("JobLevel"))
-                    level_match = re.search(r"\b(IPSA-\d+)\b", level, flags=re.I)
-                    if not level_match:
-                        level_match = re.search(
-                            r"\b(IPSA-\d+)\b",
-                            f"{detail.get('Title','')} {detail.get('ExternalDescriptionStr','')}",
-                            flags=re.I,
-                        )
-                    if not level_match:
-                        continue
-
-                    level = level_match.group(1).upper()
-                    title = clean(detail.get("Title"))
-                    location = clean(detail.get("PrimaryLocation") or detail.get("WorkLocation"))
-                    country_code = clean(detail.get("PrimaryLocationCountry"))
-                    description = clean(
-                        detail.get("ExternalDescriptionStr")
-                        or detail.get("ExternalDescription")
-                        or ""
-                    )
-                    qualifications = clean(detail.get("ExternalQualificationsStr"))
-                    responsibilities = clean(detail.get("ExternalResponsibilitiesStr"))
-                    full_description = "\n\n".join(
-                        x for x in [description, qualifications, responsibilities] if x
-                    )
-                    rid_final = clean(detail.get("RequisitionId") or detail.get("Id") or rid)
-
-                    job_url = (
-                        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
-                        f"{UNDP_ORACLE_SITE}/job/{rid_final}"
-                    )
-
-                    job = {
-                        "id": make_id("UNDP IPSA", rid_final, title),
-                        "title": title,
-                        "company": clean(detail.get("LegalEmployer") or "UNDP"),
-                        "location": location or "Global",
-                        "district": infer_location(location, fallback=""),
-                        "province": infer_province(location),
-                        "country": infer_country(location, explicit=""),
-                        "via": "UNDP Careers",
-                        "source": "UNDP — IPSA",
-                        "source_family": "UN Development Programme — International",
-                        "posted_at": clean(
-                            detail.get("ExternalPostedStartDate")
-                            or detail.get("PostedDate")
-                            or detail.get("postingDate")
-                        ),
-                        "expires_at": clean(
-                            detail.get("ExternalPostedEndDate")
-                            or detail.get("PostingEndDate")
-                            or detail.get("postingEndDate")
-                        ),
-                        "schedule_type": level,
-                        "salary": "",
-                        "description": full_description,
-                        "original_url": job_url,
-                        "search_query": "UNDP IPSA",
-                        "extensions": [
-                            level,
-                            clean(detail.get("JobType")),
-                            clean(detail.get("JobSchedule")),
-                            clean(detail.get("WorkerType")),
-                            clean(detail.get("WorkplaceType")),
-                        ],
-                        "remote": clean(detail.get("WorkplaceType")).lower() == "remote"
-                            or "home-based" in full_description.lower()
-                            or "home based" in full_description.lower(),
-                        "status": "current",
-                        "contract_level": level,
-                        "details": make_source_details(
-                            "UNDP Careers",
-                            requisition_id=rid_final,
-                            post_level=level,
-                            job_level=clean(detail.get("JobLevel")),
-                            job_grade=clean(detail.get("JobGrade")),
-                            job_type=clean(detail.get("JobType")),
-                            job_schedule=clean(detail.get("JobSchedule")),
-                            worker_type=clean(detail.get("WorkerType")),
-                            workplace_type=clean(detail.get("WorkplaceType")),
-                            primary_location=location,
-                            country_code=country_code,
-                            organization=clean(detail.get("Organization")),
-                            job_function=clean(detail.get("JobFunction")),
-                            study_level=clean(detail.get("StudyLevel")),
-                            number_of_openings=clean(detail.get("NumberOfOpenings")),
-                            international_travel=clean(detail.get("InternationalTravelRequired")),
-                            posted=clean(detail.get("ExternalPostedStartDate")),
-                            deadline=clean(detail.get("ExternalPostedEndDate")),
-                        ),
-                    }
-                    jobs.append(job)
-
+                    job = normalize_undp_oracle(base_item)
+                    if job:
+                        jobs.append(job)
             has_more = bool(payload.get("hasMore")) if isinstance(payload, dict) else False
             if not has_more:
                 break
@@ -1227,6 +1389,7 @@ def main():
     for fetcher, name in [
         (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
+        (fetch_toploker, "TopLoker"),
         (fetch_reliefweb, "ReliefWeb"),
         (fetch_un_professional_global, "UN Careers — P-level"),
         (fetch_undp_ipsa_global, "UNDP — IPSA"),
