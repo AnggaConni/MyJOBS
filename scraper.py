@@ -15,7 +15,8 @@ from bs4 import BeautifulSoup
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "").strip()
 RELIEFWEB_APPNAME = os.getenv("RELIEFWEB_APPNAME", "").strip()
 APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN", "").strip()
-APIFY_UNCAREERS_ACTOR = os.getenv("APIFY_UNCAREERS_ACTOR", "nomad-dev/un-careers-scraper").strip()
+APIFY_UNCAREERS_ACTOR = os.getenv("APIFY_UNCAREERS_ACTOR", "nomad-agent/un-careers-scraper").strip()
+APIFY_UNDP_ACTOR = os.getenv("APIFY_UNDP_ACTOR", "maydit/oracle-recruiting-jobs-scraper").strip()
 MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
@@ -828,6 +829,134 @@ def fetch_un_professional_apify():
             "errors": [f"{type(exc).__name__}: {exc}"],
         }
 
+def normalize_undp_oracle(item):
+    title = clean(item.get("title"))
+    description = clean(item.get("descriptionText") or item.get("shortDescription"))
+    req_id = clean(item.get("requisitionId"))
+    url = clean(item.get("url"))
+    location = clean(item.get("primaryLocation"))
+    country_code = clean(item.get("primaryLocationCountry"))
+    posting_date = clean(item.get("postingDate"))
+    closing_date = clean(item.get("postingEndDate"))
+    salary_text = clean(item.get("salaryText"))
+    qualifications = clean(item.get("qualificationsText"))
+    responsibilities = clean(item.get("responsibilitiesText"))
+
+    level_match = re.search(r"\b(IPSA-\d+)\b", f"{title} {description}", flags=re.I)
+    if not level_match:
+        return None
+
+    level = level_match.group(1).upper()
+    full_description = "\n\n".join(
+        x for x in [description, qualifications, responsibilities] if x
+    )
+
+    return {
+        "id": make_id("UNDP IPSA", req_id or url, title),
+        "title": title,
+        "company": clean(item.get("employer") or "UNDP"),
+        "location": location or "Global",
+        "district": infer_location(location, fallback=""),
+        "province": infer_province(location),
+        "country": infer_country(location, explicit=""),
+        "via": "UNDP Careers",
+        "source": "UNDP — IPSA",
+        "source_family": "UN Development Programme — International",
+        "posted_at": posting_date,
+        "expires_at": closing_date,
+        "schedule_type": level,
+        "salary": salary_text,
+        "description": full_description,
+        "original_url": url or "https://jobs.undp.org/",
+        "search_query": "UNDP IPSA",
+        "extensions": [
+            level,
+            clean(item.get("category")),
+            clean(item.get("jobFunction")),
+            clean(item.get("jobSchedule")),
+            clean(item.get("workplaceType")),
+        ],
+        "remote": clean(item.get("workplaceType")).lower() == "remote"
+            or "home-based" in full_description.lower()
+            or "home based" in full_description.lower(),
+        "status": "current",
+        "contract_level": level,
+        "details": make_source_details(
+            "UNDP Careers",
+            requisition_id=req_id,
+            post_level=level,
+            category=clean(item.get("category")),
+            job_function=clean(item.get("jobFunction")),
+            schedule=clean(item.get("jobSchedule")),
+            workplace=clean(item.get("workplaceType")),
+            primary_location=location,
+            country_code=country_code,
+            secondary_locations=item.get("secondaryLocations") or [],
+            posting_date=posting_date,
+            closing_date=closing_date,
+            salary=salary_text,
+            detail_fetched=item.get("detailFetched"),
+        ),
+    }
+
+def fetch_undp_ipsa_apify():
+    if not APIFY_API_TOKEN:
+        return [], {
+            "status": "skipped",
+            "count": 0,
+            "message": "APIFY_API_TOKEN not configured",
+            "actor": APIFY_UNDP_ACTOR,
+            "filter": "IPSA only",
+        }
+
+    url = (
+        "https://api.apify.com/v2/acts/"
+        + APIFY_UNDP_ACTOR.replace("/", "~")
+        + "/run-sync-get-dataset-items"
+    )
+    careers_url = "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/requisitions"
+
+    try:
+        response = requests.post(
+            url,
+            params={"token": APIFY_API_TOKEN},
+            json={
+                "careersUrls": [careers_url],
+                "maxJobsPerSite": 500,
+                "includeDetails": True,
+                "keyword": "IPSA",
+                "sortBy": "POSTING_DATES_DESC",
+                "maxRunSeconds": 240,
+            },
+            headers={"User-Agent": "MyJOBS/1.0"},
+            timeout=max(TIMEOUT, 90),
+        )
+        response.raise_for_status()
+        data = response.json()
+        jobs = []
+
+        for item in data if isinstance(data, list) else []:
+            job = normalize_undp_oracle(item)
+            if job:
+                jobs.append(job)
+
+        unique = dedupe(jobs)
+        return unique, {
+            "status": "ok" if unique else "empty",
+            "count": len(unique),
+            "actor": APIFY_UNDP_ACTOR,
+            "filter": "IPSA only",
+            "errors": [],
+        }
+    except Exception as exc:
+        return [], {
+            "status": "error",
+            "count": 0,
+            "actor": APIFY_UNDP_ACTOR,
+            "filter": "IPSA only",
+            "errors": [f"{type(exc).__name__}: {exc}"],
+        }
+
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
     active, expired, stale = [], 0, 0
@@ -896,6 +1025,13 @@ def main():
         un_api_jobs, un_api_health = fetch_un_professional_apify()
         all_jobs.extend(un_api_jobs)
         sources["UN Careers — P-level / Apify"] = un_api_health
+
+    # UNDP current vacancies are served from Oracle Recruiting Cloud.
+    # Use the dedicated Oracle adapter when direct HTML extraction returns no IPSA jobs.
+    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs) and APIFY_API_TOKEN:
+        undp_api_jobs, undp_api_health = fetch_undp_ipsa_apify()
+        all_jobs.extend(undp_api_jobs)
+        sources["UNDP — IPSA / Apify Oracle"] = undp_api_health
 
     unique_jobs = dedupe(all_jobs)
     active_jobs, expired_count, stale_count = filter_expired(unique_jobs)
