@@ -328,7 +328,14 @@ button{cursor:pointer}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]})}
   function norm(v){return String(v||"").toLowerCase().normalize("NFKC")}
   function initials(v){return String(v||"?").trim().split(/\s+/).slice(0,2).map(function(x){return x[0]}).join("").toUpperCase()||"?"}
-  function isUNP(j){return j.source==="UN Careers — P-level"} function isIPSA(j){return j.source==="UNDP — IPSA"}
+  function isUNP(j){
+    return /^(?:P|p)\s*[-–—.]?\s*[1-7]$/.test(String(j.contract_level||""))
+      || String(j.source_category||"").toLowerCase()==="un p-level";
+  }
+  function isIPSA(j){
+    return /^IPSA\s*[-–—.]?\s*\d+$/i.test(String(j.contract_level||""))
+      || String(j.source_category||"").toLowerCase()==="undp — ipsa";
+  }
   function isUN(j){var t=norm([j.source,j.company,j.title,j.description].join(" "));return t.indexOf("un careers")>=0||t.indexOf("united nations")>=0||t.indexOf(" ocha")>=0||t.indexOf("ocha ")>=0}
   function isHuman(j){var t=norm([j.source_family,j.source,j.company,j.title,j.description].join(" "));return t.indexOf("reliefweb")>=0||t.indexOf("humanitarian")>=0||isUN(j)||isIPSA(j)}
   function typeOf(j){return isUNP(j)?"un-p":(isIPSA(j)?"undp-ipsa":(isUN(j)?"un":(isHuman(j)?"humanitarian":"local")))}
