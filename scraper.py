@@ -164,6 +164,29 @@ def fetch_public_text(url, headers=None, jina_fallback=False, jina_first=False):
     return via_jina(), True
 
 
+def search_duckduckgo_links(query, url_pattern):
+    try:
+        response = requests.get(
+            "https://html.duckduckgo.com/html/",
+            params={"q": query},
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+            timeout=max(TIMEOUT, 30),
+        )
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        found = []
+        for anchor in soup.select("a.result__a, a.result__url"):
+            href = clean(anchor.get("href"))
+            if href and re.search(url_pattern, href, flags=re.I):
+                found.append(href)
+        return list(dict.fromkeys(found))
+    except Exception:
+        return []
+
+
 def search_bing_links(query, url_pattern):
     try:
         response = requests.get(
@@ -1789,6 +1812,9 @@ def parse_unvacancies_undp_detail(html, source_url):
     blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob)
     blob = blob.replace("\u00a0", " ")
 
+    if not re.search(r"\bUNDP\b", blob, flags=re.I):
+        return None
+
     grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
         grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
@@ -1959,6 +1985,24 @@ def fetch_undp_ipsa_unvacancies():
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
+    # Search-engine fallback: unvacancies' own filter pages can be
+    # incomplete when rendered through a text proxy. DDG gives us fresh
+    # detail URLs without requiring a paid API.
+    ddg_queries = [
+        'site:unvacancies.org/jobs/ "UNDP" "IPSA-10"',
+        'site:unvacancies.org/jobs/ "UNDP" "IPSA-11"',
+        'site:unvacancies.org/jobs/ "UNDP" "IPSA-12"',
+        'site:unvacancies.org/jobs/ "UNDP" "IPSA-9"',
+    ]
+    for query in ddg_queries:
+        for candidate in search_duckduckgo_links(
+            query,
+            r"unvacancies\.org/jobs/[^/]+-DP-\d{4,6}",
+        ):
+            normalized_url = candidate.split("#", 1)[0]
+            detail_urls.add(normalized_url)
+            preferred_detail_urls.add(normalized_url)
+
     selected = list(dict.fromkeys(list(preferred_detail_urls) + list(detail_urls)))[:120]
     detail_urls = set(selected)
 
@@ -1993,6 +2037,11 @@ def fetch_undp_ipsa_unvacancies():
                 elif len(failed_detail_samples) < 5:
                     failed_detail_samples.append(source_url)
 
+    jobs = [
+        job for job in jobs
+        if job.get("source") == "UNDP — IPSA"
+        and job.get("company") == "UNDP"
+    ]
     unique = dedupe(jobs)
     return unique, {
         "status": "ok" if unique else ("error" if errors else "empty"),
@@ -2001,6 +2050,7 @@ def fetch_undp_ipsa_unvacancies():
         "card_jobs": len(jobs),
         "detail_urls": len(detail_urls),
         "preferred_detail_urls": len(preferred_detail_urls),
+        "ddg_queries": ddg_queries,
         "parsed_details": parsed_details,
         "failed_detail_samples": failed_detail_samples,
         "errors": errors[:25],
