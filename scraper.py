@@ -622,39 +622,60 @@ def fetch_un_careers():
 UNDP_URL = "https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100"
 
 def parse_undp_job_anchor(anchor):
-    title_text = clean(anchor.get_text(" ", strip=True))
+    direct = clean(anchor.get_text(" ", strip=True))
+    parent = clean(anchor.parent.get_text(" ", strip=True)) if anchor.parent else ""
+    grand = clean(anchor.parent.parent.get_text(" ", strip=True)) if anchor.parent and anchor.parent.parent else ""
+    title_text = max([direct, parent, grand], key=len)
     href = urljoin("https://jobs.undp.org/", clean(anchor.get("href")))
-    level = re.search(r"\b(IPSA-\d+)\b", title_text, flags=re.I)
-    if not level:
+
+    level_match = re.search(r"\b(IPSA-\d+)\b", title_text, flags=re.I)
+    if not level_match:
         return None
-    apply_by = re.search(r"Apply by\s+([A-Z][a-z]{2}-\d{1,2}-\d{2})", title_text, flags=re.I)
-    agency = re.search(r"Agency\s+(.+?)\s+Location\s+", title_text, flags=re.I)
-    location = re.search(r"Location\s+(.+)$", title_text, flags=re.I)
-    job_title = re.sub(r"^Job Title\s*", "", title_text, flags=re.I)
+
+    apply_match = re.search(r"Apply by\s+([A-Z][a-z]{2}-\d{1,2}-\d{2})", title_text, flags=re.I)
+    agency_match = re.search(r"Agency\s+(.+?)\s+Location\s+", title_text, flags=re.I)
+    location_match = re.search(r"Location\s+(.+?)(?:\s*$)", title_text, flags=re.I)
+
+    level = clean(level_match.group(1)).upper()
+    apply_by = clean(apply_match.group(1)) if apply_match else ""
+    agency = clean(agency_match.group(1)) if agency_match else "UNDP"
+    location = clean(location_match.group(1)) if location_match else "Global"
+
+    job_title = re.sub(r"^Job Title\s*", "", direct or title_text, flags=re.I)
     job_title = re.split(r"\s+Post level\s+", job_title, flags=re.I)[0]
+    job_title = clean(job_title)
+
     return {
-        "id": make_id("UNDP IPSA", href, job_title),
+        "id": make_id("UNDP IPSA", href or job_title, job_title),
         "title": job_title,
-        "company": clean(agency.group(1)) if agency else "UNDP",
-        "location": clean(location.group(1)) if location else "Global",
-        "district": clean(location.group(1)) if location else "Global",
+        "company": agency,
+        "location": location,
+        "district": location,
         "province": "",
-        "country": "Global",
+        "country": infer_country(location, explicit=""),
         "via": "UNDP Careers",
         "source": "UNDP — IPSA",
         "source_family": "UN Development Programme — International",
         "posted_at": "",
-        "expires_at": clean(apply_by.group(1)) if apply_by else "",
-        "schedule_type": clean(level.group(1)).upper(),
+        "expires_at": apply_by,
+        "schedule_type": level,
         "salary": "",
-        "description": title_text[:700],
+        "description": title_text,
         "original_url": href,
         "search_query": "UNDP IPSA global",
-        "extensions": [clean(level.group(1)).upper()],
-        "remote": "home based" in title_text.lower(),
+        "extensions": [level],
+        "remote": "home based" in title_text.lower() or "home-based" in title_text.lower(),
         "status": "current",
-        "contract_level": clean(level.group(1)).upper(),
+        "contract_level": level,
+        "details": make_source_details(
+            "UNDP Careers",
+            post_level=level,
+            apply_by=apply_by,
+            agency=agency,
+            location=location,
+        ),
     }
+
 
 def fetch_undp_ipsa_global():
     try:
