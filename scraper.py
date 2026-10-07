@@ -5,7 +5,7 @@ import re
 import time
 import xml.etree.ElementTree as ET
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from urllib.parse import urljoin, urlparse
 
@@ -104,6 +104,16 @@ def parse_datetime(value):
             return dt.astimezone(timezone.utc)
         except ValueError:
             pass
+    relative = re.match(r"^(just posted|today|yesterday|(\d+)\+?\s+days?\s+ago)$", raw, flags=re.I)
+    if relative:
+        now = datetime.now(timezone.utc)
+        value_lower = raw.lower()
+        if value_lower in {"just posted", "today"}:
+            return now
+        if value_lower == "yesterday":
+            return now - timedelta(days=1)
+        return now - timedelta(days=int(relative.group(2)))
+
     try:
         dt = parsedate_to_datetime(raw)
         if dt.tzinfo is None:
