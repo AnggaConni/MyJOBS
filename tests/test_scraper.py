@@ -8,6 +8,7 @@ from scraper import (
     filter_expired,
     make_id,
     normalize_google,
+    preserve_text,
     normalize_un_professional,
     parse_datetime,
     parse_undp_job_anchor,
@@ -49,6 +50,14 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(expired, 1)
         self.assertEqual(stale, 1)
         self.assertEqual([job["title"] for job in active], ["Active", "No Date"])
+
+    def test_preserve_text_keeps_paragraph_breaks(self):
+        value = "YOUR PROFILE:\r\n\r\nDIPLOMAS: A master's degree\r\n\r\nEXPERIENCE: More than 5 years"
+        preserved = preserve_text(value)
+        self.assertEqual(
+            preserved,
+            "YOUR PROFILE:\n\nDIPLOMAS: A master's degree\n\nEXPERIENCE: More than 5 years",
+        )
 
     def test_google_normalization(self):
         job = normalize_google(
