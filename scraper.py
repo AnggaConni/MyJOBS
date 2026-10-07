@@ -1461,14 +1461,29 @@ def normalize_undp_oracle(item):
             "Title",
             "descriptionText",
             "ExternalDescriptionStr",
+            "ContractType",
+            "VacancyType",
         )
         if clean(item.get(key))
     )
-    level_match = re.search(r"\bIPSA\s*-?\s*(\d+)\b", level_blob, flags=re.I)
-    if not level_match:
-        return None
+    level_match = re.search(
+        r"\bIPSA\s*[-–—.]?\s*(\d+)\b",
+        level_blob,
+        flags=re.I,
+    )
+    level = f"IPSA-{level_match.group(1)}" if level_match else ""
 
-    level = f"IPSA-{level_match.group(1)}"
+    vacancy_type = clean(
+        item.get("VacancyType")
+        or item.get("vacancyType")
+        or item.get("ContractType")
+        or item.get("EmploymentType")
+    )
+    job_type = clean(item.get("JobType") or item.get("jobType"))
+    schedule = clean(item.get("JobSchedule") or item.get("jobSchedule"))
+    worker_type = clean(item.get("WorkerType") or item.get("workerType"))
+    workplace_type = clean(item.get("WorkplaceType") or item.get("workplaceType"))
+
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
@@ -1478,7 +1493,8 @@ def normalize_undp_oracle(item):
     )
 
     return {
-        "id": make_id("UNDP IPSA", req_id or job_url, title),
+        "id": make_id("UNDP Careers", req_id or job_url, title),
+        "source_job_id": req_id,
         "title": title,
         "company": clean(
             item.get("employer")
@@ -1491,29 +1507,37 @@ def normalize_undp_oracle(item):
         "province": infer_province(location),
         "country": infer_country(location, explicit=""),
         "via": "UNDP Careers",
-        "source": "UNDP — IPSA",
-        "source_family": "UN Development Programme — International",
+        "source": "UNDP Careers",
+        "source_category": "UNDP — IPSA" if level else "UNDP",
+        "source_family": "UN Development Programme",
         "posted_at": posting_date,
         "expires_at": closing_date,
-        "schedule_type": level,
+        "schedule_type": level or schedule,
         "salary": salary_text,
         "description": full_description or "Open the original UNDP source for full job details.",
         "original_url": job_url or "https://jobs.undp.org/",
-        "search_query": "UNDP IPSA",
+        "search_query": "UNDP current jobs",
         "extensions": [
-            level,
-            clean(item.get("JobType") or item.get("jobType")),
-            clean(item.get("JobSchedule") or item.get("jobSchedule")),
-            clean(item.get("WorkerType") or item.get("workerType")),
-            clean(item.get("WorkplaceType") or item.get("workplaceType")),
+            x for x in [
+                level,
+                vacancy_type,
+                job_type,
+                schedule,
+                worker_type,
+                workplace_type,
+            ] if x
         ],
         "remote": (
-            clean(item.get("WorkplaceType") or item.get("workplaceType")).lower() == "remote"
+            workplace_type.lower() == "remote"
             or "home-based" in full_description.lower()
             or "home based" in full_description.lower()
         ),
         "status": "current",
         "contract_level": level,
+        "vacancy_type": vacancy_type,
+        "job_type": job_type,
+        "worker_type": worker_type,
+        "workplace_type": workplace_type,
         "details": make_source_details(
             "UNDP Careers",
             requisition_id=req_id,
@@ -1521,10 +1545,12 @@ def normalize_undp_oracle(item):
             post_level=level,
             job_level=clean(item.get("JobLevel")),
             job_grade=clean(item.get("JobGrade")),
-            job_type=clean(item.get("JobType") or item.get("jobType")),
-            schedule=clean(item.get("JobSchedule") or item.get("jobSchedule")),
-            worker_type=clean(item.get("WorkerType") or item.get("workerType")),
-            workplace_type=clean(item.get("WorkplaceType") or item.get("workplaceType")),
+            vacancy_type=vacancy_type,
+            contract_type=clean(item.get("ContractType")),
+            job_type=job_type,
+            schedule=schedule,
+            worker_type=worker_type,
+            workplace_type=workplace_type,
             primary_location=location,
             country_code=country_code,
             organization=clean(item.get("Organization") or item.get("DepartmentName")),
@@ -2408,20 +2434,31 @@ def fetch_undp_ipsa_unvacancies():
 
 def parse_unvacancies_un_professional_detail(text, source_url):
     soup = BeautifulSoup(text, "html.parser")
-    lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
+    root = soup.find("main") or soup.find("article") or soup
+    for tag in root.select("script, style, noscript, nav, header, footer, aside"):
+        tag.decompose()
+
+    lines = [clean(x) for x in root.get_text("\n", strip=True).splitlines() if clean(x)]
     blob = " ".join(lines)
 
     if not re.search(r"United Nations Secretariat|UN Secretariat", blob, flags=re.I):
         return None
 
     level = extract_un_p_level(blob)
-    if not level:
-        return None
 
-    heading = soup.find("h1")
+    heading = root.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
     if not title:
-        title = clean(next((line for line in lines if line and "UN Secretariat" not in line and "United Nations Secretariat" not in line and "P-" not in line), ""))
+        title = clean(next(
+            (
+                line for line in lines
+                if line
+                and "UN Secretariat" not in line
+                and "United Nations Secretariat" not in line
+                and not re.search(r"\bP\s*[-–—.]?\s*[1-7]\b", line)
+            ),
+            "",
+        ))
 
     location = ""
     location_match = re.search(
@@ -2444,7 +2481,7 @@ def parse_unvacancies_un_professional_detail(text, source_url):
     )
 
     official_url = ""
-    for anchor in soup.select("a[href]"):
+    for anchor in root.select("a[href]"):
         href = clean(anchor.get("href"))
         if re.search(r"(?:careers\.un\.org|inspira)", href, flags=re.I):
             official_url = href
@@ -2454,7 +2491,7 @@ def parse_unvacancies_un_professional_detail(text, source_url):
     requisition_id = requisition_match.group(1) if requisition_match else ""
 
     return {
-        "id": make_id("UN P", requisition_id or official_url or source_url or title, title),
+        "id": make_id("UN Careers", requisition_id or official_url or source_url or title, title),
         "source_job_id": requisition_id,
         "title": title,
         "company": "United Nations Secretariat",
@@ -2463,16 +2500,17 @@ def parse_unvacancies_un_professional_detail(text, source_url):
         "province": "",
         "country": "Global",
         "via": "UN Careers",
-        "source": "UN Careers — P-level",
-        "source_family": "UN Secretariat — Professional",
+        "source": "UN Careers",
+        "source_category": "UN P-Level" if level else "UN",
+        "source_family": "UN Secretariat",
         "posted_at": posted_match.group(1) if posted_match else "",
         "expires_at": closed_match.group(1) if closed_match else "",
-        "schedule_type": level,
+        "schedule_type": level or "",
         "salary": "",
-        "description": html_description_to_text(soup)[:8000],
+        "description": html_description_to_text(root)[:8000],
         "original_url": official_url or source_url,
-        "search_query": "UN Secretariat P-level / unvacancies",
-        "extensions": [level],
+        "search_query": "UN Secretariat current jobs / unvacancies",
+        "extensions": [level] if level else [],
         "remote": "remote" in blob.lower() or "home based" in blob.lower() or "home-based" in blob.lower(),
         "status": "current",
         "contract_level": level,
@@ -2484,6 +2522,8 @@ def parse_unvacancies_un_professional_detail(text, source_url):
             deadline=closed_match.group(1) if closed_match else "",
         ),
     }
+
+
 
 
 def fetch_un_professional_unvacancies():
