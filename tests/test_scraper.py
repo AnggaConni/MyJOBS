@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 
 from scraper import (
     canon,
-    city_of,
+    infer_location,
     dedupe,
     filter_expired,
     make_id,
@@ -15,10 +15,10 @@ from scraper import (
 
 
 class ScraperTests(unittest.TestCase):
-    def test_city_detection(self):
-        self.assertEqual(city_of("Kabupaten Ketapang"), "Ketapang")
-        self.assertEqual(city_of("Pontianak, Kalimantan Barat"), "Pontianak")
-        self.assertEqual(city_of("unknown place"), "Kalimantan Barat")
+    def test_location_detection(self):
+        self.assertEqual(infer_location("Jakarta, Indonesia"), "Jakarta")
+        self.assertEqual(infer_location("Pontianak, Kalimantan Barat"), "Pontianak")
+        self.assertEqual(infer_location("unknown place"), "Indonesia")
 
     def test_canon(self):
         self.assertEqual(canon("Sales & Marketing!"), "sales marketing")
@@ -54,7 +54,7 @@ class ScraperTests(unittest.TestCase):
                 },
                 "extensions": ["Full-time"],
             },
-            "lowongan kerja Ketapang",
+            "lowongan kerja Indonesia",
         )
         self.assertEqual(job["district"], "Ketapang")
         self.assertEqual(job["source"], "Google Jobs")
