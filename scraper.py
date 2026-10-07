@@ -1726,14 +1726,48 @@ def fetch_undp_ipsa_unvacancies():
             soup = BeautifulSoup(text, "html.parser")
 
             for anchor in soup.select('a[href*="/jobs/"]'):
+                href = clean(anchor.get("href"))
+                if href:
+                    detail_urls.add(urljoin("https://unvacancies.org", href))
                 job = parse_unvacancies_undp_card(anchor)
                 if job:
                     jobs.append(job)
-                    href = clean(anchor.get("href"))
-                    if href:
-                        detail_urls.add(urljoin("https://unvacancies.org", href))
+
+            # Jina can return Markdown rather than HTML. Recover absolute/relative
+            # job links from the text in that representation as well.
+            for href in re.findall(
+                r'https?://unvacancies\.org/jobs/[^)\s"]+|/jobs/[A-Za-z0-9_./%?=&-]+',
+                text,
+                flags=re.I,
+            ):
+                detail_urls.add(urljoin("https://unvacancies.org", href))
+
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
+
+    detail_urls = set(list(detail_urls)[:50])
+
+    def fetch_detail(source_url):
+        try:
+            detail_text, _ = fetch_public_text(
+                source_url,
+                headers=headers,
+                jina_fallback=True,
+                jina_first=False,
+            )
+            return parse_unvacancies_undp_detail(detail_text, source_url), None
+        except Exception as exc:
+            return None, f"{source_url}: {type(exc).__name__}: {exc}"
+
+    if detail_urls:
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            futures = [executor.submit(fetch_detail, url) for url in detail_urls]
+            for future in as_completed(futures):
+                job, error = future.result()
+                if error:
+                    errors.append(error)
+                elif job:
+                    jobs.append(job)
 
     unique = dedupe(jobs)
     return unique, {
@@ -1745,7 +1779,6 @@ def fetch_undp_ipsa_unvacancies():
         "errors": errors[:25],
         "source": "unvacancies.org (UNDP official application links)",
     }
-
 
 
 def load_historical_source_jobs(source_name, max_commits=20):
