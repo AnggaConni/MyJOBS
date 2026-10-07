@@ -182,6 +182,20 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["location"], "Jakarta Selatan")
         self.assertIn("Develop policy briefs", job["description"])
 
+    def test_undp_oracle_grade_without_hyphen(self):
+        job = normalize_undp_oracle({
+            "Id": "9002",
+            "Title": "Country Economist",
+            "EmployerName": "UNDP",
+            "PrimaryLocation": "New Delhi, India",
+            "PostedDate": "2026-10-01T00:00:00Z",
+            "ExternalPostedEndDate": "2026-10-15T00:00:00Z",
+            "JobGrade": "IPSA11",
+            "ExternalDescriptionStr": "International Personnel Service Agreement",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-11")
+
     def test_undp_oracle_list_row(self):
         job = normalize_undp_oracle({
             "Id": "9001",
