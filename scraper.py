@@ -187,6 +187,38 @@ def search_bing_links(query, url_pattern):
         return []
 
 
+def search_bing_results(query, url_pattern):
+    try:
+        response = requests.get(
+            "https://www.bing.com/search",
+            params={"q": query, "count": 50, "setlang": "en-US"},
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+            timeout=max(TIMEOUT, 30),
+        )
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        results = []
+        for item in soup.select("li.b_algo"):
+            anchor = item.select_one("h2 a")
+            if not anchor:
+                continue
+            href = clean(anchor.get("href"))
+            if not href or not re.search(url_pattern, href, flags=re.I):
+                continue
+            title = clean(anchor.get_text(" ", strip=True))
+            caption = item.select_one(".b_caption")
+            snippet = clean(caption.get_text(" ", strip=True)) if caption else clean(item.get_text(" ", strip=True))
+            results.append({"url": href, "title": title, "snippet": snippet})
+        return results
+    except Exception:
+        return []
+
+
+
+
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
@@ -1330,6 +1362,96 @@ def fetch_undp_oracle_detail(requisition_id):
     response.raise_for_status()
     return first_json_item(response.json())
 
+def normalize_undp_bing_result(item):
+    title = clean(item.get("title"))
+    snippet = clean(item.get("snippet"))
+    url = clean(item.get("url"))
+    blob = " ".join([title, snippet])
+
+    grade_match = re.search(r"\b(IPSA-\d+)\b", blob, flags=re.I)
+    if not grade_match:
+        return None
+
+    level = grade_match.group(1).upper()
+
+    posting_match = re.search(
+        r"Posting\s+Date\s+(\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)",
+        blob,
+        flags=re.I,
+    )
+    deadline_match = re.search(
+        r"Apply\s+Before\s+(\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)",
+        blob,
+        flags=re.I,
+    )
+    location_match = re.search(
+        r"^(?:[^,]+\s+)?([A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+,\s+[A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+)\s+(?:Be the First to Apply|Job Info)",
+        snippet,
+        flags=re.I,
+    )
+    if not location_match:
+        location_match = re.search(
+            r"([A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+,\s+[A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+)\s+Be the First",
+            snippet,
+            flags=re.I,
+        )
+
+    location = clean(location_match.group(1)) if location_match else ""
+    clean_title = re.sub(r"\s*[|–—-]\s*UNDP Careers.*$", "", title, flags=re.I)
+    clean_title = re.sub(r"\s*[|–—-]\s*UNDP.*$", "", clean_title, flags=re.I)
+    clean_title = clean(clean_title)
+
+    posting = posting_match.group(1) if posting_match else ""
+    deadline = deadline_match.group(1) if deadline_match else ""
+
+    return normalize_undp_oracle({
+        "Id": clean((re.search(r"/job/(\d+)", url) or [None, ""])[1]),
+        "Title": clean_title,
+        "EmployerName": "UNDP",
+        "PrimaryLocation": location,
+        "PostedDate": posting,
+        "ExternalPostedEndDate": deadline,
+        "JobGrade": level,
+        "ExternalDescriptionStr": snippet,
+        "ExternalUrl": url,
+    })
+
+
+def fetch_undp_ipsa_bing():
+    queries = [
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Apply Before" "IPSA-"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Posting Date" "IPSA-"',
+    ]
+    results = []
+    seen = set()
+
+    for query in queries:
+        for item in search_bing_results(
+            query,
+            r"estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+",
+        ):
+            url = clean(item.get("url"))
+            if url and url not in seen:
+                seen.add(url)
+                results.append(item)
+
+    jobs = []
+    for item in results[:50]:
+        job = normalize_undp_bing_result(item)
+        if job:
+            jobs.append(job)
+
+    jobs = dedupe(jobs)
+    return jobs, {
+        "status": "ok" if jobs else "empty",
+        "count": len(jobs),
+        "queries": queries,
+        "discovered_results": len(results),
+        "errors": [],
+    }
+
+
 def parse_undp_oracle_job_html(text, url):
     soup = BeautifulSoup(text, "html.parser")
     lines = [
@@ -1806,6 +1928,11 @@ def main():
     undp_html_jobs, undp_html_health = fetch_undp_ipsa_oracle_html()
     all_jobs.extend(undp_html_jobs)
     sources["UNDP — IPSA / Oracle HTML"] = undp_html_health
+
+    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
+        undp_bing_jobs, undp_bing_health = fetch_undp_ipsa_bing()
+        all_jobs.extend(undp_bing_jobs)
+        sources["UNDP — IPSA / Bing"] = undp_bing_health
 
     if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
         undp_public_jobs, undp_public_health = fetch_undp_ipsa_oracle_public()
