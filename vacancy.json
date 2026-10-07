@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 15:29 UTC",
+  "last_updated": "2026-10-07 15:33 UTC",
   "total": 247,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -8236,7 +8236,7 @@
       "count": 0,
       "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs?keyword=IPSA",
       "filter": "IPSA keyword",
-      "discovered_urls": 0,
+      "discovered_urls": 7,
       "proxy": true,
       "errors": []
     },
@@ -8271,5 +8271,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 21.28
+  "runtime_seconds": 51.97
 }
