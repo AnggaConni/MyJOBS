@@ -14,6 +14,8 @@ from bs4 import BeautifulSoup
 
 SERPAPI_KEY = os.getenv("SERPAPI_KEY", "").strip()
 RELIEFWEB_APPNAME = os.getenv("RELIEFWEB_APPNAME", "").strip()
+APIFY_API_TOKEN = os.getenv("APIFY_API_TOKEN", "").strip()
+APIFY_UNCAREERS_ACTOR = os.getenv("APIFY_UNCAREERS_ACTOR", "nomad-dev/un-careers-scraper").strip()
 MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
@@ -721,6 +723,111 @@ def fetch_undp_ipsa_global():
         }
 
 
+def normalize_un_apify(item):
+    title = clean(item.get("title") or item.get("jobTitle") or item.get("name"))
+    link = clean(item.get("url") or item.get("applyUrl") or item.get("jobUrl"))
+    description = clean(item.get("description") or item.get("jobDescription") or item.get("summary"))
+    level = clean(item.get("level") or item.get("categoryAndLevel") or item.get("grade"))
+    match = re.search(r"\bP-([1-7])\b", f"{level} {description}", flags=re.I)
+    if not match:
+        return None
+
+    level = f"P-{match.group(1)}"
+    duty = clean(item.get("dutyStation") or item.get("location"))
+    deadline = clean(item.get("deadline") or item.get("closingDate"))
+    posted = clean(item.get("datePosted") or item.get("publishedAt"))
+    job_id = clean(item.get("jobId") or item.get("id"))
+    network = clean(item.get("jobNetwork"))
+    family = clean(item.get("jobFamily"))
+    category = clean(item.get("category") or item.get("categoryAndLevel"))
+    recruitment = clean(item.get("recruitmentType"))
+    office = clean(item.get("departmentOffice") or item.get("department"))
+
+    return {
+        "id": make_id("UN P", job_id or link or title, title),
+        "title": title,
+        "company": "United Nations Secretariat",
+        "location": duty or "Global",
+        "district": duty or "Global",
+        "province": "",
+        "country": "Global",
+        "via": "UN Careers",
+        "source": "UN Careers — P-level",
+        "source_family": "UN Secretariat — Professional",
+        "posted_at": posted,
+        "expires_at": deadline,
+        "schedule_type": level,
+        "salary": "",
+        "description": description,
+        "original_url": link or "https://careers.un.org/job-opening",
+        "search_query": "UN global P-level",
+        "extensions": [x for x in [level, network, family, category, recruitment, office] if x],
+        "remote": "home-based" in f"{duty} {description}".lower(),
+        "status": "current",
+        "contract_level": level,
+        "details": make_source_details(
+            "UN Careers",
+            job_id=job_id,
+            job_network=network,
+            job_family=family,
+            category_level=category,
+            recruitment_type=recruitment,
+            duty_station=duty,
+            department_office=office,
+            date_posted=posted,
+            deadline=deadline,
+            level=level,
+        ),
+    }
+
+def fetch_un_professional_apify():
+    if not APIFY_API_TOKEN:
+        return [], {
+            "status": "skipped",
+            "count": 0,
+            "message": "APIFY_API_TOKEN not configured",
+            "actor": APIFY_UNCAREERS_ACTOR,
+        }
+
+    url = (
+        "https://api.apify.com/v2/acts/"
+        + APIFY_UNCAREERS_ACTOR.replace("/", "~")
+        + "/run-sync-get-dataset-items"
+    )
+
+    try:
+        response = requests.post(
+            url,
+            params={"token": APIFY_API_TOKEN},
+            json={"maxItems": 150, "includeDescription": True, "sortDirection": "newest"},
+            headers={"User-Agent": "MyJOBS/1.0"},
+            timeout=max(TIMEOUT, 60),
+        )
+        response.raise_for_status()
+        data = response.json()
+        jobs = []
+        for item in data if isinstance(data, list) else []:
+            job = normalize_un_apify(item)
+            if job:
+                jobs.append(job)
+
+        unique = dedupe(jobs)
+        return unique, {
+            "status": "ok" if unique else "empty",
+            "count": len(unique),
+            "actor": APIFY_UNCAREERS_ACTOR,
+            "filter": "P-1 through P-7 only",
+            "errors": [],
+        }
+    except Exception as exc:
+        return [], {
+            "status": "error",
+            "count": 0,
+            "actor": APIFY_UNCAREERS_ACTOR,
+            "filter": "P-1 through P-7 only",
+            "errors": [f"{type(exc).__name__}: {exc}"],
+        }
+
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
     active, expired, stale = [], 0, 0
@@ -783,6 +890,12 @@ def main():
         jobs, health = fetcher()
         all_jobs.extend(jobs)
         sources[name] = health
+
+    # If direct UN Careers access is blocked, use the optional Apify adapter.
+    if not any(job.get("source") == "UN Careers — P-level" for job in all_jobs) and APIFY_API_TOKEN:
+        un_api_jobs, un_api_health = fetch_un_professional_apify()
+        all_jobs.extend(un_api_jobs)
+        sources["UN Careers — P-level / Apify"] = un_api_health
 
     unique_jobs = dedupe(all_jobs)
     active_jobs, expired_count, stale_count = filter_expired(unique_jobs)
