@@ -37,7 +37,9 @@ jobs:
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
+          APIFY_API_TOKEN: ${{ secrets.APIFY_API_TOKEN }}
           MAX_GOOGLE_QUERIES: 19
+          APIFY_UNCAREERS_ACTOR: nomad-dev/un-careers-scraper
           STALE_DAYS: 7
         run: python scraper.py
 
