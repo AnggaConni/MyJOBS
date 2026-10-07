@@ -2,6 +2,7 @@ import hashlib
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import os
+import subprocess
 import re
 import time
 import xml.etree.ElementTree as ET
@@ -22,12 +23,16 @@ MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
 STALE_DAYS = int(os.getenv("STALE_DAYS", "7"))
-TOPLOKER_PAGE_OFFSETS = [
-    int(value.strip())
-    for value in os.getenv("TOPLOKER_PAGE_OFFSETS", "0,12,24,36").split(",")
-    if value.strip().isdigit()
+TOPLOKER_LIST_URLS = [
+    value.strip()
+    for value in os.getenv(
+        "TOPLOKER_LIST_URLS",
+        "https://toploker.com/loker/daftar,https://toploker.com/loker/aktif-merekrut"
+    ).split(",")
+    if value.strip()
 ]
-TOPLOKER_MAX_JOBS = int(os.getenv("TOPLOKER_MAX_JOBS", "80"))
+TOPLOKER_MAX_LIST_PAGES = int(os.getenv("TOPLOKER_MAX_LIST_PAGES", "4"))
+TOPLOKER_MAX_JOBS = int(os.getenv("TOPLOKER_MAX_JOBS", "60"))
 BASE_URL = "https://www.loker.id"
 TOPLOKER_BASE = "https://toploker.com"
 TOPLOKER_LIST_URL = f"{TOPLOKER_BASE}/loker/daftar"
@@ -122,6 +127,25 @@ CITY_ALIASES = {
     "mempawah": "Mempawah",
 }
 
+def fetch_public_text(url, headers=None, jina_fallback=False):
+    headers = headers or {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
+    response = requests.get(url, headers=headers, timeout=max(TIMEOUT, 30))
+    if response.status_code < 400:
+        return response.text, False
+    if not jina_fallback:
+        response.raise_for_status()
+
+    target = "http://" + url[len("https://"):] if url.startswith("https://") else url
+    proxy = "https://r.jina.ai/" + target
+    proxy_response = requests.get(
+        proxy,
+        headers={"User-Agent": "MyJOBS/1.0"},
+        timeout=max(TIMEOUT, 30),
+    )
+    proxy_response.raise_for_status()
+    return proxy_response.text, True
+
+
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
@@ -185,6 +209,16 @@ def parse_datetime(value):
             return dt.astimezone(timezone.utc)
         except ValueError:
             pass
+    ind_months = {"januari":1,"februari":2,"maret":3,"april":4,"mei":5,"juni":6,"juli":7,"agustus":8,"september":9,"oktober":10,"november":11,"desember":12}
+    month_match = re.match(r"^(\d{1,2})\s+([A-Za-z]+)\s+(\d{4})$", raw, flags=re.I)
+    if month_match and month_match.group(2).lower() in ind_months:
+        return datetime(
+            int(month_match.group(3)),
+            ind_months[month_match.group(2).lower()],
+            int(month_match.group(1)),
+            tzinfo=timezone.utc,
+        )
+
     relative = re.match(r"^(just posted|today|yesterday|(\d+)\+?\s+days?\s+ago)$", raw, flags=re.I)
     if relative:
         now = datetime.now(timezone.utc)
@@ -501,43 +535,68 @@ def fetch_toploker():
     errors = []
     detail_urls = []
     seen_urls = set()
+    seen_pages = set()
+    page_queue = list(TOPLOKER_LIST_URLS)
     headers = {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
 
-    try:
-        for offset in TOPLOKER_PAGE_OFFSETS:
-            url = TOPLOKER_LIST_URL if offset == 0 else f"{TOPLOKER_LIST_URL}/{offset}"
-            response = requests.get(url, headers=headers, timeout=TIMEOUT)
-            response.raise_for_status()
-            soup = BeautifulSoup(response.text, "html.parser")
+    while page_queue and len(seen_pages) < TOPLOKER_MAX_LIST_PAGES:
+        page = page_queue.pop(0)
+        if page in seen_pages:
+            continue
+        seen_pages.add(page)
+
+        try:
+            text, proxied = fetch_public_text(page, headers=headers, jina_fallback=True)
+            soup = BeautifulSoup(text, "html.parser")
+
             for anchor in soup.select('a[href*="/lowongan/"]'):
                 href = clean(anchor.get("href"))
                 if not href:
                     continue
-                job_url = urljoin(TOPLOKER_BASE, href).split("#", 1)[0]
-                if "/lowongan/" not in urlparse(job_url).path:
-                    continue
-                if job_url not in seen_urls:
+                job_url = urljoin(TOPLOKER_BASE, href).split("#", 1)[0].replace("%21", "!")
+                if "/lowongan/" in urlparse(job_url).path and job_url not in seen_urls:
                     seen_urls.add(job_url)
                     detail_urls.append(job_url)
                 if len(detail_urls) >= TOPLOKER_MAX_JOBS:
                     break
-            if len(detail_urls) >= TOPLOKER_MAX_JOBS:
-                break
-    except Exception as exc:
-        errors.append(f"list discovery: {type(exc).__name__}: {exc}")
 
-    jobs = []
+            # TopLoker's pagination uses paths such as /loker/daftar/7764,
+            # rather than numeric offsets. Discover the next few pages dynamically.
+            for anchor in soup.select('a[href*="/loker/daftar/"], a[href*="/loker/aktif-merekrut/"]'):
+                href = clean(anchor.get("href"))
+                if not href:
+                    continue
+                next_page = urljoin(TOPLOKER_BASE, href).split("#", 1)[0]
+                if next_page not in seen_pages and next_page not in page_queue:
+                    page_queue.append(next_page)
+                if len(page_queue) + len(seen_pages) >= TOPLOKER_MAX_LIST_PAGES:
+                    break
+
+        except Exception as exc:
+            errors.append(
+                f"{page}: {type(exc).__name__}: {exc}"
+            )
+
+        if len(detail_urls) >= TOPLOKER_MAX_JOBS:
+            break
 
     def fetch_detail(job_url):
         try:
-            response = requests.get(job_url, headers=headers, timeout=TIMEOUT)
-            response.raise_for_status()
-            return parse_toploker_detail(response.text, job_url), None
+            text, _ = fetch_public_text(
+                job_url,
+                headers=headers,
+                jina_fallback=True,
+            )
+            return parse_toploker_detail(text, job_url), None
         except Exception as exc:
             return None, f"{job_url}: {type(exc).__name__}: {exc}"
 
+    jobs = []
     with ThreadPoolExecutor(max_workers=8) as executor:
-        futures = [executor.submit(fetch_detail, job_url) for job_url in detail_urls]
+        futures = [
+            executor.submit(fetch_detail, job_url)
+            for job_url in detail_urls
+        ]
         for future in as_completed(futures):
             job, error = future.result()
             if error:
@@ -545,11 +604,12 @@ def fetch_toploker():
             elif job and job.get("title"):
                 jobs.append(job)
 
-    unique = dedupe(jobs)
-    return unique, {
-        "status": "ok" if unique else ("error" if errors else "empty"),
-        "count": len(unique),
-        "pages": TOPLOKER_PAGE_OFFSETS,
+    jobs = dedupe(jobs)
+    return jobs, {
+        "status": "ok" if jobs else ("error" if errors else "empty"),
+        "count": len(jobs),
+        "list_urls": TOPLOKER_LIST_URLS,
+        "pages_crawled": list(seen_pages),
         "discovered_urls": len(detail_urls),
         "errors": errors[:25],
     }
@@ -1178,6 +1238,182 @@ def fetch_undp_oracle_detail(requisition_id):
     response.raise_for_status()
     return first_json_item(response.json())
 
+def parse_undp_oracle_job_html(text, url):
+    soup = BeautifulSoup(text, "html.parser")
+    lines = [
+        clean(x)
+        for x in soup.get_text("\n", strip=True).splitlines()
+        if clean(x)
+    ]
+    blob = " ".join(lines)
+
+    heading = soup.find("h1")
+    title = clean(heading.get_text(" ", strip=True)) if heading else ""
+
+    def field(pattern):
+        match = re.search(pattern, blob, flags=re.I)
+        return clean(match.group(1)) if match else ""
+
+    grade = field(r"Grade\s+([A-Z0-9]+-?\d+)")
+    if not re.search(
+        r"\bIPSA-?\d+\b",
+        f"{grade} {title} {blob}",
+        flags=re.I,
+    ):
+        return None
+
+    posting = field(
+        r"Posting\s+Date\s+(.+?)(?=\s+Apply\s+Before\s+)"
+    )
+    deadline = field(
+        r"Apply\s+Before\s+(.+?)(?=\s+Job\s+Schedule\s+)"
+    )
+    location = field(
+        r"Locations?\s+(.+?)(?=\s+Agency\s+)"
+    )
+    agency = field(
+        r"Agency\s+(.+?)(?=\s+Grade\s+)"
+    )
+    vacancy_type = field(
+        r"Vacancy\s+Type\s+(.+?)(?=\s+Practice\s+Area\s+)"
+    )
+    practice = field(
+        r"Practice\s+Area\s+(.+?)(?=\s+Bureau\s+)"
+    )
+    bureau = field(
+        r"Bureau\s+(.+?)(?=\s+Contract\s+Duration\s+)"
+    )
+    duration = field(
+        r"Contract\s+Duration\s+(.+?)(?=\s+Education\s+&\s+Work\s+Experience\s+)"
+    )
+
+    try:
+        description_start = next(
+            i for i, line in enumerate(lines)
+            if canon(line) == "job description"
+        )
+        description = clean(" ".join(lines[description_start + 1:]))
+    except StopIteration:
+        description = clean(blob)
+
+    def iso(value):
+        try:
+            return (
+                datetime.strptime(
+                    value.strip(),
+                    "%m/%d/%Y, %I:%M %p",
+                )
+                .replace(tzinfo=timezone.utc)
+                .isoformat()
+                .replace("+00:00", "Z")
+            )
+        except ValueError:
+            return value
+
+    match = re.search(r"/job/(\d+)", url)
+    requisition_id = match.group(1) if match else ""
+
+    return normalize_undp_oracle({
+        "Id": requisition_id,
+        "Title": title,
+        "EmployerName": agency or "UNDP",
+        "PrimaryLocation": location,
+        "PostedDate": iso(posting),
+        "ExternalPostedEndDate": iso(deadline),
+        "JobGrade": grade,
+        "JobType": vacancy_type,
+        "PracticeArea": practice,
+        "Bureau": bureau,
+        "ContractDuration": duration,
+        "ExternalDescriptionStr": description,
+        "ExternalUrl": url,
+    })
+
+
+def fetch_undp_ipsa_oracle_html():
+    search_url = (
+        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
+        f"{UNDP_ORACLE_SITE}/jobs?keyword=IPSA"
+    )
+    headers = {
+        "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+        "Accept": "text/html,application/xhtml+xml",
+    }
+
+    try:
+        text, proxied = fetch_public_text(
+            search_url,
+            headers=headers,
+            jina_fallback=True,
+        )
+
+        urls = set()
+        for href in re.findall(
+            r'href=["\'](/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+[^"\']*)',
+            text,
+            flags=re.I,
+        ):
+            urls.add(urljoin(UNDP_ORACLE_BASE, href))
+
+        urls.update(
+            re.findall(
+                r'https://estm\.fa\.em2\.oraclecloud\.com/hcmUI/'
+                r'CandidateExperience/en/sites/CX_1/job/\d+[^)\s"\']*',
+                text,
+                flags=re.I,
+            )
+        )
+
+        urls = sorted(urls)[:80]
+        jobs = []
+        errors = []
+
+        def fetch_detail(job_url):
+            try:
+                detail_text, _ = fetch_public_text(
+                    job_url,
+                    headers=headers,
+                    jina_fallback=True,
+                )
+                return parse_undp_oracle_job_html(
+                    detail_text,
+                    job_url,
+                ), None
+            except Exception as exc:
+                return None, f"{job_url}: {type(exc).__name__}: {exc}"
+
+        with ThreadPoolExecutor(max_workers=8) as executor:
+            futures = [
+                executor.submit(fetch_detail, job_url)
+                for job_url in urls
+            ]
+            for future in as_completed(futures):
+                job, error = future.result()
+                if error:
+                    errors.append(error)
+                elif job:
+                    jobs.append(job)
+
+        jobs = dedupe(jobs)
+        return jobs, {
+            "status": "ok" if jobs else ("error" if errors else "empty"),
+            "count": len(jobs),
+            "endpoint": search_url,
+            "filter": "IPSA keyword",
+            "discovered_urls": len(urls),
+            "proxy": proxied,
+            "errors": errors[:25],
+        }
+    except Exception as exc:
+        return [], {
+            "status": "error",
+            "count": 0,
+            "endpoint": search_url,
+            "filter": "IPSA keyword",
+            "errors": [f"{type(exc).__name__}: {exc}"],
+        }
+
+
 def fetch_undp_ipsa_oracle_public():
     jobs = []
     errors = []
@@ -1335,6 +1571,52 @@ def fetch_undp_ipsa_apify():
             "errors": [f"{type(exc).__name__}: {exc}"],
         }
 
+def load_historical_source_jobs(source_name, max_commits=20):
+    try:
+        log = subprocess.run(
+            ["git", "log", "--format=%H", "--", "vacancy.json"],
+            capture_output=True,
+            text=True,
+            check=True,
+        )
+        for commit in log.stdout.splitlines()[:max_commits]:
+            try:
+                raw = subprocess.run(
+                    ["git", "show", f"{commit}:vacancy.json"],
+                    capture_output=True,
+                    text=True,
+                    check=True,
+                ).stdout
+                payload = json.loads(raw)
+                jobs = [
+                    job for job in (payload.get("jobs") or [])
+                    if job.get("source") == source_name
+                ]
+                if jobs:
+                    return jobs
+            except Exception:
+                continue
+    except Exception:
+        pass
+    return []
+
+
+def carry_forward_source_jobs(all_jobs, previous_jobs, source_name):
+    if any(job.get("source") == source_name for job in all_jobs):
+        return 0
+    retained = [
+        job for job in (previous_jobs or [])
+        if job.get("source") == source_name
+    ]
+    if retained:
+        all_jobs.extend(retained)
+        return len(retained)
+
+    historical = load_historical_source_jobs(source_name)
+    all_jobs.extend(historical)
+    return len(historical)
+
+
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
     active, expired, stale = [], 0, 0
@@ -1385,6 +1667,7 @@ def summary(jobs):
 def main():
     started = time.time()
     all_jobs, sources = [], {}
+    previous_jobs = load_historical_source_jobs("UN Careers — P-level") or load_previous_jobs()
 
     for fetcher, name in [
         (fetch_google, "Google Jobs"),
@@ -1405,16 +1688,37 @@ def main():
         all_jobs.extend(un_api_jobs)
         sources["UN Careers — P-level / Apify"] = un_api_health
 
-    # UNDP current vacancies are served from Oracle Recruiting Cloud.
-    # Use the dedicated Oracle adapter when direct HTML extraction returns no IPSA jobs.
-    undp_public_jobs, undp_public_health = fetch_undp_ipsa_oracle_public()
-    all_jobs.extend(undp_public_jobs)
-    sources["UNDP — IPSA / Oracle public JSON"] = undp_public_health
+    # UNDP now runs on Oracle Candidate Experience.
+    # Prefer the public HTML search/detail pages, then keep the older JSON/Apify
+    # adapters as fallbacks.
+    undp_html_jobs, undp_html_health = fetch_undp_ipsa_oracle_html()
+    all_jobs.extend(undp_html_jobs)
+    sources["UNDP — IPSA / Oracle HTML"] = undp_html_health
+
+    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs):
+        undp_public_jobs, undp_public_health = fetch_undp_ipsa_oracle_public()
+        all_jobs.extend(undp_public_jobs)
+        sources["UNDP — IPSA / Oracle public JSON"] = undp_public_health
 
     if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs) and APIFY_API_TOKEN:
         undp_api_jobs, undp_api_health = fetch_undp_ipsa_apify()
         all_jobs.extend(undp_api_jobs)
         sources["UNDP — IPSA / Apify Oracle"] = undp_api_health
+
+    for protected_source in ("UNDP — IPSA", "UN Careers — P-level"):
+        if not any(job.get("source") == protected_source for job in all_jobs):
+            retained = carry_forward_source_jobs(
+                all_jobs,
+                previous_jobs,
+                protected_source,
+            )
+            if retained:
+                sources[f"{protected_source} / carry-forward"] = {
+                    "status": "carry-forward",
+                    "count": retained,
+                    "message": "Kept the last known jobs while the live source was unavailable.",
+                }
+
 
     unique_jobs = dedupe(all_jobs)
     active_jobs, expired_count, stale_count = filter_expired(unique_jobs)
