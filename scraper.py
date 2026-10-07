@@ -935,7 +935,7 @@ def normalize_un_search_result(item):
             deadline = clean(match.group(1))
             break
 
-    job_id_match = re.search(r"/(?:job-opening|jobopenings|job-opening-details|job)/(\d+)", link, flags=re.I)
+    job_id_match = re.search(r"/(?:jobopening|job-opening|jobopenings|job-opening-details|job)/?(\d+)", link, flags=re.I)
     job_id = job_id_match.group(1) if job_id_match else ""
 
     return {
