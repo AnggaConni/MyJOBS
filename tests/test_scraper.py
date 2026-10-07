@@ -156,6 +156,40 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["contract_level"], "P-4")
         self.assertEqual(job["country"], "Global")
 
+    def test_undp_oracle_normalization_keeps_non_ipsa(self):
+        job = normalize_undp_oracle({
+            "Id": "54321",
+            "Title": "Programme Specialist",
+            "EmployerName": "UNDP",
+            "PrimaryLocation": "Jakarta, Indonesia",
+            "VacancyType": "National Personnel Service Agreement",
+            "JobGrade": "NPSA-9",
+            "PostedDate": "2026-10-01T00:00:00Z",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "UNDP Careers")
+        self.assertEqual(job["contract_level"], "")
+        self.assertEqual(job["vacancy_type"], "National Personnel Service Agreement")
+
+    def test_un_secretariat_normalization_keeps_non_p(self):
+        job = parse_unvacancies_un_professional_detail(
+            """
+            <main>
+              <h1>Programme Assistant</h1>
+              <div>United Nations Secretariat · New York, USA</div>
+              <div>Posted 7 Oct 2026</div>
+              <div>Grade G-6</div>
+              <div>Contract General Service</div>
+              <p>Support programme operations.</p>
+            </main>
+            """,
+            "https://unvacancies.org/jobs/programme-assistant-DP-12345",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "UN Careers")
+        self.assertEqual(job["contract_level"], "")
+        self.assertEqual(job["source_category"], "UN")
+
     def test_undp_oracle_normalization(self):
         job = normalize_undp_oracle({
             "title": "Project Manager",
