@@ -433,7 +433,7 @@ def normalize_toploker(item):
         "title": title,
         "company": company,
         "location": location or "Indonesia",
-        "district": infer_location(location or title, fallback=""),
+        "district": clean(location) or infer_location(location or title, fallback=""),
         "province": infer_province(location or title),
         "country": "Indonesia",
         "via": "TopLoker",
@@ -493,6 +493,12 @@ def parse_toploker_detail(html, url):
         text_blob,
         flags=re.I,
     )
+    if not location_match:
+        location_match = re.search(
+            r"(?:ditempatkan|penempatan)\s+di\s+(.+?)(?=\.|\s+dan\s+bersedia\b|\s+serta\b|$)",
+            text_blob,
+            flags=re.I,
+        )
     schedule_match = re.search(
         r"Status\s+Kerja\s*:?\s*(.+?)(?=\s+Batas\s+Lamaran\b)",
         text_blob,
@@ -610,6 +616,7 @@ def fetch_toploker():
         "count": len(jobs),
         "list_urls": TOPLOKER_LIST_URLS,
         "pages_crawled": list(seen_pages),
+        "proxy_fallback": bool(seen_pages),
         "discovered_urls": len(detail_urls),
         "errors": errors[:25],
     }
@@ -1667,7 +1674,7 @@ def summary(jobs):
 def main():
     started = time.time()
     all_jobs, sources = [], {}
-    previous_jobs = load_historical_source_jobs("UN Careers — P-level") or load_previous_jobs()
+    previous_jobs = []
 
     for fetcher, name in [
         (fetch_google, "Google Jobs"),
