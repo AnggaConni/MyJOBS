@@ -328,12 +328,35 @@ button{cursor:pointer}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]})}
   function norm(v){return String(v||"").toLowerCase().normalize("NFKC")}
   function initials(v){return String(v||"?").trim().split(/\s+/).slice(0,2).map(function(x){return x[0]}).join("").toUpperCase()||"?"}
+  function metadataText(j){
+    var d=j.details||{};
+    return norm([
+      j.contract_level,
+      j.vacancy_type,
+      j.schedule_type,
+      j.source_category,
+      j.source_family,
+      j.extensions&&j.extensions.join(" "),
+      d.category_level,
+      d.post_level,
+      d.job_level,
+      d.job_grade,
+      d.vacancy_type,
+      d.contract_type,
+      d.recruitment_type,
+      j.title,
+      j.description
+    ].filter(Boolean).join(" "));
+  }
   function isUNP(j){
-    return /^(?:P|p)\s*[-–—.]?\s*[1-7]$/.test(String(j.contract_level||""))
+    var t=metadataText(j);
+    return /\bP\s*[-–—.]?\s*[1-7]\b/i.test(t)
       || String(j.source_category||"").toLowerCase()==="un p-level";
   }
   function isIPSA(j){
-    return /^IPSA\s*[-–—.]?\s*\d+$/i.test(String(j.contract_level||""))
+    var t=metadataText(j);
+    return /\bIPSA\s*[-–—.]?\s*\d+\b/i.test(t)
+      || /international personnel service agreement/i.test(t)
       || String(j.source_category||"").toLowerCase()==="undp — ipsa";
   }
   function isUN(j){var t=norm([j.source,j.company,j.title,j.description].join(" "));return t.indexOf("un careers")>=0||t.indexOf("united nations")>=0||t.indexOf(" ocha")>=0||t.indexOf("ocha ")>=0}
