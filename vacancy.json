@@ -1,16 +1,77 @@
 {
-  "last_updated": "2026-10-07 02:50 WIB",
-  "total": 1,
-  "jobs": [
-    {
-      "id": "dummy-1",
-      "title": "Staf Administrasi (Menunggu Update)",
-      "company": "Sistem Loker Ketapang",
-      "location": "Ketapang",
-      "via": "System",
-      "posted_at": "Hari ini",
-      "description": "Sistem sedang mengumpulkan data terbaru...",
-      "original_url": "#"
+  "schema_version": 4,
+  "last_updated": "2026-10-07 11:46 UTC",
+  "total": 0,
+  "expired_removed": 0,
+  "stale_removed": 0,
+  "stale_days": 7,
+  "status": "error",
+  "region": "Indonesia",
+  "scope": "Indonesia-first job aggregator",
+  "jobs": [],
+  "summary": {
+    "by_location": {},
+    "by_source": {},
+    "humanitarian_jobs": 0,
+    "un_jobs": 0,
+    "un_p_jobs": 0,
+    "undp_ipsa_jobs": 0
+  },
+  "sources": {
+    "Google Jobs": {
+      "status": "skipped",
+      "count": 0,
+      "message": "SERPAPI_KEY not configured"
+    },
+    "Loker.id": {
+      "status": "error",
+      "count": 0,
+      "errors": [
+        "Indonesia: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Indonesia",
+        "Jakarta: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Jakarta",
+        "Bandung: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bandung",
+        "Surabaya: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Surabaya",
+        "Kalimantan: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Kalimantan",
+        "Bali: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bali"
+      ]
+    },
+    "ReliefWeb": {
+      "status": "ok",
+      "count": 0,
+      "api_results": 0,
+      "errors": []
+    },
+    "UN Careers — P-level": {
+      "status": "error",
+      "count": 0,
+      "errors": [
+        "ParseError: syntax error: line 1, column 0"
+      ]
+    },
+    "UNDP — IPSA": {
+      "status": "empty",
+      "count": 0,
+      "url": "https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100",
+      "filter": "IPSA only",
+      "errors": []
+    },
+    "UN Careers — Indonesia": {
+      "status": "error",
+      "count": 0,
+      "errors": [
+        "ParseError: syntax error: line 1, column 0"
+      ]
     }
-  ]
+  },
+  "errors": [
+    "Indonesia: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Indonesia",
+    "Jakarta: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Jakarta",
+    "Bandung: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bandung",
+    "Surabaya: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Surabaya",
+    "Kalimantan: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Kalimantan",
+    "Bali: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bali",
+    "ParseError: syntax error: line 1, column 0",
+    "ParseError: syntax error: line 1, column 0"
+  ],
+  "runtime_seconds": 4.35
 }
