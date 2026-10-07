@@ -1,6 +1,6 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 14:38 UTC",
+  "last_updated": "2026-10-07 14:39 UTC",
   "total": 237,
   "expired_removed": 1,
   "stale_removed": 0,
@@ -7897,6 +7897,14 @@
       "errors": [
         "ParseError: syntax error: line 1, column 0"
       ]
+    },
+    "UNDP — IPSA / Oracle public JSON": {
+      "status": "empty",
+      "count": 0,
+      "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmRestApi/resources/latest/recruitingCEJobRequisitions",
+      "filter": "IPSA only",
+      "site": "CX_1",
+      "errors": []
     }
   },
   "errors": [
@@ -7909,5 +7917,5 @@
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 4.1
+  "runtime_seconds": 14.4
 }
