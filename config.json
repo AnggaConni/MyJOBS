@@ -6,6 +6,7 @@
   "regions": "Nationwide Indonesia",
   "sources": ["Google Jobs", "Loker.id", "ReliefWeb", "UN Careers"],
   "expiry_policy": {
+    "stale_days": 7,
     "remove_when_status": ["past", "closed", "expired", "inactive"],
     "remove_when_expires_at_is_before_now": true,
     "do_not_infer_deadlines_for_sources_without_deadline": true
