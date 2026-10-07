@@ -277,6 +277,26 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["location"], "Dakar, Senegal")
         self.assertIn("/job/37195", job["original_url"])
 
+    def test_unvacancies_unicode_ipsa_detail(self):
+        text = """
+        Project Manager – UNDP
+        UNDP · Dakar, Senegal Posted 30 Sep 2026
+        Grade
+        IPSA‑11
+        Contract
+        International PSA
+        Closes
+        7 Oct 2026
+        Description
+        Manage the project.
+        """
+        job = parse_unvacancies_undp_detail(
+            text,
+            "https://unvacancies.org/jobs/project-manager-ipsa11-dakar-senegal-DP-37195",
+        )
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-11")
+
     def test_dedupe_by_url(self):
         job = {
             "title": "A",

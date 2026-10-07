@@ -1631,10 +1631,12 @@ def parse_unvacancies_undp_detail(html, source_url):
     soup = BeautifulSoup(html, "html.parser")
     lines = [clean(x) for x in soup.get_text("\n", strip=True).splitlines() if clean(x)]
     blob = " ".join(lines)
+    blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob)
+    blob = blob.replace("\u00a0", " ")
 
-    grade_match = re.search(r"\bIPSA-?(\d+)\b", blob, flags=re.I)
+    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
-        grade_match = re.search(r"ipsa-?(\d+)", source_url, flags=re.I)
+        grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
     if not grade_match:
         return None
 
@@ -1659,11 +1661,18 @@ def parse_unvacancies_undp_detail(html, source_url):
     )
     if not location_match:
         location_match = re.search(
-            r"UNDP[^\n]{0,40}?[·|]\s*([^\n]+?)(?=\s+Posted\b|\s+Grade\b)",
+            r"UNDP[^\n]{0,60}?[·|•]\s*([^\n]+?)(?=\s+Posted\b|\s+Grade\b|\s+IPSA\b)",
             blob,
             flags=re.I,
         )
     location = clean(location_match.group(1)) if location_match else ""
+    if not location:
+        fallback_loc = re.search(
+            r"\b(?:Remote(?:\s*\([^)]*\))?|[A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+,\s+[A-Z][A-Za-zÀ-ÖØ-öø-ÿ .'-]+)\s+Posted\b",
+            blob,
+        )
+        if fallback_loc:
+            location = clean(fallback_loc.group(0).rsplit(" Posted", 1)[0])
 
     posted_match = re.search(
         r"Posted\s+(\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4})",
