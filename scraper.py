@@ -1894,6 +1894,7 @@ def fetch_undp_ipsa_unvacancies():
     errors = []
     jobs = []
     detail_urls = set()
+    preferred_detail_urls = set()
     page_urls = [
         "https://unvacancies.org/organizations/undp",
         "https://unvacancies.org/explore?organization=UNDP&q=IPSA",
@@ -1922,25 +1923,44 @@ def fetch_undp_ipsa_unvacancies():
                     candidate_url = urljoin("https://unvacancies.org", href)
                     if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", candidate_url, flags=re.I):
                         detail_urls.add(candidate_url)
+                        context = clean(
+                            " ".join([
+                                anchor.get_text(" ", strip=True),
+                                anchor.parent.get_text(" ", strip=True) if anchor.parent else "",
+                                anchor.parent.parent.get_text(" ", strip=True)
+                                if anchor.parent and anchor.parent.parent else "",
+                            ])
+                        )
+                        if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
+                            preferred_detail_urls.add(candidate_url)
+
                 job = parse_unvacancies_undp_card(anchor)
                 if job:
                     jobs.append(job)
 
-            # Jina can return Markdown rather than HTML. Recover absolute/relative
-            # job links from the text in that representation as well.
-            for href in re.findall(
-                r'https?://unvacancies\.org/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*|/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*',
-                text,
-                flags=re.I,
-            ):
-                candidate_url = urljoin("https://unvacancies.org", href)
-                if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", candidate_url, flags=re.I):
+            # Jina often returns Markdown. Select links whose surrounding lines
+            # explicitly mention an IPSA grade.
+            raw_lines = [clean(x) for x in text.splitlines() if clean(x)]
+            for idx, line in enumerate(raw_lines):
+                found_urls = re.findall(
+                    r'https?://unvacancies\.org/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*|/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*',
+                    line,
+                    flags=re.I,
+                )
+                if not found_urls:
+                    continue
+                context = " ".join(raw_lines[max(0, idx-2):min(len(raw_lines), idx+6)])
+                for href in found_urls:
+                    candidate_url = urljoin("https://unvacancies.org", href)
                     detail_urls.add(candidate_url)
+                    if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
+                        preferred_detail_urls.add(candidate_url)
 
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
 
-    detail_urls = set(list(detail_urls)[:120])
+    selected = list(dict.fromkeys(list(preferred_detail_urls) + list(detail_urls)))[:120]
+    detail_urls = set(selected)
 
     def fetch_detail(source_url):
         try:
@@ -1958,8 +1978,12 @@ def fetch_undp_ipsa_unvacancies():
     failed_detail_samples = []
     if detail_urls:
         with ThreadPoolExecutor(max_workers=6) as executor:
-            futures = [executor.submit(fetch_detail, url) for url in detail_urls]
-            for future in as_completed(futures):
+            future_map = {
+                executor.submit(fetch_detail, url): url
+                for url in detail_urls
+            }
+            for future in as_completed(future_map):
+                source_url = future_map[future]
                 job, error = future.result()
                 if error:
                     errors.append(error)
@@ -1967,7 +1991,7 @@ def fetch_undp_ipsa_unvacancies():
                     jobs.append(job)
                     parsed_details += 1
                 elif len(failed_detail_samples) < 5:
-                    failed_detail_samples.append("detail parser returned no job")
+                    failed_detail_samples.append(source_url)
 
     unique = dedupe(jobs)
     return unique, {
@@ -1976,6 +2000,7 @@ def fetch_undp_ipsa_unvacancies():
         "queries": page_urls,
         "card_jobs": len(jobs),
         "detail_urls": len(detail_urls),
+        "preferred_detail_urls": len(preferred_detail_urls),
         "parsed_details": parsed_details,
         "failed_detail_samples": failed_detail_samples,
         "errors": errors[:25],
