@@ -1419,6 +1419,125 @@ def normalize_undp_bing_result(item):
     })
 
 
+def first_json_item(payload):
+    if isinstance(payload, dict):
+        items = payload.get("items")
+        if isinstance(items, list) and items:
+            return items[0]
+        return payload
+    if isinstance(payload, list) and payload:
+        return payload[0]
+    return {}
+
+
+def fetch_undp_oracle_detail(requisition_id):
+    url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitionDetails"
+    finder = f'ById;Id="{requisition_id}",siteNumber={UNDP_ORACLE_SITE}'
+    response = requests.get(
+        url,
+        params={"onlyData":"true","expand":"all","finder":finder},
+        headers={
+            "User-Agent":"MyJOBS/1.0",
+            "Accept":"application/json",
+            "Ora-Irc-Language":"en",
+        },
+        timeout=max(TIMEOUT,30),
+    )
+    response.raise_for_status()
+    return first_json_item(response.json())
+
+
+def fetch_undp_ipsa_oracle_public():
+    list_url = f"{UNDP_ORACLE_BASE}/hcmRestApi/resources/latest/recruitingCEJobRequisitions"
+    page_size = 100
+    max_pages = 5
+    offset = 0
+    seen = set()
+    jobs = []
+    errors = []
+
+    for _ in range(max_pages):
+        finder = (
+            f"findReqs;keyword=IPSA,siteNumber={UNDP_ORACLE_SITE},"
+            f"limit={page_size},offset={offset},sortBy=POSTING_DATES_DESC"
+        )
+        try:
+            response = requests.get(
+                list_url,
+                params={
+                    "onlyData":"true",
+                    "expand":"requisitionList",
+                    "finder":finder,
+                },
+                headers={
+                    "User-Agent":"MyJOBS/1.0",
+                    "Accept":"application/json",
+                    "Ora-Irc-Language":"en",
+                    "Referer":f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs?keyword=IPSA",
+                },
+                timeout=max(TIMEOUT,30),
+            )
+            response.raise_for_status()
+            payload = response.json()
+        except Exception as exc:
+            errors.append(f"list offset={offset}: {type(exc).__name__}: {exc}")
+            break
+
+        rows = []
+        for item in payload.get("items", []) if isinstance(payload, dict) else []:
+            nested = item.get("requisitionList")
+            if isinstance(nested, list):
+                rows.extend(nested)
+            elif isinstance(item, dict):
+                rows.append(item)
+
+        if not rows:
+            break
+
+        ids = []
+        for row in rows:
+            rid = clean(row.get("Id") or row.get("RequisitionId") or row.get("SearchId"))
+            if rid and rid not in seen:
+                seen.add(rid)
+                ids.append(rid)
+
+        def get_detail(rid):
+            try:
+                return rid, fetch_undp_oracle_detail(rid), None
+            except Exception as exc:
+                return rid, None, f"{rid}: {type(exc).__name__}: {exc}"
+
+        with ThreadPoolExecutor(max_workers=6) as executor:
+            futures = [executor.submit(get_detail, rid) for rid in ids]
+            for future in as_completed(futures):
+                rid, detail, err = future.result()
+                if err:
+                    errors.append(err)
+                    continue
+                if not detail:
+                    continue
+
+                job = normalize_undp_oracle(detail)
+                if job:
+                    jobs.append(job)
+
+        has_more = bool(payload.get("hasMore")) if isinstance(payload, dict) else False
+        if not has_more:
+            break
+        offset += page_size
+
+    jobs = dedupe(jobs)
+    return jobs, {
+        "status":"ok" if jobs else ("error" if errors else "empty"),
+        "count":len(jobs),
+        "endpoint":list_url,
+        "filter":"IPSA keyword",
+        "finder":"findReqs;keyword=IPSA",
+        "site":UNDP_ORACLE_SITE,
+        "errors":errors[:25],
+    }
+
+
 def fetch_undp_ipsa_bing():
     queries = [
         'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-" "UNDP Careers"',
@@ -1759,6 +1878,12 @@ def main():
     undp_bing_jobs, undp_bing_health = fetch_undp_ipsa_bing()
     all_jobs.extend(undp_bing_jobs)
     sources["UNDP — IPSA / Bing Oracle"] = undp_bing_health
+
+    # UNDP IPSA: query Oracle Recruiting Cloud directly using its public
+    # FindReqs finder, then enrich each requisition with ById details.
+    undp_oracle_jobs, undp_oracle_health = fetch_undp_ipsa_oracle_public()
+    all_jobs.extend(undp_oracle_jobs)
+    sources["UNDP — IPSA / Oracle REST"] = undp_oracle_health
 
     # UNDP IPSA: use the stable unvacancies live index, which links
     # each listing back to the official UNDP application page.
