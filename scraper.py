@@ -164,6 +164,29 @@ def fetch_public_text(url, headers=None, jina_fallback=False, jina_first=False):
     return via_jina(), True
 
 
+def search_bing_links(query, url_pattern):
+    try:
+        response = requests.get(
+            "https://www.bing.com/search",
+            params={"q": query, "count": 50, "setlang": "en-US"},
+            headers={
+                "User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)",
+                "Accept-Language": "en-US,en;q=0.9",
+            },
+            timeout=max(TIMEOUT, 30),
+        )
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, "html.parser")
+        found = []
+        for anchor in soup.select("li.b_algo h2 a, h2 a"):
+            href = clean(anchor.get("href"))
+            if href and re.search(url_pattern, href, flags=re.I):
+                found.append(href)
+        return list(dict.fromkeys(found))
+    except Exception:
+        return []
+
+
 def clean(value):
     return re.sub(r"\s+", " ", str(value or "")).strip()
 
@@ -577,7 +600,7 @@ def fetch_toploker():
             soup = BeautifulSoup(text, "html.parser")
 
             for href in re.findall(
-                r'https?://toploker\\.com/lowongan/[^)\\s]+',
+                r'https?://toploker\.com/lowongan/[^)\s]+',
                 text,
                 flags=re.I,
             ):
@@ -587,7 +610,7 @@ def fetch_toploker():
                     detail_urls.append(job_url)
 
             for href in re.findall(
-                r'/lowongan/20\\d{2}-\\d{2}-\\d{2}![^)\\s)]+',
+                r'/lowongan/20\d{2}-\d{2}-\d{2}![^)\s)]+',
                 text,
                 flags=re.I,
             ):
@@ -626,6 +649,25 @@ def fetch_toploker():
 
         if len(detail_urls) >= TOPLOKER_MAX_JOBS:
             break
+
+    if not detail_urls:
+        today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        bing_queries = [
+            f'site:toploker.com/lowongan/ "{today}"',
+            f'site:toploker.com/lowongan/ "{datetime.now(timezone.utc).year}"',
+        ]
+        for query in bing_queries:
+            for job_url in search_bing_links(
+                query,
+                r"toploker\.com/lowongan/",
+            ):
+                if job_url not in seen_urls:
+                    seen_urls.add(job_url)
+                    detail_urls.append(job_url)
+                if len(detail_urls) >= TOPLOKER_MAX_JOBS:
+                    break
+            if detail_urls or len(detail_urls) >= TOPLOKER_MAX_JOBS:
+                break
 
     def fetch_detail(job_url):
         try:
@@ -1414,6 +1456,18 @@ def fetch_undp_ipsa_oracle_html():
                 flags=re.I,
             )
         )
+
+        if not urls:
+            for query in [
+                'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "IPSA-" "2026"',
+                'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-"',
+            ]:
+                for job_url in search_bing_links(
+                    query,
+                    r"estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+",
+                ):
+                    urls.add(job_url)
+            urls = sorted(urls)
 
         urls = sorted(urls)[:80]
         jobs = []
