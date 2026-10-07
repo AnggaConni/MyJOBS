@@ -1766,11 +1766,6 @@ def main():
     all_jobs.extend(undp_mirror_jobs)
     sources["UNDP — IPSA / unvacancies"] = undp_mirror_health
 
-    if not any(job.get("source") == "UNDP — IPSA" for job in all_jobs) and APIFY_API_TOKEN:
-        undp_api_jobs, undp_api_health = fetch_undp_ipsa_apify()
-        all_jobs.extend(undp_api_jobs)
-        sources["UNDP — IPSA / Apify Oracle"] = undp_api_health
-
     for protected_source in ("UNDP — IPSA", "UN Careers — P-level"):
         if not any(job.get("source") == protected_source for job in all_jobs):
             retained = carry_forward_source_jobs(
