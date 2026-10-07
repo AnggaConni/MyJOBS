@@ -1,7 +1,7 @@
 {
   "schema_version": 4,
-  "last_updated": "2026-10-07 16:34 UTC",
-  "total": 267,
+  "last_updated": "2026-10-07 16:37 UTC",
+  "total": 266,
   "expired_removed": 1,
   "stale_removed": 0,
   "stale_days": 7,
@@ -23,11 +23,11 @@
   ],
   "jobs": [
     {
-      "id": "job-04cff1c96321ca37",
+      "id": "job-f8aaa75ce5ceda31",
       "title": "Creative Content Creator",
       "company": "PT Yasma Natura Internasional",
-      "location": "kota madiun",
-      "district": "kota madiun",
+      "location": "kab. ponorogo",
+      "district": "kab. ponorogo",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -38,7 +38,7 @@
       "schedule_type": "",
       "salary": "",
       "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-680!di!pt-yasma-natura-internasional-518",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-843!di!pt-yasma-natura-internasional-518",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -47,7 +47,35 @@
       "details": {
         "source": "TopLoker",
         "deadline": "07 April 2027",
-        "location": "kota madiun"
+        "location": "kab. ponorogo"
+      }
+    },
+    {
+      "id": "job-076a932ea19eab33",
+      "title": "Creative Content Creator",
+      "company": "PT Yasma Natura Internasional",
+      "location": "kota batu",
+      "district": "kota batu",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-10-07",
+      "expires_at": "07 April 2027",
+      "schedule_type": "",
+      "salary": "",
+      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-401!di!pt-yasma-natura-internasional-518",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "deadline": "07 April 2027",
+        "location": "kota batu"
       }
     },
     {
@@ -80,62 +108,6 @@
       }
     },
     {
-      "id": "job-1a7cd103dd6788f6",
-      "title": "Creative Content Creator",
-      "company": "PT Yasma Natura Internasional",
-      "location": "kab. blitar",
-      "district": "kab. blitar",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-07",
-      "expires_at": "07 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-806!di!pt-yasma-natura-internasional-518",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "07 April 2027",
-        "location": "kab. blitar"
-      }
-    },
-    {
-      "id": "job-f8aaa75ce5ceda31",
-      "title": "Creative Content Creator",
-      "company": "PT Yasma Natura Internasional",
-      "location": "kab. ponorogo",
-      "district": "kab. ponorogo",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-07",
-      "expires_at": "07 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-843!di!pt-yasma-natura-internasional-518",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "07 April 2027",
-        "location": "kab. ponorogo"
-      }
-    },
-    {
       "id": "job-a01c4b1d4466ef74",
       "title": "Creative Content Creator",
       "company": "PT Yasma Natura Internasional",
@@ -164,22 +136,22 @@
       }
     },
     {
-      "id": "job-06bd1d16ee6f5bd2",
+      "id": "job-dda41c5f65d11bd3",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. sigi",
-      "district": "kab. sigi",
+      "location": "kab. banjarnegara",
+      "district": "kab. banjarnegara",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
       "source": "TopLoker",
       "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-07-07",
-      "expires_at": "09 Januari 2027",
+      "posted_at": "2026-08-20",
+      "expires_at": "21 Februari 2027",
       "schedule_type": "Full Time",
       "salary": "",
-      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-796!di!pt-buku-usaha-digital-buku-warung-746",
+      "description": "bukuwarung sedang mencari merchant succes executive (sales) untuk melakukan akuisisi merchant dan penjualan mesin edc di berbagai wilayah di jawa tengah dan diy. posisi ini bertanggung jawab untuk memperluas jaringan merchant dengan dukungan gaji pokok, tunjangan pulsa dan transportasi, serta jaminan bpjs.\n\npria atau wanita dengan usia maksimal 35 tahun dan pendidikan minimal sma sederajat. kandidat wajib memiliki pengalaman sebagai sales fmcg, kemampuan komunikasi yang baik, serta memiliki kendaraan roda dua dan sim c aktif. pengalaman dalam menjual mesin edc dan akuisisi sangat diutamakan.",
+      "original_url": "https://toploker.com/lowongan/2026-08-20!merchant-succes-executive-sales-188!di!pt-buku-usaha-digital-buku-warung-640",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -188,16 +160,16 @@
       "details": {
         "source": "TopLoker",
         "schedule": "Full Time",
-        "deadline": "09 Januari 2027",
-        "location": "kab. sigi"
+        "deadline": "21 Februari 2027",
+        "location": "kab. banjarnegara"
       }
     },
     {
-      "id": "job-076a932ea19eab33",
+      "id": "job-1a7cd103dd6788f6",
       "title": "Creative Content Creator",
       "company": "PT Yasma Natura Internasional",
-      "location": "kota batu",
-      "district": "kota batu",
+      "location": "kab. blitar",
+      "district": "kab. blitar",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -208,7 +180,7 @@
       "schedule_type": "",
       "salary": "",
       "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
-      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-401!di!pt-yasma-natura-internasional-518",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-806!di!pt-yasma-natura-internasional-518",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -217,7 +189,35 @@
       "details": {
         "source": "TopLoker",
         "deadline": "07 April 2027",
-        "location": "kota batu"
+        "location": "kab. blitar"
+      }
+    },
+    {
+      "id": "job-04cff1c96321ca37",
+      "title": "Creative Content Creator",
+      "company": "PT Yasma Natura Internasional",
+      "location": "kota madiun",
+      "district": "kota madiun",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-10-07",
+      "expires_at": "07 April 2027",
+      "schedule_type": "",
+      "salary": "",
+      "description": "yasma natura membuka lowongan untuk posisi creative content creator. pekerjaan melibatkan pembuatan ide, konsep, serta script konten media sosial, penyuntingan video hingga siap rilis, dan pengelolaan konten tiktok serta instagram. kandidat juga bertugas mengikuti tren short video, berkoordinasi terkait seo, meta, dan ai generative untuk digital marketing, mendokumentasikan aktivitas perusahaan, serta mengevaluasi performa konten. benefit mencakup gaji pokok, tunjangan, bpjstk, asuransi, dan jenjang karir.\n\nkandidat minimal lulusan sma/smk sederajat, pria/wanita usia 19-27 tahun. mampu membuat konsep, script, shooting, serta editing video (capcut/vn/adobe premiere). memahami tiktok, instagram reels, dan tren konten video pendek. memiliki portofolio konten menjadi nilai tambah. diutamakan berdomisili sidoarjo.",
+      "original_url": "https://toploker.com/lowongan/2026-10-07!creative-content-creator-680!di!pt-yasma-natura-internasional-518",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "deadline": "07 April 2027",
+        "location": "kota madiun"
       }
     },
     {
@@ -250,35 +250,6 @@
       }
     },
     {
-      "id": "job-2de2efdfe1fe1ee7",
-      "title": "Merchant Succes Executive (Sales)",
-      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. poso",
-      "district": "kab. poso",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-07-07",
-      "expires_at": "09 Januari 2027",
-      "schedule_type": "Full Time",
-      "salary": "",
-      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-932!di!pt-buku-usaha-digital-buku-warung-746",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "schedule": "Full Time",
-        "deadline": "09 Januari 2027",
-        "location": "kab. poso"
-      }
-    },
-    {
       "id": "job-762efff8884986f4",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
@@ -305,6 +276,35 @@
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
         "location": "kota palu"
+      }
+    },
+    {
+      "id": "job-2de2efdfe1fe1ee7",
+      "title": "Merchant Succes Executive (Sales)",
+      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
+      "location": "kab. poso",
+      "district": "kab. poso",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-07-07",
+      "expires_at": "09 Januari 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-932!di!pt-buku-usaha-digital-buku-warung-746",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "09 Januari 2027",
+        "location": "kab. poso"
       }
     },
     {
@@ -337,11 +337,11 @@
       }
     },
     {
-      "id": "job-79ef8e4e140227e5",
+      "id": "job-f2e203194068d8ad",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. buol",
-      "district": "kab. buol",
+      "location": "kab. donggala",
+      "district": "kab. donggala",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -352,7 +352,7 @@
       "schedule_type": "Full Time",
       "salary": "",
       "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-11!di!pt-buku-usaha-digital-buku-warung-746",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-945!di!pt-buku-usaha-digital-buku-warung-746",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -362,7 +362,7 @@
         "source": "TopLoker",
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
-        "location": "kab. buol"
+        "location": "kab. donggala"
       }
     },
     {
@@ -395,11 +395,11 @@
       }
     },
     {
-      "id": "job-f2e203194068d8ad",
+      "id": "job-06bd1d16ee6f5bd2",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. donggala",
-      "district": "kab. donggala",
+      "location": "kab. sigi",
+      "district": "kab. sigi",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -410,7 +410,7 @@
       "schedule_type": "Full Time",
       "salary": "",
       "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-945!di!pt-buku-usaha-digital-buku-warung-746",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-796!di!pt-buku-usaha-digital-buku-warung-746",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -420,15 +420,15 @@
         "source": "TopLoker",
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
-        "location": "kab. donggala"
+        "location": "kab. sigi"
       }
     },
     {
-      "id": "job-2359648f4447e4c2",
+      "id": "job-79ef8e4e140227e5",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
-      "location": "kab. banggai",
-      "district": "kab. banggai",
+      "location": "kab. buol",
+      "district": "kab. buol",
       "province": "",
       "country": "Indonesia",
       "via": "TopLoker",
@@ -439,7 +439,7 @@
       "schedule_type": "Full Time",
       "salary": "",
       "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
-      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-892!di!pt-buku-usaha-digital-buku-warung-746",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-11!di!pt-buku-usaha-digital-buku-warung-746",
       "search_query": "TopLoker",
       "extensions": [],
       "remote": false,
@@ -449,63 +449,7 @@
         "source": "TopLoker",
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
-        "location": "kab. banggai"
-      }
-    },
-    {
-      "id": "job-46e51ef2b47dc0cc",
-      "title": "Middle Mile Supervisor",
-      "company": "SPX Express akbar",
-      "location": "kab. jeneponto",
-      "district": "kab. jeneponto",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-05",
-      "expires_at": "05 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "posisi middle mile supervisor di spx express bertugas memantau dan memimpin operasional middle mile dari 3pl/in house di kab. maros, sulawesi selatan. tanggung jawab meliputi berkolaborasi dengan tim lm, mm, dan fm terkait lead time, durasi delivery, dan kebutuhan trip. selain itu, posisi ini berkoordinasi dengan tim fleet untuk memastikan kesiapan unit, melakukan pemetaan rute, memaksimalkan penggunaan unit, serta mengalokasikan perencanaan sumber daya untuk implementasi baru distribution center (dc).\n\npendidikan minimal sma/diploma dari semua jurusan. memiliki pengalaman kerja 3-5 tahun di industri transportasi, logistik, atau rantai pasokan. memiliki pengalaman dalam menangani operasi darat, udara, maupun laut. mahir menggunakan microsoft office dan memiliki keterampilan komunikasi yang baik. bersedia bekerja dengan sistem shifting serta bersedia ditempatkan di area yang ditentukan.",
-      "original_url": "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "05 April 2027",
-        "location": "kab. jeneponto"
-      }
-    },
-    {
-      "id": "job-b973fd0bdf4c2dfb",
-      "title": "Driver Management Supervisor",
-      "company": "SPX Express akbar",
-      "location": "kab. tabalong",
-      "district": "kab. tabalong",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-05",
-      "expires_at": "05 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "posisi driver management supervisor bertanggung jawab untuk melakukan evaluasi kehadiran driver sesuai jadwal yang ditetapkan, mengelola pelatihan, penilaian kinerja, serta peningkatan kompetensi driver secara berkala. selain itu, posisi ini bertugas melakukan pembinaan dan berkoordinasi dengan tim hse guna mencegah kecelakaan kerja, proaktif melakukan pemecahan masalah untuk perbaikan kinerja beserta efektivitasnya, serta bertanggung jawab atas pencapaian target dari kinerja dan pengembangan tim di penempatan banjarmasin dc, kab. banjar.\n\npendidikan minimal d3 semua jurusan, namun diutamakan dari jurusan logistik atau supply chain. memiliki pengalaman 3-5 tahun di bidang logistik/ekspres dan driver management. memiliki skill teknis manajemen armada & roster serta memahami standar k3/hse. memiliki kemampuan problem solving, komunikasi, dan kepemimpinan.",
-      "original_url": "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "05 April 2027",
-        "location": "kab. tabalong"
+        "location": "kab. buol"
       }
     },
     {
@@ -538,6 +482,35 @@
       }
     },
     {
+      "id": "job-2359648f4447e4c2",
+      "title": "Merchant Succes Executive (Sales)",
+      "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
+      "location": "kab. banggai",
+      "district": "kab. banggai",
+      "province": "",
+      "country": "Indonesia",
+      "via": "TopLoker",
+      "source": "TopLoker",
+      "source_family": "Job Portal — Indonesia",
+      "posted_at": "2026-07-07",
+      "expires_at": "09 Januari 2027",
+      "schedule_type": "Full Time",
+      "salary": "",
+      "description": "kami mencari merchant succes executive (sales) untuk bergabung dengan tim kami. bertanggung jawab untuk meningkatkan penjualan dan mencapai target penjualan. melakukan analisis pasar dan kompetitor, serta membangun hubungan dengan merchant.\n\nlaki-laki/wanita usia maks 35 tahun, minimum pendidikan sma sederajat, memiliki pengalaman sebagai sales fmcg, memiliki komunikasi skill yang baik, memiliki kendaraan roda dua, memiliki sim c aktif, pengalaman menjual mesin edc & akuisisi",
+      "original_url": "https://toploker.com/lowongan/2026-07-07!merchant-succes-executive-sales-892!di!pt-buku-usaha-digital-buku-warung-746",
+      "search_query": "TopLoker",
+      "extensions": [],
+      "remote": false,
+      "status": "current",
+      "country_code": "ID",
+      "details": {
+        "source": "TopLoker",
+        "schedule": "Full Time",
+        "deadline": "09 Januari 2027",
+        "location": "kab. banggai"
+      }
+    },
+    {
       "id": "job-e39dd9bf774b9e55",
       "title": "Merchant Succes Executive (Sales)",
       "company": "PT. BUKU USAHA DIGITAL (Buku Warung)",
@@ -564,34 +537,6 @@
         "schedule": "Full Time",
         "deadline": "09 Januari 2027",
         "location": "kab. banggai kepulauan"
-      }
-    },
-    {
-      "id": "job-80f4e1899f699f8a",
-      "title": "Middle Mile Coordinator",
-      "company": "SPX Express akbar",
-      "location": "kab. kotabaru",
-      "district": "kab. kotabaru",
-      "province": "",
-      "country": "Indonesia",
-      "via": "TopLoker",
-      "source": "TopLoker",
-      "source_family": "Job Portal — Indonesia",
-      "posted_at": "2026-10-05",
-      "expires_at": "05 April 2027",
-      "schedule_type": "",
-      "salary": "",
-      "description": "bertanggung jawab untuk memantau proses masuk dan keluarnya barang hingga diproses ke linehaul, serta memastikan alur penyortiran barang berjalan sesuai dengan standard operating procedure (sop). merencanakan kebutuhan tenaga kerja berdasarkan fluktuasi volume harian, memantau produktivitas, kapasitas, dan kesiapan peralatan di sortation center. melakukan briefing rutin bersama tim operasional terkait laporan kerja harian dan penerapan budaya kerja 5s.\n\npendidikan minimal sma/smk sederajat atau lebih tinggi. memiliki pengalaman kerja minimal 1 tahun sebagai staf transportasi di bidang logistik atau transportasi. mampu mengoperasikan microsoft excel secara mahir, khususnya rumus vlookup dan sumif. memiliki kemampuan komunikasi interpersonal yang baik. bersedia bekerja dengan sistem shift dan siap ditempatkan di area banjarmasin dc, kabupaten banjar, kalimantan selatan.",
-      "original_url": "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
-      "search_query": "TopLoker",
-      "extensions": [],
-      "remote": false,
-      "status": "current",
-      "country_code": "ID",
-      "details": {
-        "source": "TopLoker",
-        "deadline": "05 April 2027",
-        "location": "kab. kotabaru"
       }
     },
     {
@@ -8402,6 +8347,41 @@
       "country_code": ""
     },
     {
+      "id": "job-a8c53f8763265826",
+      "title": "Advisor, Diversity Inclusion Shared Leadership I-PPSA12 New York USA",
+      "company": "UNDP",
+      "location": "Global",
+      "district": "Indonesia",
+      "province": "",
+      "country": "Global",
+      "via": "UNDP Careers",
+      "source": "UNDP — IPSA",
+      "source_family": "UN Development Programme — International",
+      "posted_at": "",
+      "expires_at": "",
+      "schedule_type": "IPSA-12",
+      "salary": "",
+      "description": "Advisor, Diversity Inclusion Shared Leadership I-PPSA12 New York USA Advisor, Diversity Inclusion Shared Leadership I-PPSA12 New York USA UN Women · New York, United States New York, United States IPSA-12 International PSA New Closes in 7 days",
+      "original_url": "/jobs/un-women-advisor-diversity-inclusion-shared-leadership-i-ppsa12-new-york-usa-EN-37297",
+      "search_query": "UNDP IPSA",
+      "extensions": [
+        "IPSA-12",
+        "",
+        "",
+        "",
+        ""
+      ],
+      "remote": false,
+      "status": "current",
+      "contract_level": "IPSA-12",
+      "details": {
+        "source": "UNDP Careers",
+        "post_level": "IPSA-12",
+        "job_grade": "IPSA-12",
+        "external_url": "/jobs/un-women-advisor-diversity-inclusion-shared-leadership-i-ppsa12-new-york-usa-EN-37297"
+      }
+    },
+    {
       "id": "job-88a93ee0aec82bee",
       "title": "HEAD OF RESIDENT COORDINATOR OFFICE, P4",
       "company": "United Nations Secretariat",
@@ -8714,45 +8694,44 @@
   ],
   "summary": {
     "by_location": {
-      "Indonesia": 124,
+      "Indonesia": 125,
       "Global": 75,
       "Remote": 37,
       "Montreuil": 3,
       "Port Sudan": 2,
       "Papua": 2,
       "Arequipa": 2,
-      "kota madiun": 1,
-      "kota denpasar": 1,
-      "kab. blitar": 1,
       "kab. ponorogo": 1,
-      "kab. lumajang": 1,
-      "kab. sigi": 1,
       "kota batu": 1,
+      "kota denpasar": 1,
+      "kab. lumajang": 1,
+      "kab. banjarnegara": 1,
+      "kab. blitar": 1,
+      "kota madiun": 1,
       "kab. tojo una una": 1,
-      "kab. poso": 1,
       "kota palu": 1,
+      "kab. poso": 1,
       "kab. parigi moutong": 1,
-      "kab. buol": 1,
-      "kab. toli toli": 1,
       "kab. donggala": 1,
-      "kab. banggai": 1,
-      "kab. jeneponto": 1,
-      "kab. tabalong": 1,
+      "kab. toli toli": 1,
+      "kab. sigi": 1,
+      "kab. buol": 1,
       "kab. banggai laut": 1,
+      "kab. banggai": 1,
       "kab. banggai kepulauan": 1,
-      "kab. kotabaru": 1,
       "Kabul": 1,
       "Riau": 1
     },
     "by_source": {
       "ReliefWeb": 237,
-      "TopLoker": 20,
-      "UN Careers — P-level": 10
+      "TopLoker": 18,
+      "UN Careers — P-level": 10,
+      "UNDP — IPSA": 1
     },
     "humanitarian_jobs": 237,
     "un_jobs": 10,
     "un_p_jobs": 10,
-    "undp_ipsa_jobs": 0
+    "undp_ipsa_jobs": 1
   },
   "sources": {
     "Google Jobs": {
@@ -8774,30 +8753,32 @@
     },
     "TopLoker": {
       "status": "ok",
-      "count": 20,
+      "count": 18,
       "list_urls": [
         "https://toploker.com/loker/daftar",
         "https://toploker.com/loker/aktif-merekrut"
       ],
       "pages_crawled": [
-        "https://toploker.com/loker/daftar",
-        "https://toploker.com/loker/aktif-merekrut"
+        "https://toploker.com/loker/aktif-merekrut",
+        "https://toploker.com/loker/daftar"
       ],
       "proxy_fallback": true,
       "discovered_urls": 34,
       "sample_page_text": "Title: Daftar Loker Website URL Source: https://toploker.com/loker/daftar Markdown Content: [![Image 13: #](https://toploker.com/assets/Logo%20Toploker%20Verifikasi%202.png)](https://toploker.com/) [![Image 14: #](https://toploker.com/assets/winner2.webp)](https://toploker.com/) [![Image 15: #](https://toploker.com/assets/toploker.webp)](https://toploker.com/) [![Image 16: #](https://toploker.com/assets/winner1.png)](https://toploker.com/) * [PENCARI KARIR](https://toploker.com/login_pelamar) [PERUSAHAAN / IKM](https://toploker.com/login_perusahaan) [MENU](https://toploker.com/loker",
       "errors": [
+        "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-08-20!merchant-succes-executive-sales-188!di!pt-buku-usaha-digital-buku-warung-640: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-08-20!merchant-succes-executive-sales-188!di!pt-buku-usaha-digital-buku-warung-640",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
-        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
+        "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490",
         "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490"
@@ -8865,14 +8846,14 @@
       "count": 0,
       "endpoint": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs?keyword=IPSA",
       "filter": "IPSA keyword",
-      "discovered_urls": 0,
-      "selected_urls": 0,
+      "discovered_urls": 7,
+      "selected_urls": 7,
       "proxy": true,
       "errors": []
     },
     "UNDP — IPSA / unvacancies": {
-      "status": "empty",
-      "count": 0,
+      "status": "ok",
+      "count": 1,
       "queries": [
         "https://unvacancies.org/organizations/undp",
         "https://unvacancies.org/explore?organization=UNDP&q=IPSA",
@@ -8880,15 +8861,16 @@
         "https://unvacancies.org/explore?organization=UNDP&keyword=IPSA",
         "https://unvacancies.org/explore?organization=UNDP&contract=International%20PSA"
       ],
-      "card_jobs": 0,
-      "detail_urls": 10,
+      "card_jobs": 4,
+      "detail_urls": 24,
+      "preferred_detail_urls": 24,
       "parsed_details": 0,
       "failed_detail_samples": [
-        "detail parser returned no job",
-        "detail parser returned no job",
-        "detail parser returned no job",
-        "detail parser returned no job",
-        "detail parser returned no job"
+        "https://unvacancies.org/jobs/internship-data-analysis-and-report-synthesis-with-undp-rbas-in-ny-usa-office-based-DP-37322\\",
+        "https://unvacancies.org/jobs/team-leader-nature-low-carbon-development-open-to-tier-0-1-2-applicants-DP-37240\\",
+        "https://unvacancies.org/jobs/travel-analyst-open-to-all-candidates-DP-36839",
+        "https://unvacancies.org/jobs/officier-de-securite-ouvert-aux-candidats-internes-externes-DP-37341\\",
+        "https://unvacancies.org/jobs/internship-data-analysis-and-report-synthesis-with-undp-rbas-in-ny-usa-office-based-DP-37322"
       ],
       "errors": [],
       "source": "unvacancies.org (UNDP official application links)"
@@ -8906,22 +8888,24 @@
     "Surabaya: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Surabaya",
     "Kalimantan: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Kalimantan",
     "Bali: HTTPError: 403 Client Error: Forbidden for url: https://www.loker.id/cari-lowongan-kerja?q=Bali",
+    "https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!driver-management-supervisor-177!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-air-sea-139!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-359!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-480!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-381!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-659!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-167!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-484!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-205!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!3pl-management-supervisor-42!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-08-20!merchant-succes-executive-sales-188!di!pt-buku-usaha-digital-buku-warung-640: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-08-20!merchant-succes-executive-sales-188!di!pt-buku-usaha-digital-buku-warung-640",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
-    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!sortation-center-shift-lead-655!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-890!di!spx-express-akbar-490",
+    "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-503!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-823!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-supervisor-111!di!spx-express-akbar-490",
     "https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490: HTTPError: 429 Client Error: Too Many Requests for url: https://r.jina.ai/https://toploker.com/lowongan/2026-10-05!middle-mile-coordinator-830!di!spx-express-akbar-490",
     "ParseError: syntax error: line 1, column 0",
     "ParseError: syntax error: line 1, column 0"
   ],
-  "runtime_seconds": 38.64
+  "runtime_seconds": 30.52
 }
