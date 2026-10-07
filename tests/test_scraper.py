@@ -16,6 +16,7 @@ from scraper import (
     parse_undp_oracle_job_html,
     normalize_undp_bing_result,
     parse_unvacancies_undp_detail,
+    parse_unvacancies_undp_card,
     normalize_toploker,
     parse_toploker_detail,
 )
@@ -199,6 +200,21 @@ class ScraperTests(unittest.TestCase):
     def test_indonesian_date_parser(self):
         parsed = parse_datetime("31 Oktober 2026")
         self.assertEqual(parsed, datetime(2026, 10, 31, tzinfo=timezone.utc))
+
+    def test_unvacancies_undp_card(self):
+        html = """
+        <a href="/jobs/chief-engineering-specialist-DP-37266">
+          Chief Engineering Specialist
+        </a>
+        <div>UNDP · Libreville, Gabon Grade IPSA-11 International PSA Closes 19 Oct 2026</div>
+        """
+        from bs4 import BeautifulSoup
+        anchor = BeautifulSoup(html, "html.parser").a
+        job = parse_unvacancies_undp_card(anchor)
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-11")
+        self.assertEqual(job["location"], "Libreville, Gabon")
+        self.assertIn("/job/37266", job["original_url"])
 
     def test_unvacancies_undp_detail(self):
         html = """
