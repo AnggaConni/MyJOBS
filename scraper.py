@@ -1728,7 +1728,9 @@ def fetch_undp_ipsa_unvacancies():
             for anchor in soup.select('a[href*="/jobs/"]'):
                 href = clean(anchor.get("href"))
                 if href:
-                    detail_urls.add(urljoin("https://unvacancies.org", href))
+                    candidate_url = urljoin("https://unvacancies.org", href)
+                    if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", candidate_url, flags=re.I):
+                        detail_urls.add(candidate_url)
                 job = parse_unvacancies_undp_card(anchor)
                 if job:
                     jobs.append(job)
@@ -1736,11 +1738,13 @@ def fetch_undp_ipsa_unvacancies():
             # Jina can return Markdown rather than HTML. Recover absolute/relative
             # job links from the text in that representation as well.
             for href in re.findall(
-                r'https?://unvacancies\.org/jobs/[^)\s"]+|/jobs/[A-Za-z0-9_./%?=&-]+',
+                r'https?://unvacancies\.org/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*|/jobs/[^)\s"]*-DP-\d{4,6}[^)\s"]*',
                 text,
                 flags=re.I,
             ):
-                detail_urls.add(urljoin("https://unvacancies.org", href))
+                candidate_url = urljoin("https://unvacancies.org", href)
+                if re.search(r"/jobs/[^/?#]*-DP-\d{4,6}(?:[/?#]|$)", candidate_url, flags=re.I):
+                    detail_urls.add(candidate_url)
 
         except Exception as exc:
             errors.append(f"{page_url}: {type(exc).__name__}: {exc}")
