@@ -13,6 +13,7 @@ from scraper import (
     parse_undp_job_anchor,
     normalize_un_apify,
     normalize_undp_oracle,
+    parse_undp_oracle_job_page,
     normalize_undp_bing_result,
     parse_unvacancies_undp_detail,
     parse_unvacancies_undp_card,
