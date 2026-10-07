@@ -1,4 +1,4 @@
-name: Auto Update Kalimantan Barat Vacancies
+name: Auto Update MyJOBS
 
 on:
   schedule:
@@ -29,17 +29,17 @@ jobs:
       - name: Unit Tests
         run: python -m unittest discover -s tests -v
 
-      - name: Run Hybrid Scraper
+      - name: Run MyJOBS Scraper
         env:
           SERPAPI_KEY: ${{ secrets.SERPAPI_KEY }}
           RELIEFWEB_APPNAME: ${{ secrets.RELIEFWEB_APPNAME }}
-          MAX_GOOGLE_QUERIES: 6
+          MAX_GOOGLE_QUERIES: 8
         run: python scraper.py
 
       - name: Commit & Push Update JSON
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add vacancy.json sources.json
-          git diff --quiet && git diff --staged --quiet || git commit -m "auto-update: refresh Kalimantan Barat jobs"
+          git add vacancy.json
+          git diff --quiet && git diff --staged --quiet || git commit -m "auto-update: refresh MyJOBS"
           git push
