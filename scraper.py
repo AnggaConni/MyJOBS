@@ -44,6 +44,33 @@ QUERIES = [
     "jobs Indonesia",
 ]
 
+INDONESIA_PROVINCE_BY_CITY = {
+    "jakarta": "DKI Jakarta",
+    "bandung": "Jawa Barat",
+    "semarang": "Jawa Tengah",
+    "yogyakarta": "DI Yogyakarta",
+    "surabaya": "Jawa Timur",
+    "medan": "Sumatera Utara",
+    "palembang": "Sumatera Selatan",
+    "denpasar": "Bali",
+    "makassar": "Sulawesi Selatan",
+    "pontianak": "Kalimantan Barat",
+    "ketapang": "Kalimantan Barat",
+    "singkawang": "Kalimantan Barat",
+    "kubu raya": "Kalimantan Barat",
+    "sintang": "Kalimantan Barat",
+    "sambas": "Kalimantan Barat",
+    "sanggau": "Kalimantan Barat",
+    "sekadau": "Kalimantan Barat",
+    "melawi": "Kalimantan Barat",
+    "landak": "Kalimantan Barat",
+    "bengkayang": "Kalimantan Barat",
+    "kapuas hulu": "Kalimantan Barat",
+    "mempawah": "Kalimantan Barat",
+    "balikpapan": "Kalimantan Timur",
+    "banjarmasin": "Kalimantan Selatan"
+}
+
 CITY_ALIASES = {
     "jakarta": "Jakarta",
     "bandung": "Bandung",
@@ -91,6 +118,19 @@ def infer_location(text, fallback="Indonesia"):
     if "global" in blob:
         return "Global"
     return fallback or "Indonesia"
+
+def infer_province(text, explicit=""):
+    explicit = clean(explicit)
+    if explicit:
+        return explicit
+    blob = clean(text).lower()
+    for city, province in INDONESIA_PROVINCE_BY_CITY.items():
+        if city in blob:
+            return province
+    for province in INDONESIA_REGIONS:
+        if province.lower() in blob:
+            return province
+    return ""
 
 def parse_datetime(value):
     if not value:
@@ -158,8 +198,8 @@ def normalize_google(item, query):
         "title": title,
         "company": company or "Unknown company",
         "location": location or "Indonesia",
-        "district": infer_location(location or description),
-        "province": infer_location(location or description),
+        "district": infer_location(location or description, fallback=""),
+        "province": infer_province(location or description),
         "country": "Indonesia",
         "via": clean(item.get("via") or "Google Jobs"),
         "source": "Google Jobs",
@@ -228,8 +268,8 @@ def fetch_loker():
                     "title": title,
                     "company": "See source page",
                     "location": location,
-                    "district": infer_location(f"{location} {title}"),
-                    "province": infer_location(f"{location} {title}"),
+                    "district": infer_location(f"{location} {title}", fallback=""),
+                    "province": infer_province(f"{location} {title}"),
                     "country": "Indonesia",
                     "via": "Loker.id",
                     "source": "Loker.id",
@@ -269,14 +309,18 @@ def normalize_reliefweb(item):
     closing_date = clean(date_info.get("closing"))
     created_date = clean(date_info.get("created"))
     blob = f"{fields.get('title','')} {fields.get('body','')} {city_name} {country_name}"
+    state_info = first_reliefweb_value(fields.get("state") or fields.get("admin1") or fields.get("region") or fields.get("province"))
+    state_name = clean(state_info.get("name"))
     location_fallback = country_name or "Global"
+    district_name = city_name or infer_location(blob, fallback="")
+    province_name = infer_province(blob, explicit=state_name)
     return {
         "id": make_id("reliefweb", fields.get("id") or item.get("id"), fields.get("url")),
         "title": clean(fields.get("title")),
         "company": source_name or "ReliefWeb source",
         "location": city_name or country_name or "Indonesia",
-        "district": infer_location(blob, fallback=location_fallback),
-        "province": country_name or "",
+        "district": district_name,
+        "province": province_name,
         "country": country_name or "Indonesia",
         "via": "ReliefWeb",
         "source": "ReliefWeb",
