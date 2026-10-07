@@ -78,7 +78,7 @@ def canon(value):
 def make_id(*parts):
     return "job-" + hashlib.sha1("|".join(canon(p) for p in parts).encode("utf-8")).hexdigest()[:16]
 
-def infer_location(text):
+def infer_location(text, fallback="Indonesia"):
     blob = clean(text).lower()
     for alias, city in CITY_ALIASES.items():
         if alias in blob:
@@ -90,7 +90,7 @@ def infer_location(text):
         return "Remote"
     if "global" in blob:
         return "Global"
-    return "Indonesia"
+    return fallback or "Indonesia"
 
 def parse_datetime(value):
     if not value:
@@ -269,14 +269,14 @@ def normalize_reliefweb(item):
     closing_date = clean(date_info.get("closing"))
     created_date = clean(date_info.get("created"))
     blob = f"{fields.get('title','')} {fields.get('body','')} {city_name} {country_name}"
-
+    location_fallback = country_name or "Global"
     return {
         "id": make_id("reliefweb", fields.get("id") or item.get("id"), fields.get("url")),
         "title": clean(fields.get("title")),
         "company": source_name or "ReliefWeb source",
         "location": city_name or country_name or "Indonesia",
-        "district": infer_location(blob),
-        "province": infer_location(blob),
+        "district": infer_location(blob, fallback=location_fallback),
+        "province": country_name or "",
         "country": country_name or "Indonesia",
         "via": "ReliefWeb",
         "source": "ReliefWeb",
@@ -316,8 +316,23 @@ def fetch_reliefweb():
         )
         response.raise_for_status()
         data = response.json().get("data") or []
-        jobs = [normalize_reliefweb(item) for item in data]
-        return jobs, {"status": "ok", "count": len(jobs), "api_results": len(data), "errors": []}
+        jobs = []
+        excluded = 0
+        excluded_types = {"Tender/RFPs/EOIs", "Tender", "RFP", "EOI"}
+        for item in data:
+            job = normalize_reliefweb(item)
+            if job.get("schedule_type") in excluded_types:
+                excluded += 1
+                continue
+            jobs.append(job)
+
+        return jobs, {
+            "status": "ok",
+            "count": len(jobs),
+            "api_results": len(data),
+            "excluded_non_job": excluded,
+            "errors": [],
+        }
     except Exception as exc:
         return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
 
