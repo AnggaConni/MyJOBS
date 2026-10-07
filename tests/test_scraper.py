@@ -29,14 +29,18 @@ class ScraperTests(unittest.TestCase):
     def test_date_parser(self):
         parsed = parse_datetime("2026-10-01T00:00:00Z")
         self.assertEqual(parsed, datetime(2026, 10, 1, tzinfo=timezone.utc))
+        self.assertIsNotNone(parse_datetime("2 days ago"))
 
     def test_expiry_filter(self):
-        active, expired = filter_expired([
-            {"title": "Expired", "status": "current", "expires_at": "2020-01-01"},
-            {"title": "Active", "status": "current", "expires_at": ""},
+        active, expired, stale = filter_expired([
+            {"title": "Expired", "status": "current", "expires_at": "2020-01-01", "posted_at": ""},
+            {"title": "Stale", "status": "current", "expires_at": "", "posted_at": "30 days ago"},
+            {"title": "Active", "status": "current", "expires_at": "", "posted_at": "2 days ago"},
+            {"title": "No Date", "status": "current", "expires_at": "", "posted_at": "Unknown"},
         ])
         self.assertEqual(expired, 1)
-        self.assertEqual([job["title"] for job in active], ["Active"])
+        self.assertEqual(stale, 1)
+        self.assertEqual([job["title"] for job in active], ["Active", "No Date"])
 
     def test_google_normalization(self):
         job = normalize_google(
