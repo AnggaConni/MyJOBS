@@ -208,7 +208,7 @@ button{cursor:pointer}
 
 <script>
 (function(){
-  var state={jobs:[],query:"",type:"all",country:"all",province:"all",district:"all",sort:"newest",saved:JSON.parse(localStorage.getItem("myjobs:saved")||"[]")};
+  var state={jobs:[],query:"",type:"all",country:"Indonesia",province:"all",district:"all",sort:"newest",saved:JSON.parse(localStorage.getItem("myjobs:saved")||"[]")};
   var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112.75],Semarang:[-6.97,110.42],Yogyakarta:[-7.8,110.37],Medan:[3.59,98.67],Denpasar:[-8.65,115.22],Makassar:[-5.15,119.43],Palembang:[-2.99,104.76],Pontianak:[-0.03,109.34],Ketapang:[-1.85,109.97],Singkawang:[0.91,108.98],Balikpapan:[-1.27,116.83],Banjarmasin:[-3.32,114.59]};
   function $(s){return document.querySelector(s)} function $$(s){return Array.prototype.slice.call(document.querySelectorAll(s))}
   function esc(v){return String(v==null?"":v).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#039;"}[c]})}
@@ -279,7 +279,7 @@ button{cursor:pointer}
     $("#locationTitle").textContent=summary.length?summary[summary.length-1]:"Jobs across Indonesia";
   }
   function sync(){$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
-  function reset(){state.query="";state.type="all";state.country="all";state.province="all";state.district="all";$("#searchInput").value="";sync();populateGeoFilters();render()}
+  function reset(){state.query="";state.type="all";state.country="Indonesia";state.province="all";state.district="all";$("#searchInput").value="";sync();populateGeoFilters();render()}
   function toggleSave(id){var i=state.saved.indexOf(id);if(i>=0)state.saved.splice(i,1);else state.saved.push(id);localStorage.setItem("myjobs:saved",JSON.stringify(state.saved));render();toast(i>=0?"Removed from saved jobs":"Saved job")}
   function toast(msg){var t=$("#toast");t.textContent=msg;t.classList.add("show");clearTimeout(window.__t);window.__t=setTimeout(function(){t.classList.remove("show")},1400)}
   function nearestCity(lat,lon){var best="Indonesia",bestKm=Infinity,r=6371,rad=Math.PI/180;Object.keys(CITY_COORDS).forEach(function(name){var c=CITY_COORDS[name],dLat=(c[0]-lat)*rad,dLon=(c[1]-lon)*rad,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*rad)*Math.cos(c[0]*rad)*Math.sin(dLon/2)*Math.sin(dLon/2),km=2*r*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(km<bestKm){bestKm=km;best=name}});return{city:best,km:bestKm}}
@@ -319,11 +319,11 @@ button{cursor:pointer}
     $("#modalJobTitle").textContent=j.title||"Untitled opportunity";
     $("#modalCompany").textContent=j.company||"Unknown company";
     var meta=[];
-    if(j.location||j.district)meta.push("📍 "+(j.location||j.district));
-    if(j.schedule_type)meta.push("◷ "+j.schedule_type);
-    if(j.salary)meta.push("💰 "+j.salary);
+    if(j.location||j.district)meta.push("Location · "+(j.location||j.district));
+    if(j.schedule_type)meta.push("Employment · "+j.schedule_type);
+    if(j.salary)meta.push("Salary · "+j.salary);
     if(j.remote)meta.push("Remote");
-    if(j.expires_at)meta.push("Deadline "+j.expires_at);
+    if(j.expires_at)meta.push("Deadline · "+j.expires_at);
     $("#modalMeta").innerHTML=meta.map(function(x){return "<span>"+esc(x)+"</span>"}).join("");
     $("#modalDescription").innerHTML=formatDescription(j.description);
     $("#modalSourceDetails").innerHTML="<p><strong>"+esc(j.source||"Original source")+"</strong><br>"+esc(j.via||j.source_family||"Source listing")+"</p>";
@@ -348,7 +348,7 @@ button{cursor:pointer}
   $("#provinceSelect").onchange=function(){state.province=this.value;state.district="all";populateGeoFilters();render()};
   $("#districtSelect").onchange=function(){state.district=this.value;render()};
   $("#resetFilters").onclick=reset;$("#allLink").onclick=reset;$("#detectIpBtn").onclick=detectIP;$("#detectGpsBtn").onclick=detectGPS;
-  $("#savedTop").onclick=function(){state.query="";state.type="all";state.country="all";state.province="all";state.district="all";populateGeoFilters();render();$("#resultsMeta").textContent=state.saved.length+" saved "+(state.saved.length===1?"job":"jobs")+" · saved locally in this browser";$("#jobsList").innerHTML=state.jobs.filter(function(j){return state.saved.indexOf(j.id)>=0}).map(card).join("")||"<div class='empty'><div style='font-size:34px'>♡</div><h3>No saved jobs yet</h3><p>Use the heart button on a job to save it for later.</p></div>";bindModal()}
+  $("#savedTop").onclick=function(){state.query="";state.type="all";state.country="Indonesia";state.province="all";state.district="all";populateGeoFilters();render();$("#resultsMeta").textContent=state.saved.length+" saved "+(state.saved.length===1?"job":"jobs")+" · saved locally in this browser";$("#jobsList").innerHTML=state.jobs.filter(function(j){return state.saved.indexOf(j.id)>=0}).map(card).join("")||"<div class='empty'><div style='font-size:34px'>♡</div><h3>No saved jobs yet</h3><p>Use the heart button on a job to save it for later.</p></div>";bindModal()}
   $$(".side-link[data-filter]").forEach(function(b){b.onclick=function(){state.type=b.getAttribute("data-filter");sync();render()}})
   $("#modalClose").onclick=closeJob;
   $("#jobModal").addEventListener("click",function(e){if(e.target.id==="jobModal")closeJob()});
