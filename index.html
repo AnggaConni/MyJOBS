@@ -77,6 +77,16 @@ button{cursor:pointer}
 .note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:9px}
 .mobile-tools{display:none}
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;background:var(--navy);color:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:800;pointer-events:none;transition:.2s;z-index:90}.toast.show{opacity:1;transform:translate(-50%,0)}
+.modal-backdrop{position:fixed;inset:0;background:rgba(8,15,28,.62);backdrop-filter:blur(3px);z-index:100;display:none;padding:24px}
+.modal-backdrop.open{display:flex;align-items:center;justify-content:center}
+.job-modal{width:min(920px,100%);max-height:calc(100vh - 48px);background:#fff;border-radius:14px;box-shadow:0 30px 80px rgba(0,0,0,.26);display:flex;flex-direction:column;overflow:hidden}
+.modal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:22px 24px 16px;border-bottom:1px solid var(--line)}
+.modal-head-main{display:flex;gap:14px;min-width:0}.modal-logo{width:54px;height:54px;flex:0 0 54px;border-radius:10px;background:#edf1f5;display:grid;place-items:center;color:#536174;font-weight:900;font-size:17px}
+.modal-kicker{font-size:11px;color:var(--muted);font-weight:800;margin-bottom:4px}.modal-title{font-size:23px;line-height:1.2;margin:0 0 5px;letter-spacing:-.02em}.modal-company{font-size:13px;font-weight:800;color:#445064}
+.modal-close{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:9px;font-size:21px;line-height:1;color:#566274}
+.modal-body{padding:20px 24px;overflow:auto}.modal-meta{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}.modal-meta span{padding:6px 9px;border:1px solid #e6eaf0;background:#f8fafc;border-radius:999px;font-size:10px;font-weight:800;color:#526074}
+.modal-section{margin-bottom:22px}.modal-section h3{margin:0 0 8px;font-size:13px}.modal-description{font-size:13px;line-height:1.7;color:#3d4859}.modal-description p{margin:0 0 11px}.modal-description ul{margin:6px 0 12px;padding-left:20px}.modal-foot{padding:15px 24px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:10px;background:#fff}.modal-source{font-size:10px;color:var(--muted)}.apply-btn{border:0;background:var(--blue);color:#fff;padding:11px 16px;border-radius:8px;font-size:12px;font-weight:900;display:inline-flex;align-items:center;gap:7px}.apply-btn.disabled{background:#98a2b3;pointer-events:none}body.modal-open{overflow:hidden}
+@media(max-width:640px){.modal-backdrop{padding:0}.job-modal{max-height:100vh;height:100vh;border-radius:0}.modal-head{padding:18px}.modal-body{padding:18px}.modal-foot{padding:13px 18px}.modal-title{font-size:19px}.apply-btn{flex:1;justify-content:center}.modal-source{max-width:46%}}
 @media(max-width:1050px){.layout{grid-template-columns:200px minmax(0,1fr)}.right{display:none}}
 @media(max-width:780px){.top-inner{height:auto;min-height:64px;flex-wrap:wrap;padding:9px 0}.nav-search{order:3;max-width:none;flex-basis:100%}.nav-links{display:none}.location-banner{align-items:flex-start;flex-direction:column}.layout{grid-template-columns:1fr}.left{display:none}.mobile-tools{display:flex;gap:7px;overflow:auto;margin-bottom:10px}.mobile-tools .filter{flex:0 0 auto;width:auto;background:#fff;border:1px solid var(--line)}.mobile-tools .filter.active{border-color:#ffd2c8;background:#fff4f1}.container{width:calc(100% - 18px)}}
 @media(max-width:520px){.job-top{grid-template-columns:42px 1fr}.logo{width:42px;height:42px}.job-actions{grid-column:2}.job-foot{align-items:flex-start;flex-direction:column}.fresh{white-space:normal}.brand-name{font-size:17px}.nav-actions{display:none}}
@@ -164,6 +174,30 @@ button{cursor:pointer}
   </div>
 </main>
 
+<div class="modal-backdrop" id="jobModal" role="dialog" aria-modal="true" aria-labelledby="modalJobTitle" aria-hidden="true">
+  <div class="job-modal" role="document">
+    <div class="modal-head">
+      <div class="modal-head-main">
+        <div class="modal-logo" id="modalLogo">M</div>
+        <div>
+          <div class="modal-kicker" id="modalKicker">Job opportunity</div>
+          <h2 class="modal-title" id="modalJobTitle">Job title</h2>
+          <div class="modal-company" id="modalCompany">Company</div>
+        </div>
+      </div>
+      <button class="modal-close" id="modalClose" type="button" aria-label="Close job details">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="modal-meta" id="modalMeta"></div>
+      <div class="modal-section"><h3>About this opportunity</h3><div class="modal-description" id="modalDescription"></div></div>
+      <div class="modal-section"><h3>Source</h3><div class="modal-description" id="modalSourceDetails"></div></div>
+    </div>
+    <div class="modal-foot">
+      <div class="modal-source" id="modalSourceLabel">Original source</div>
+      <a class="apply-btn" id="modalApply" href="#" target="_blank" rel="noopener noreferrer">Apply on source ↗</a>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -188,9 +222,9 @@ button{cursor:pointer}
     var meta="<span>📍 "+esc(j.location||j.district||j.country||"Indonesia")+"</span>";
     if(j.salary)meta+="<span>💰 "+esc(j.salary)+"</span>";
     if(j.schedule_type)meta+="<span>◷ "+esc(j.schedule_type)+"</span>";
-    return "<article class='feed-card'><div class='job-top'><div class='logo'>"+esc(initials(j.company))+"</div><div><h3 class='job-title'>"+esc(j.title||"Untitled opportunity")+"</h3><div class='job-company'>"+esc(j.company||"Unknown company")+"</div><div class='job-meta'>"+meta+"</div></div><div class='job-actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"'>"+(saved?"♥":"♡")+"</button>"+(href?"<a class='view-btn' href='"+href+"' target='_blank' rel='noopener'>View ↗</a>":"")+"</div></div><div class='job-foot'><div class='badges'><span class='badge "+badgeClass+"'>"+esc(label)+"</span>"+(j.remote?"<span class='badge'>Remote</span>":"")+(j.expires_at?"<span class='badge'>Deadline "+esc(j.expires_at)+"</span>":"")+"</div><div class='fresh'>"+esc(j.posted_at||"Source date unavailable")+"</div></div></article>"
+    return "<article class='feed-card'><div class='job-top'><div class='logo'>"+esc(initials(j.company))+"</div><div><h3 class='job-title'>"+esc(j.title||"Untitled opportunity")+"</h3><div class='job-company'>"+esc(j.company||"Unknown company")+"</div><div class='job-meta'>"+meta+"</div></div><div class='job-actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"'>"+(saved?"♥":"♡")+"</button>"+(href?"<button class='view-btn' type='button' data-view='"+esc(j.id)+"'>View ↗</button>":"")+"</div></div><div class='job-foot'><div class='badges'><span class='badge "+badgeClass+"'>"+esc(label)+"</span>"+(j.remote?"<span class='badge'>Remote</span>":"")+(j.expires_at?"<span class='badge'>Deadline "+esc(j.expires_at)+"</span>":"")+"</div><div class='fresh'>"+esc(j.posted_at||"Source date unavailable")+"</div></div></article>"
   }
-  function render(){var list=sorted(state.jobs.filter(matches));$("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown";if(!list.length){$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>🔎</div><h3>No matching opportunities</h3><p>Try a different keyword or filter. You can also explore the official sources on the right.</p><button class='nav-btn primary' id='emptyReset'>Clear filters</button></div>";$("#emptyReset").onclick=reset;return}$("#jobsList").innerHTML=list.map(card).join("");$$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}})}
+  function render(){var list=sorted(state.jobs.filter(matches));$("#resultsMeta").textContent=list.length+" "+(list.length===1?"opportunity":"opportunities")+" shown";if(!list.length){$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>🔎</div><h3>No matching opportunities</h3><p>Try a different keyword or filter. You can also explore the official sources on the right.</p><button class='nav-btn primary' id='emptyReset'>Clear filters</button></div>";$("#emptyReset").onclick=reset;return}$("#jobsList").innerHTML=list.map(card).join("");$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}});bindModal()}
   function locations(){var counts={};state.jobs.forEach(function(j){var d=j.district||j.location||j.country||"Indonesia";counts[d]=(counts[d]||0)+1});var e=Object.keys(counts).sort(function(a,b){return counts[b]-counts[a]}).slice(0,8);var h="<button class='filter "+(state.location==="all"?"active":"")+"' data-location='all'>All locations</button>";e.forEach(function(d){h+="<button class='filter "+(state.location===d?"active":"")+"' data-location='"+esc(d)+"'>"+esc(d)+" <span class='count'>"+counts[d]+"</span></button>"});$("#locationFilters").innerHTML=h;$$("[data-location]").forEach(function(b){b.onclick=function(){state.location=b.getAttribute("data-location");sync();locations();render()}})}
   function sync(){$$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
   function reset(){state.query="";state.type="all";state.location="all";$("#searchInput").value="";sync();locations();render()}
@@ -200,6 +234,49 @@ button{cursor:pointer}
   function setLocation(city,message){state.location=city;$("#locationTitle").textContent=city==="all"?"Jobs across Indonesia":"Jobs near "+city;$("#locationStatus").textContent=message||"Location is used only to filter opportunities in your browser.";sync();locations();render()}
   async function detectIP(){var b=$("#detectIpBtn"),g=$("#detectGpsBtn");b.disabled=true;g.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var r=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!r.ok)throw Error();var d=await r.json();if(String(d.country_code||"").toUpperCase()!=="ID"){setLocation("all","Outside current Indonesia-first coverage · showing Indonesia-wide jobs.");return}var c=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(c)setLocation(c,"Approximate IP location: "+c+" · not saved.");else setLocation("all","Indonesia detected · choose a city manually for a more specific view.")}catch(e){toast("Approximate location unavailable")}finally{b.disabled=false;g.disabled=false}}
   function detectGPS(){if(!navigator.geolocation){toast("Browser geolocation is unavailable");return}var b=$("#detectGpsBtn"),i=$("#detectIpBtn");b.disabled=true;i.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(p){var n=nearestCity(p.coords.latitude,p.coords.longitude);setLocation(n.city,"GPS selected: "+n.city+" · precise coordinates are not saved.");b.disabled=false;i.disabled=false},function(){b.disabled=false;i.disabled=false;$("#locationStatus").textContent="GPS permission was not granted · approximate detection is still available.";toast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
+  function formatDescription(raw){
+    var text=String(raw||"").replace(/\r\n?/g,"\n").trim();
+    if(!text)return "<p>No description was provided by the source.</p>";
+    var safe=esc(text);
+    safe=safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
+    safe=safe.replace(/^#{1,6}\s+(.+)$/gm,"<strong>$1</strong>");
+    var blocks=safe.split(/\n\s*\n/).map(function(block){
+      var lines=block.split("\n").map(function(x){return x.trim()}).filter(Boolean);
+      if(lines.length&&lines.every(function(x){return /^[-•]\s+/.test(x)})){
+        return "<ul>"+lines.map(function(x){return "<li>"+x.replace(/^[-•]\s+/,"")+"</li>"}).join("")+"</ul>";
+      }
+      return "<p>"+lines.join("<br>")+"</p>";
+    });
+    return blocks.join("");
+  }
+  function openJob(id){
+    var j=state.jobs.find(function(x){return x.id===id}); if(!j)return;
+    var type=typeOf(j);
+    $("#modalLogo").textContent=initials(j.company);
+    $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP International (IPSA)":(j.source||"Job opportunity"));
+    $("#modalJobTitle").textContent=j.title||"Untitled opportunity";
+    $("#modalCompany").textContent=j.company||"Unknown company";
+    var meta=[];
+    if(j.location||j.district)meta.push("📍 "+(j.location||j.district));
+    if(j.schedule_type)meta.push("◷ "+j.schedule_type);
+    if(j.salary)meta.push("💰 "+j.salary);
+    if(j.remote)meta.push("Remote");
+    if(j.expires_at)meta.push("Deadline "+j.expires_at);
+    $("#modalMeta").innerHTML=meta.map(function(x){return "<span>"+esc(x)+"</span>"}).join("");
+    $("#modalDescription").innerHTML=formatDescription(j.description);
+    $("#modalSourceDetails").innerHTML="<p><strong>"+esc(j.source||"Original source")+"</strong><br>"+esc(j.via||j.source_family||"Source listing")+"</p>";
+    var apply=$("#modalApply");
+    if(j.original_url&&j.original_url!=="#"){apply.href=j.original_url;apply.classList.remove("disabled");apply.textContent="Apply on source ↗"}else{apply.removeAttribute("href");apply.classList.add("disabled");apply.textContent="Source link unavailable"}
+    $("#modalSourceLabel").textContent=(j.source?"Source: "+j.source:"Original source")+" · MyJOBS does not collect applications.";
+    $("#jobModal").classList.add("open");$("#jobModal").setAttribute("aria-hidden","false");document.body.classList.add("modal-open");
+    setTimeout(function(){$("#modalClose").focus()},0);
+  }
+  function closeJob(){
+    $("#jobModal").classList.remove("open");$("#jobModal").setAttribute("aria-hidden","true");document.body.classList.remove("modal-open");
+  }
+  function bindModal(){
+    $(".view-btn[data-view]").forEach(function(b){b.onclick=function(){openJob(b.getAttribute("data-view"))}});
+  }
   function load(){Promise.all([fetch("vacancy.json?ts="+Date.now(),{cache:"no-store"}),fetch("sources.json?ts="+Date.now(),{cache:"no-store"})]).then(function(rs){return Promise.all([rs[0].json(),rs[1].ok?rs[1].json():Promise.resolve({})])}).then(function(v){var d=v[0],s=v[1];state.jobs=Array.isArray(d.jobs)?d.jobs:[];$("#statJobs").textContent=Number(d.total||state.jobs.length).toLocaleString();$("#statSources").textContent=d.sources?Object.keys(d.sources).length:"—";$("#statExpired").textContent=Number(d.expired_removed||0).toLocaleString();$("#statUpdated").textContent=d.last_updated?String(d.last_updated).split(" ")[0]:"—";(s.buttons||[]).forEach(function(x){if(x.id==="karirhub")$("#karirhubLink").href=x.url;if(x.id==="reliefweb")$("#reliefwebLink").href=x.url;if(x.id==="un-careers")$("#unLink").href=x.url;if(x.id==="un-p")$("#unPLink").href=x.url;if(x.id==="undp-ipsa")$("#undpLink").href=x.url;if(x.id==="ocha")$("#ochaLink").href=x.url});locations();render()}).catch(function(){$("#resultsMeta").textContent="Dataset unavailable";$("#jobsList").innerHTML="<div class='empty'><div style='font-size:34px'>⚠️</div><h3>Job data is temporarily unavailable</h3><p>The interface is ready, but the latest dataset could not be loaded. Try again shortly.</p><button class='nav-btn primary' onclick='location.reload()'>Refresh</button></div>"})}
   $("#searchForm").onsubmit=function(e){e.preventDefault();state.query=$("#searchInput").value.trim();state.sort="relevance";$("#sortSelect").value="relevance";render()}
   $("#searchInput").oninput=function(e){state.query=e.target.value.trim();render()}
@@ -208,6 +285,9 @@ button{cursor:pointer}
   $("#resetFilters").onclick=reset;$("#allLink").onclick=reset;$("#detectIpBtn").onclick=detectIP;$("#detectGpsBtn").onclick=detectGPS;
   $("#savedTop").onclick=function(){state.query="";state.type="all";state.location="all";render();$("#resultsMeta").textContent=state.saved.length+" saved "+(state.saved.length===1?"job":"jobs")+" · saved locally in this browser";$("#jobsList").innerHTML=state.jobs.filter(function(j){return state.saved.indexOf(j.id)>=0}).map(card).join("")||"<div class='empty'><div style='font-size:34px'>♡</div><h3>No saved jobs yet</h3><p>Use the heart button on a job to save it for later.</p></div>"}
   $$(".side-link[data-filter]").forEach(function(b){b.onclick=function(){state.type=b.getAttribute("data-filter");sync();render()}})
+  $("#modalClose").onclick=closeJob;
+  $("#jobModal").addEventListener("click",function(e){if(e.target.id==="jobModal")closeJob()});
+  document.addEventListener("keydown",function(e){if(e.key==="Escape"&&$("#jobModal").classList.contains("open"))closeJob()});
   load();
 })();
 </script>
