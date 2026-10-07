@@ -244,7 +244,7 @@ class ScraperTests(unittest.TestCase):
             "schedule_type": "Full Time",
             "url": "https://toploker.com/lowongan/2026-10-07!account-officer!di!bank-padma-1",
         })
-        self.assertEqual(job["source"], "UNDP Careers")
+        self.assertEqual(job["source"], "TopLoker")
         self.assertEqual(job["country"], "Indonesia")
         self.assertEqual(job["province"], "Bali")
         self.assertEqual(job["schedule_type"], "Full Time")
@@ -407,7 +407,8 @@ class ScraperTests(unittest.TestCase):
             "snippet": "New Delhi, India Job Info Posting Date 10/01/2026, 11:05 AM Apply Before 10/15/2026, 05:00 AM Grade IPSA-11 Vacancy Type International Personnel Service Agreement",
         })
         self.assertIsNotNone(job)
-        self.assertEqual(job["source"], "UNDP — IPSA")
+        self.assertEqual(job["source"], "UNDP Careers")
+        self.assertEqual(job["source_category"], "UNDP — IPSA")
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["original_url"], "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/37241")
 
