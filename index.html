@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="MyJOBS — discover jobs across West Kalimantan, including local, humanitarian, UN and OCHA opportunities.">
+<meta name="description" content="MyJOBS — discover jobs across Indonesia, including local, humanitarian, UN and OCHA opportunities.">
 <meta name="theme-color" content="#0b1220">
-<title>MyJOBS — Jobs in West Kalimantan</title>
+<title>MyJOBS — Indonesia Job Aggregator</title>
 <style>
 :root{--bg:#f5f7fb;--card:#fff;--ink:#0b1220;--muted:#687386;--line:#e7ebf2;--brand:#ff5d3a;--green:#16986f;--blue:#356ae6;--navy:#0b1220;--shadow:0 18px 45px rgba(11,18,32,.08)}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(circle at 12% -8%,rgba(255,93,58,.34),transparent 30%),radial-gradient(circle at 100% 0,rgba(53,106,230,.10),transparent 28%),var(--bg);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.45}a{text-decoration:none;color:inherit}button,input,select{font:inherit}button{cursor:pointer}.container{width:min(1220px,calc(100% - 32px));margin:auto}
@@ -114,7 +114,7 @@ footer{padding:50px 0 70px;color:var(--muted);font-size:12px}.footer-line{border
 </main>
 
 <footer>
-<div class="container footer-line"><div><strong>MyJOBS</strong> · West Kalimantan job aggregator.</div><div id="footerStatus">Automated source indexing · direct links open original listings.</div></div>
+<div class="container footer-line"><div><strong>MyJOBS</strong> · Indonesia-first job aggregator.</div><div id="footerStatus">Automated source indexing · direct links open original listings.</div></div>
 </footer>
 
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
@@ -165,7 +165,7 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
       "<div class='logo'>"+esc(initials(j.company))+"</div><div>"+
       "<h3 class='title'>"+esc(j.title||"Untitled opportunity")+"</h3>"+
       "<div class='company'>"+esc(j.company||"Unknown company")+"</div>"+
-      "<div class='line'><span>📍 "+esc(j.location||j.district||"West Kalimantan")+"</span>"+meta+"</div></div>"+
+      "<div class='line'><span>📍 "+esc(j.location||j.district||"Indonesia")+"</span>"+meta+"</div></div>"+
       "<div class='actions'><button class='save "+(saved?"active":"")+"' data-save='"+esc(j.id)+"' aria-label='"+(saved?"Unsave":"Save")+" job'>"+(saved?"♥":"♡")+"</button>"+
       (href?"<a class='apply' href='"+href+"' target='_blank' rel='noopener'>View job ↗</a>":"")+"</div></div>"+
       "<div class='job-bottom'><div class='badges'><span class='badge "+cls+"'>"+esc(j.source||"Source")+"</span>"+
@@ -185,7 +185,7 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
     $$(".save").forEach(function(b){b.onclick=function(){toggleSave(b.getAttribute("data-save"))}})
   }
   function locations(){
-    var c={};state.jobs.forEach(function(j){var d=j.district||j.location||"West Kalimantan";c[d]=(c[d]||0)+1});
+    var c={};state.jobs.forEach(function(j){var d=j.district||j.location||"Indonesia";c[d]=(c[d]||0)+1});
     var entries=Object.keys(c).sort(function(a,b){return c[b]-c[a]}).slice(0,8);
     var html="<button class='filter "+(state.location==="all"?"active":"")+"' data-location='all'>All areas</button>";
     entries.forEach(function(d){html+="<button class='filter "+(state.location===d?"active":"")+"' data-location='"+esc(d)+"'>"+esc(d)+" <span style='float:right;color:#97a0af'>"+c[d]+"</span></button>"});
@@ -203,7 +203,7 @@ var CITY_COORDS={Jakarta:[-6.2,106.8],Bandung:[-6.92,107.61],Surabaya:[-7.25,112
     localStorage.setItem("ketapangjobs:saved",JSON.stringify(state.saved));render();
     var t=$("#toast");t.textContent=i>=0?"Job removed":"Job saved";t.classList.add("show");clearTimeout(window.__toast);window.__toast=setTimeout(function(){t.classList.remove("show")},1500)
   }
-  function nearestCity(lat,lon){var best="Ketapang",bestKm=Infinity;Object.keys(CITY_COORDS).forEach(function(name){var c=CITY_COORDS[name],r=6371,rad=Math.PI/180,dLat=(c[0]-lat)*rad,dLon=(c[1]-lon)*rad,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*rad)*Math.cos(c[0]*rad)*Math.sin(dLon/2)*Math.sin(dLon/2),km=2*r*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(km<bestKm){bestKm=km;best=name}});return {city:best,km:bestKm}}
+  function nearestCity(lat,lon){var best="Jakarta",bestKm=Infinity;Object.keys(CITY_COORDS).forEach(function(name){var c=CITY_COORDS[name],r=6371,rad=Math.PI/180,dLat=(c[0]-lat)*rad,dLon=(c[1]-lon)*rad,a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat*rad)*Math.cos(c[0]*rad)*Math.sin(dLon/2)*Math.sin(dLon/2),km=2*r*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));if(km<bestKm){bestKm=km;best=name}});return {city:best,km:bestKm}}
   function setDetectedLocation(city,mode,message){state.location=city;sync();locations();render();$("#locationStatus").textContent=message||("Showing "+city+" jobs · "+mode);}
   async function detectByIP(){var btn=$("#detectIpBtn"),gps=$("#detectGpsBtn");btn.disabled=true;gps.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var res=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!res.ok)throw new Error("IP lookup failed");var d=await res.json();var country=String(d.country_code||"").toUpperCase();if(country&&country!=="ID"){state.location="all";sync();locations();render();$("#locationStatus").textContent="Outside current Indonesia-first coverage · showing indexed jobs.";return}var city=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(!city){var blob=String((d.city||"")+" "+(d.region||"")).toLowerCase();city=Object.keys(CITY_COORDS).find(function(x){return blob.indexOf(x.toLowerCase())>=0})}if(city)setDetectedLocation(city,"IP","Approximate IP location: "+city+" · coordinates are not saved.");else{state.location="all";sync();locations();render();$("#locationStatus").textContent="Indonesia detected, but this city is outside current indexed areas."}}catch(e){$("#locationStatus").textContent="Approximate detection unavailable · try precise GPS or choose a location.";showToast("Could not detect location")}finally{btn.disabled=false;gps.disabled=false}}
   function detectByGPS(){var btn=$("#detectGpsBtn"),ip=$("#detectIpBtn");if(!navigator.geolocation){showToast("GPS / browser geolocation is not available");return}btn.disabled=true;ip.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(pos){var n=nearestCity(pos.coords.latitude,pos.coords.longitude);if(n.km<=180){setDetectedLocation(n.city,"GPS","GPS selected: "+n.city+" · accuracy ±"+Math.round(pos.coords.accuracy||0)+"m · not saved")}else{state.location="all";sync();locations();render();$("#locationStatus").textContent="GPS location is outside current Indonesia coverage · showing indexed jobs."}btn.disabled=false;ip.disabled=false},function(err){btn.disabled=false;ip.disabled=false;$("#locationStatus").textContent=err.code===1?"GPS permission was not granted · approximate IP detection is still available.":"GPS detection failed · try again or use approximate detection.";showToast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
