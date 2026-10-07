@@ -1717,38 +1717,95 @@ def fetch_undp_ipsa_oracle_html():
 
 
 def fetch_undp_ipsa_bing():
-    queries = [
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-" "UNDP Careers"',
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Apply Before" "IPSA-"',
-        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Posting Date" "IPSA-"',
+    # Oracle Candidate Experience search pages can render inconsistently in CI.
+    # Search engines remain a useful free discovery index for the official job URLs.
+    grade_queries = [
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-9" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-10" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-11" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "Grade IPSA-12" "UNDP Careers"',
+        'site:estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/ "International Personnel Service Agreement" "UNDP Careers"',
     ]
     results = []
     seen = set()
+    bing_count = 0
+    ddg_count = 0
 
-    for query in queries:
+    def add_result(item):
+        url = clean(item.get("url"))
+        if not url:
+            return
+        url = url.split("#", 1)[0]
+        if url not in seen:
+            seen.add(url)
+            results.append({
+                "url": url,
+                "title": clean(item.get("title")),
+                "snippet": clean(item.get("snippet")),
+            })
+
+    for query in grade_queries:
         for item in search_bing_results(
             query,
             r"estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+",
         ):
-            url = clean(item.get("url"))
-            if url and url not in seen:
-                seen.add(url)
-                results.append(item)
+            before = len(results)
+            add_result(item)
+            if len(results) > before:
+                bing_count += 1
+
+        for url in search_duckduckgo_links(
+            query,
+            r"estm\.fa\.em2\.oraclecloud\.com/hcmUI/CandidateExperience/en/sites/CX_1/job/\d+",
+        ):
+            before = len(results)
+            add_result({"url": url})
+            if len(results) > before:
+                ddg_count += 1
 
     jobs = []
-    for item in results[:50]:
+    detail_parsed = 0
+    detail_errors = []
+
+    def fetch_detail(item):
+        url = item["url"]
+        try:
+            text, _ = fetch_public_text(
+                url,
+                headers={"User-Agent":"Mozilla/5.0 (compatible; MyJOBS/1.0)","Accept":"text/html"},
+                jina_fallback=True,
+                jina_first=True,
+            )
+            job = parse_undp_oracle_job_page(text, url)
+            if job:
+                return job, None
+        except Exception as exc:
+            detail_errors.append(f"{url}: {type(exc).__name__}: {exc}")
+
+        # Fallback to the Bing snippet when the detail page cannot be read.
         job = normalize_undp_bing_result(item)
-        if job:
+        return job, None
+
+    for item in results[:80]:
+        job, error = fetch_detail(item)
+        if error:
+            detail_errors.append(error)
+        elif job:
             jobs.append(job)
+            detail_parsed += 1
 
     jobs = dedupe(jobs)
     return jobs, {
         "status": "ok" if jobs else "empty",
         "count": len(jobs),
-        "queries": queries,
+        "queries": grade_queries,
         "discovered_results": len(results),
-        "errors": [],
+        "bing_results": bing_count,
+        "duckduckgo_results": ddg_count,
+        "detail_parsed": detail_parsed,
+        "errors": detail_errors[:25],
     }
+
 
 
 def parse_unvacancies_undp_card(anchor):
