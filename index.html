@@ -413,6 +413,20 @@ button{cursor:pointer}
   function detectGPS(){if(!navigator.geolocation){toast("Browser geolocation is unavailable");return}var b=$("#detectGpsBtn"),i=$("#detectIpBtn");b.disabled=true;i.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(p){var n=nearestCity(p.coords.latitude,p.coords.longitude);setLocation(n.city,"GPS selected: "+n.city+" · precise coordinates are not saved.");b.disabled=false;i.disabled=false},function(){b.disabled=false;i.disabled=false;$("#locationStatus").textContent="GPS permission was not granted · approximate detection is still available.";toast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
   function formatDescription(raw){
     var text=String(raw||"").replace(/\r\n?/g,"\n").trim();
+
+    // Some upstream sources occasionally send HTML fragments or encoded
+    // entities. Convert them to readable plain text before rendering.
+    if(/<\/?(p|br|li|ul|ol|div|section|article|h[1-6]|strong|b)\b/i.test(text) || /&(?:nbsp|amp|lt|gt|quot|#39);/i.test(text)){
+      var holder=document.createElement("div");
+      holder.innerHTML=text
+        .replace(/<br\s*\/?>/gi,"\n")
+        .replace(/<li\b[^>]*>/gi,"\n- ")
+        .replace(/<\/(li|p|div|section|article|h[1-6])>/gi,"\n\n");
+      holder.querySelectorAll("script,style,noscript").forEach(function(el){el.remove()});
+      text=holder.textContent||holder.innerText||"";
+      text=text.replace(/\u00a0/g," ").replace(/\n{3,}/g,"\n\n").trim();
+    }
+
     if(!text)return "<p>No description was provided by the source.</p>";
     var safe=esc(text);
     safe=safe.replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>");
