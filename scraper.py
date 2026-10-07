@@ -876,9 +876,11 @@ def normalize_undp_oracle(item):
             clean(item.get("jobSchedule")),
             clean(item.get("workplaceType")),
         ],
-        "remote": clean(item.get("workplaceType")).lower() == "remote"
+        "remote": (
+            clean(item.get("workplaceType")).lower() == "remote"
             or "home-based" in full_description.lower()
-            or "home based" in full_description.lower(),
+            or "home based" in full_description.lower()
+        ),
         "status": "current",
         "contract_level": level,
         "details": make_source_details(
