@@ -114,6 +114,12 @@ def parse_datetime(value):
             return now - timedelta(days=1)
         return now - timedelta(days=int(relative.group(2)))
 
+    for fmt in ("%b-%d-%y", "%b-%d-%Y", "%d-%b-%y", "%d-%b-%Y"):
+        try:
+            return datetime.strptime(raw, fmt).replace(tzinfo=timezone.utc)
+        except ValueError:
+            pass
+
     try:
         dt = parsedate_to_datetime(raw)
         if dt.tzinfo is None:
@@ -289,7 +295,7 @@ def fetch_reliefweb():
         "limit": min(max(1, RELIEFWEB_LIMIT), 1000),
         "profile": "full",
         "sort": ["date.created:desc"],
-        "filter": {"operator": "AND", "conditions": [{"field": "status", "value": "current"}]},
+        "filter": {"operator": "AND", "conditions": [{"field": "status", "value": "published"}]},
     }
 
     try:
@@ -421,7 +427,12 @@ def fetch_un_careers():
 
         return jobs, {"status": "ok", "count": len(jobs), "feed": UN_RSS_URL, "errors": []}
     except Exception as exc:
-        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
+        message = f"{type(exc).__name__}: {exc}"
+        if isinstance(exc, requests.HTTPError) and getattr(exc.response, "status_code", None) in {401, 403, 404}:
+            return [], {"status": "skipped", "count": 0, "message": "UN Careers feed is not accessible to automated requests", "errors": [message]}
+        if isinstance(exc, ET.ParseError):
+            return [], {"status": "skipped", "count": 0, "message": "UN Careers feed no longer returns parseable XML from this endpoint", "errors": [message]}
+        return [], {"status": "error", "count": 0, "errors": [message]}
 
 UNDP_URL = "https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100"
 
@@ -462,18 +473,35 @@ def parse_undp_job_anchor(anchor):
 
 def fetch_undp_ipsa_global():
     try:
-        response = requests.get(UNDP_URL, headers={"User-Agent": "MyJOBS/1.0"}, timeout=TIMEOUT)
+        response = requests.get(UNDP_URL, headers={"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}, timeout=TIMEOUT)
         response.raise_for_status()
         soup = BeautifulSoup(response.text, "html.parser")
         jobs = []
-        for anchor in soup.select('a[href*="cj_view_job.cfm"]'):
+
+        for anchor in soup.select("a[href]"):
+            text = clean(anchor.get_text(" ", strip=True))
+            if not re.search(r"\bPost level\s+IPSA-\d+\b", text, flags=re.I):
+                continue
             job = parse_undp_job_anchor(anchor)
             if job:
                 jobs.append(job)
+
         unique = dedupe(jobs)
-        return unique, {"status": "ok" if unique else "empty", "count": len(unique), "url": UNDP_URL, "filter": "IPSA only", "errors": []}
+        return unique, {
+            "status": "ok" if unique else "empty",
+            "count": len(unique),
+            "url": UNDP_URL,
+            "filter": "IPSA only",
+            "errors": [],
+        }
     except Exception as exc:
-        return [], {"status": "error", "count": 0, "errors": [f"{type(exc).__name__}: {exc}"]}
+        return [], {
+            "status": "error",
+            "count": 0,
+            "url": UNDP_URL,
+            "filter": "IPSA only",
+            "errors": [f"{type(exc).__name__}: {exc}"],
+        }
 
 def filter_expired(jobs):
     now = datetime.now(timezone.utc)
