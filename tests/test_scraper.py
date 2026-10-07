@@ -138,6 +138,59 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Home Based")
 
+    def test_toploker_normalization(self):
+        job = normalize_toploker({
+            "title": "Account Officer",
+            "company": "Bank Padma",
+            "location": "Kota Denpasar",
+            "posted_at": "2026-10-07",
+            "expires_at": "07 Oktober 2027",
+            "description": "Drive branch sales.",
+            "requirements": "Minimal S1.",
+            "schedule_type": "Full Time",
+            "url": "https://toploker.com/lowongan/2026-10-07!account-officer!di!bank-padma-1",
+        })
+        self.assertEqual(job["source"], "TopLoker")
+        self.assertEqual(job["country"], "Indonesia")
+        self.assertEqual(job["province"], "Bali")
+        self.assertEqual(job["schedule_type"], "Full Time")
+
+    def test_toploker_detail_parser(self):
+        html = """
+        <html><body>
+        <div>Example Company</div>
+        <div>Membuka Lowongan</div>
+        <h2>Policy Officer</h2>
+        <div>Ringkasan</div>
+        <div>Status Kerja</div><div>:</div><div>Full Time</div>
+        <div>Batas Lamaran</div><div>:</div><div>31 Oktober 2026</div>
+        <div>Lokasi Kerja</div><div>:</div><div>Jakarta Selatan</div>
+        <div>Deskripsi Pekerjaan</div><div>Develop policy briefs.</div>
+        <div>Syarat Pekerjaan</div><div>S1.</div>
+        <div>Kirim Lamaran</div><div>Do not include contact details.</div>
+        </body></html>
+        """
+        job = parse_toploker_detail(html, "https://toploker.com/lowongan/2026-10-01!policy-officer!di!example-company-1")
+        self.assertEqual(job["title"], "Policy Officer")
+        self.assertEqual(job["company"], "Example Company")
+        self.assertEqual(job["location"], "Jakarta Selatan")
+        self.assertIn("Develop policy briefs", job["description"])
+
+    def test_undp_oracle_list_row(self):
+        job = normalize_undp_oracle({
+            "Id": "9001",
+            "Title": "Programme Specialist",
+            "EmployerName": "UNDP",
+            "PrimaryLocation": "Jakarta, Indonesia",
+            "PostedDate": "2026-10-07T00:00:00Z",
+            "ExternalPostedEndDate": "2026-10-31T00:00:00Z",
+            "JobGrade": "IPSA-10",
+            "ExternalUrlSeo": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/9001",
+        })
+        self.assertIsNotNone(job)
+        self.assertEqual(job["contract_level"], "IPSA-10")
+        self.assertEqual(job["location"], "Jakarta, Indonesia")
+
     def test_dedupe_by_url(self):
         job = {
             "title": "A",
