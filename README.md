@@ -59,3 +59,11 @@ No fake vacancy is generated when a source fails.
 5. Global UN opportunities: UN Careers P-1 to P-7 and UNDP IPSA.
 6. Optional ASEAN expansion after source, privacy and jurisdiction review.
 5. Optional ASEAN expansion after source, privacy and jurisdiction review.
+
+## Source-specific adapters
+
+MyJOBS treats Google Jobs, Loker.id, ReliefWeb, UN Careers and UNDP as separate source adapters because their data models, availability and application flows differ.
+
+UN Careers P-level ingestion first tries the public careers endpoints. If automated access is blocked, an optional Apify adapter can be enabled with the GitHub Actions secret APIFY_API_TOKEN. The adapter filters P-1 through P-7 only.
+
+UNDP IPSA is parsed separately from the current UNDP vacancies page and keeps its own post-level, agency, location and apply-by metadata.
