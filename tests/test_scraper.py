@@ -9,6 +9,7 @@ from scraper import (
     make_id,
     normalize_google,
     extract_un_p_level,
+    html_description_to_text,
     normalize_un_search_result,
     looks_like_undp_ipsa,
     preserve_text,
@@ -102,6 +103,15 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["country"], "Malaysia")
         self.assertEqual(job["region"], "ASEAN")
         self.assertEqual(job["country_code"], "MY")
+
+    def test_html_description_to_text(self):
+        html = "<nav>Skip to main content</nav><main><h2>About</h2><p>Hello&nbsp;world.</p><ul><li>First item</li><li>Second item</li></ul></main>"
+        text = html_description_to_text(html)
+        self.assertNotIn("Skip to main content", text)
+        self.assertIn("About", text)
+        self.assertIn("Hello world.", text)
+        self.assertIn("- First item", text)
+        self.assertIn("- Second item", text)
 
     def test_un_p_level_variants(self):
         self.assertEqual(extract_un_p_level("P-4"), "P-4")
