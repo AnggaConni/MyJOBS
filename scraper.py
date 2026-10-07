@@ -1397,6 +1397,7 @@ def normalize_undp_bing_result(item):
         )
 
     location = clean(location_match.group(1)) if location_match else ""
+    location = re.sub(r"\s+Be the First.*$", "", location, flags=re.I).strip()
     clean_title = re.sub(r"\s*[|–—-]\s*UNDP Careers.*$", "", title, flags=re.I)
     clean_title = re.sub(r"\s*[|–—-]\s*UNDP.*$", "", clean_title, flags=re.I)
     clean_title = clean(clean_title)
