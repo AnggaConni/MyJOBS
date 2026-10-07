@@ -2,33 +2,61 @@
 
 Local Job Aggregator & Labour-Market Radar for West Kalimantan, Indonesia.
 
-The original project focused on Ketapang. The current development branch expands the data pipeline to multiple West Kalimantan cities while preserving the existing vacancy.json fields used by a frontend.
+The project started as a Ketapang-focused vacancy collector and is being expanded into a regional job intelligence pipeline.
 
-## Pipeline
+## Sources
 
-Google Jobs + Loker.id -> normalization -> deduplication -> vacancy.json -> frontend
+- Google Jobs via SerpApi
+- Loker.id
+- ReliefWeb Jobs API
+- UN Careers RSS feed
+- OCHA vacancies are detected from UN Careers / humanitarian sources
+
+ReliefWeb currently requires a pre-approved `appname` for API use. Configure it as the GitHub Actions secret `RELIEFWEB_APPNAME`.
+
+## Expiry handling
+
+Jobs with an explicit source deadline are removed automatically once the deadline passes.
+
+Jobs whose source reports a closed/past/expired/inactive status are also removed.
+
+The scraper does **not** invent a deadline for Google Jobs or Loker.id when the source does not provide one.
+
+The latest run reports the number of removed expired jobs as `expired_removed`.
+
+## External source buttons
+
+`sources.json` contains button labels and official destination URLs for ReliefWeb Jobs, UN Careers and UN OCHA vacancies.
+
+## Data contract
+
+`vacancy.json` keeps the frontend fields `last_updated`, `total` and `jobs`.
+
+It additionally provides:
+
+- `status`
+- `schema_version`
+- `coverage`
+- `summary`
+- `sources`
+- `external_links`
+- `errors`
+- `expired_removed`
+
+No fake or dummy vacancy is created when all sources fail.
 
 ## Coverage
 
 Ketapang, Pontianak, Singkawang, Kubu Raya, Sintang, Sambas, Sanggau, Sekadau, Melawi, Landak, Bengkayang, Kapuas Hulu and Mempawah.
 
-## Data quality changes
-
-- Multi-query Google Jobs collection.
-- Explicit source health and error reporting.
-- Better vacancy identity using source URL / title / company / district.
-- Added district, province, source, salary, schedule type and remote fields.
-- No fake or dummy vacancy is created when all sources fail.
-- Existing fields `last_updated`, `total` and `jobs` remain available for frontend compatibility.
-
 ## Automation
 
-GitHub Actions refreshes the JSON twice per day and supports manual execution.
+GitHub Actions refreshes the dataset twice per day and supports manual execution.
 
 ## Roadmap
 
-1. More local and employer-owned sources.
-2. Vacancy expiry and freshness tracking.
-3. Skill, sector and salary normalization.
-4. Map-based vacancy exploration.
-5. Labour-market trend dashboard.
+1. Add more employer-owned and local sources.
+2. Track first-seen / last-seen timestamps.
+3. Normalize skills, sectors, salary and employment type.
+4. Add map-based vacancy exploration.
+5. Build a labour-market trend dashboard.
