@@ -348,20 +348,53 @@ button{cursor:pointer}
       j.description
     ].filter(Boolean).join(" "));
   }
+  function sourceText(j){
+    var d=j.details||{};
+    return norm([j.source,j.source_category,j.source_family,j.via,d.source,d.agency,d.organization].filter(Boolean).join(" "));
+  }
   function isUNP(j){
-    var t=metadataText(j);
-    return /\bP\s*[-–—.]?\s*[1-7]\b/i.test(t)
-      || String(j.source_category||"").toLowerCase()==="un p-level";
+    var d=j.details||{};
+    var category=norm(j.source_category||"");
+    var source=sourceText(j);
+    var level=norm([j.contract_level,d.post_level,d.category_level,d.level].filter(Boolean).join(" "));
+    // Prefer explicit source/level metadata; never classify a local vacancy
+    // from a coincidental "P-3" mention in its long description.
+    return category==="un p level"
+      || source.indexOf("un careers p level")>=0
+      || (/united nations|un careers/.test(source) && /\bp\s*[-–—.]?\s*[1-7]\b/i.test(level));
   }
   function isIPSA(j){
-    var t=metadataText(j);
-    return /\bIPSA\s*[-–—.]?\s*\d+\b/i.test(t)
-      || /international personnel service agreement/i.test(t)
-      || String(j.source_category||"").toLowerCase()==="undp — ipsa";
+    var d=j.details||{};
+    var source=sourceText(j);
+    var level=norm([j.contract_level,j.schedule_type,j.vacancy_type,d.post_level,d.job_grade,d.job_level,d.vacancy_type,d.contract_type].filter(Boolean).join(" "));
+    var undp=source.indexOf("undp")>=0 || norm(j.company||"").indexOf("undp")>=0;
+    return norm(j.source_category||"")==="undp ipsa"
+      || source.indexOf("undp ipsa")>=0
+      || (undp && (/\bipsa\s*[-–—.]?\s*\d+\b/i.test(level) || /international personnel service agreement/i.test(level)));
   }
-  function isUN(j){var t=norm([j.source,j.company,j.title,j.description].join(" "));return t.indexOf("un careers")>=0||t.indexOf("united nations")>=0||t.indexOf(" ocha")>=0||t.indexOf("ocha ")>=0}
-  function isHuman(j){var t=norm([j.source_family,j.source,j.company,j.title,j.description].join(" "));return t.indexOf("reliefweb")>=0||t.indexOf("humanitarian")>=0||isUN(j)||isIPSA(j)}
-  function typeOf(j){return isUNP(j)?"un-p":(isIPSA(j)?"undp-ipsa":(isUN(j)?"un":(isHuman(j)?"humanitarian":"local")))}
+  function isUN(j){
+    var source=sourceText(j);
+    var company=norm(j.company||"");
+    return source.indexOf("un careers")>=0
+      || source.indexOf("united nations")>=0
+      || source.indexOf("undp")>=0
+      || source.indexOf("ocha")>=0
+      || company==="undp"
+      || company.indexOf("united nations")>=0;
+  }
+  function isHuman(j){
+    var source=sourceText(j);
+    return source.indexOf("reliefweb")>=0 || source.indexOf("humanitarian")>=0 || isUN(j);
+  }
+  function typeOf(j){
+    // Source metadata wins over free-text description. UNDP roles that are
+    // not IPSA remain in the international/UN category, not local jobs.
+    if(isIPSA(j))return "undp-ipsa";
+    if(isUNP(j))return "un-p";
+    if(isUN(j))return "un";
+    if(isHuman(j))return "humanitarian";
+    return "local";
+  }
   function matches(j){
     if(state.type!=="all"&&typeOf(j)!==state.type)return false;
     if(state.country!=="all"&&String(j.country||"")!==state.country)return false;
