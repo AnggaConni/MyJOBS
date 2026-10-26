@@ -368,9 +368,14 @@ button{cursor:pointer}
     var source=sourceText(j);
     var level=norm([j.contract_level,j.schedule_type,j.vacancy_type,d.post_level,d.job_grade,d.job_level,d.vacancy_type,d.contract_type].filter(Boolean).join(" "));
     var undp=source.indexOf("undp")>=0 || norm(j.company||"").indexOf("undp")>=0;
-    return /undp\s*[—–-]\s*ipsa/i.test(norm(j.source_category||""))
+    // MyJOBS' "UNDP IPSA" filter is the dedicated UNDP Careers bucket.
+    // Some scraped UNDP listings omit the contract grade/type, so requiring
+    // an explicit IPSA token incorrectly leaves those records under "UN".
+    var undpSource = /undp/.test(source) || norm(j.company||"").indexOf("undp")>=0;
+    return undpSource
+      || /undp\s*[—–-]\s*ipsa/i.test(norm(j.source_category||""))
       || /undp\s*[—–-]\s*ipsa/i.test(source)
-      || (undp && (/\bipsa\s*[-–—.]?\s*\d+\b/i.test(level) || /international personnel service agreement/i.test(level)));
+      || (/undp/.test(source) && (/\bipsa\s*[-–—.]?\s*\d+\b/i.test(level) || /international personnel service agreement/i.test(level)));
   }
   function isUN(j){
     var source=sourceText(j);
