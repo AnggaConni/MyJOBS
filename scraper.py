@@ -2759,6 +2759,82 @@ def dedupe(jobs):
             unique[key] = job
     return list(unique.values())
 
+def enrich_job_metadata(jobs):
+    """Apply consistent source/category metadata without guessing contract levels."""
+    for job in jobs:
+        source = clean(job.get("source") or job.get("via"))
+        company = clean(job.get("company"))
+        level = clean(job.get("contract_level"))
+        vacancy_type = clean(job.get("vacancy_type"))
+        source_category = clean(job.get("source_category"))
+
+        source_key = canon(source)
+        company_key = canon(company)
+        is_undp = (
+            "undp" in source_key
+            or "un development programme" in canon(company)
+            or company_key == "undp"
+        )
+
+        # Keep publisher/source distinct from contract type. Do not infer IPSA
+        # from the employer alone; only use explicit contract/grade metadata.
+        if is_undp:
+            ipsa_match = re.search(
+                r"\\bIPSA\\s*[-–—.]?\\s*(\\d+)\\b",
+                " ".join([level, vacancy_type, source_category, clean(job.get("schedule_type"))]),
+                flags=re.I,
+            )
+            if ipsa_match:
+                job["contract_level"] = f"IPSA-{ipsa_match.group(1)}"
+                job["source_category"] = "UNDP — IPSA"
+            elif "international personnel service agreement" in canon(vacancy_type):
+                job["source_category"] = "UNDP — IPSA"
+            elif not source_category or source_category == "UNDP":
+                job["source_category"] = "UNDP"
+            job.setdefault("source_family", "UN Development Programme")
+
+        # Preserve a stable source identifier whenever an adapter supplied one.
+        if not job.get("source_job_id"):
+            details = job.get("details") if isinstance(job.get("details"), dict) else {}
+            source_id = (
+                details.get("source_job_id")
+                or details.get("requisition_id")
+                or details.get("job_id")
+            )
+            if source_id:
+                job["source_job_id"] = str(source_id).strip()
+
+        # Keep the original URL as the canonical application/source reference.
+        if not job.get("original_url") and job.get("url"):
+            job["original_url"] = job["url"]
+
+    return jobs
+
+
+def data_quality_summary(jobs):
+    """Return observable data-quality counts for workflow logs and JSON."""
+    missing_title = 0
+    missing_source = 0
+    missing_url = 0
+    missing_country = 0
+    missing_source_id = 0
+    for job in jobs:
+        missing_title += not bool(clean(job.get("title")))
+        missing_source += not bool(clean(job.get("source")))
+        url = clean(job.get("original_url"))
+        missing_url += not (url.startswith("https://") or url.startswith("http://"))
+        missing_country += not bool(clean(job.get("country")))
+        missing_source_id += not bool(clean(job.get("source_job_id")))
+
+    return {
+        "missing_title": int(missing_title),
+        "missing_source": int(missing_source),
+        "missing_valid_url": int(missing_url),
+        "missing_country": int(missing_country),
+        "missing_source_job_id": int(missing_source_id),
+    }
+
+
 def summary(jobs):
     return {
         "by_location": dict(Counter(j.get("district", "Indonesia") for j in jobs).most_common()),
@@ -2844,12 +2920,16 @@ def main():
                 }
 
 
+    # Normalize source metadata after all adapters/fallbacks have contributed.
+    # This is intentionally conservative: unknown contract levels remain unknown.
+    all_jobs = enrich_job_metadata(all_jobs)
     unique_jobs = dedupe(all_jobs)
     active_jobs, expired_count, stale_count = filter_expired(unique_jobs)
     errors = sum((s.get("errors", []) for s in sources.values()), [])
+    quality = data_quality_summary(active_jobs)
 
     output = {
-        "schema_version": 4,
+        "schema_version": 5,
         "last_updated": datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M %Z"),
         "total": len(active_jobs),
         "expired_removed": expired_count,
@@ -2861,6 +2941,7 @@ def main():
         "asean_members": [x["country"] for x in ASEAN_COUNTRIES],
         "jobs": active_jobs,
         "summary": summary(active_jobs),
+        "data_quality": quality,
         "sources": sources,
         "errors": errors[:50],
         "runtime_seconds": round(time.time() - started, 2),
@@ -2870,6 +2951,7 @@ def main():
         json.dump(output, handle, ensure_ascii=False, indent=2)
 
     print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
+    print(f"MyJOBS data quality: {json.dumps(quality, ensure_ascii=False, sort_keys=True)}")
     # Coverage diagnostics: classification is now metadata-driven, so log
     # both broad source counts and detected contract-grade counts.
     for source_name, health in sources.items():
