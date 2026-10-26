@@ -2780,7 +2780,7 @@ def enrich_job_metadata(jobs):
         # from the employer alone; only use explicit contract/grade metadata.
         if is_undp:
             ipsa_match = re.search(
-                r"\\bIPSA\\s*[-–—.]?\\s*(\\d+)\\b",
+                r"\bIPSA\s*[-–—.]?\s*(\d+)\b",
                 " ".join([level, vacancy_type, source_category, clean(job.get("schedule_type"))]),
                 flags=re.I,
             )
