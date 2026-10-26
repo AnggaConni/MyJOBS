@@ -25,6 +25,8 @@ from scraper import (
     parse_unvacancies_undp_card,
     normalize_toploker,
     parse_toploker_detail,
+    enrich_job_metadata,
+    data_quality_summary,
 )
 
 
@@ -447,6 +449,60 @@ class ScraperTests(unittest.TestCase):
             "original_url": "https://example.com/a",
         }
         self.assertEqual(len(dedupe([job, dict(job)])), 1)
+
+
+    def test_enrich_job_metadata_keeps_undp_source_and_ipsa_contract_separate(self):
+        jobs = [
+            {
+                "source": "UNDP Careers",
+                "company": "UNDP",
+                "title": "Programme Specialist",
+                "original_url": "https://jobs.undp.org/job/123",
+                "source_category": "UNDP",
+                "contract_level": "IPSA 10",
+                "vacancy_type": "International Personnel Service Agreement",
+            },
+            {
+                "source": "UNDP Careers",
+                "company": "UNDP",
+                "title": "Programme Assistant",
+                "original_url": "https://jobs.undp.org/job/456",
+                "source_category": "UNDP",
+                "contract_level": "",
+                "vacancy_type": "National Personnel Service Agreement",
+            },
+        ]
+        enriched = enrich_job_metadata(jobs)
+        self.assertEqual(enriched[0]["source_category"], "UNDP — IPSA")
+        self.assertEqual(enriched[0]["contract_level"], "IPSA-10")
+        self.assertEqual(enriched[1]["source_category"], "UNDP")
+        self.assertEqual(enriched[1]["contract_level"], "")
+        self.assertEqual(enriched[0]["source"], "UNDP Careers")
+
+    def test_data_quality_summary_counts_missing_fields(self):
+        quality = data_quality_summary([
+            {
+                "title": "Good job",
+                "source": "Example",
+                "original_url": "https://example.com/job/1",
+                "country": "Indonesia",
+                "source_job_id": "1",
+            },
+            {
+                "title": "",
+                "source": "",
+                "original_url": "not-a-url",
+                "country": "",
+                "source_job_id": "",
+            },
+        ])
+        self.assertEqual(quality, {
+            "missing_title": 1,
+            "missing_source": 1,
+            "missing_valid_url": 1,
+            "missing_country": 1,
+            "missing_source_job_id": 1,
+        })
 
 
 if __name__ == "__main__":
