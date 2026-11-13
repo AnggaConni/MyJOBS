@@ -205,7 +205,7 @@ class ScraperTests(unittest.TestCase):
             "detailFetched": True,
         })
         self.assertEqual(job["source"], "UNDP Careers")
-        self.assertEqual(job["source_category"], "UNDP — IPSA")
+        self.assertEqual(job["source_category"], "UNDP — PSA")
         self.assertEqual(job["contract_level"], "IPSA-10")
         self.assertEqual(job["location"], "Dili, Timor-Leste")
     def test_un_apify_normalization(self):
