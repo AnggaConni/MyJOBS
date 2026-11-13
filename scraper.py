@@ -4,6 +4,7 @@ import json
 import os
 import subprocess
 import re
+import shutil
 import time
 import xml.etree.ElementTree as ET
 from collections import Counter
@@ -23,6 +24,27 @@ MAX_GOOGLE_QUERIES = int(os.getenv("MAX_GOOGLE_QUERIES", "8"))
 TIMEOUT = int(os.getenv("REQUEST_TIMEOUT", "20"))
 RELIEFWEB_LIMIT = int(os.getenv("RELIEFWEB_LIMIT", "250"))
 STALE_DAYS = int(os.getenv("STALE_DAYS", "7"))
+
+AGENT_REACH_ENABLED = os.getenv("AGENT_REACH_ENABLED", "false").strip().lower() in {"1", "true", "yes", "on"}
+AGENT_REACH_LIMIT = max(1, min(10, int(os.getenv("AGENT_REACH_LIMIT", "5"))))
+AGENT_REACH_TIMEOUT = max(15, min(90, int(os.getenv("AGENT_REACH_TIMEOUT", "55"))))
+AGENT_REACH_QUERIES = [
+    ("LinkedIn", 'site:linkedin.com/jobs/view Indonesia (Jakarta OR Indonesia) job vacancy'),
+    ("JobStreet", '(site:jobstreet.co.id OR site:id.jobstreet.com) Indonesia lowongan kerja vacancy'),
+    ("Glints", 'site:glints.com/id Indonesia jobs lowongan kerja'),
+    ("Kalibrr", 'site:kalibrr.com Indonesia jobs OR site:dealls.com Indonesia lowongan kerja'),
+    ("KitaLulus", 'site:kitalulus.com Indonesia lowongan kerja jobs'),
+    ("Employer Career Sites", 'Indonesia company careers vacancies hiring jobs official career site Jakarta'),
+]
+AGENT_REACH_SOURCE_HOSTS = {
+    "linkedin.com": "LinkedIn",
+    "jobstreet.co.id": "JobStreet",
+    "id.jobstreet.com": "JobStreet",
+    "glints.com": "Glints",
+    "kalibrr.com": "Kalibrr",
+    "dealls.com": "Dealls",
+    "kitalulus.com": "KitaLulus",
+}
 TOPLOKER_LIST_URLS = [
     value.strip()
     for value in os.getenv(
@@ -516,6 +538,156 @@ def fetch_loker():
             errors.append(f"{query}: {type(exc).__name__}: {exc}")
 
     return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs), "errors": errors}
+
+
+
+def normalize_agent_reach_job(item, query):
+    """Normalize a public Agent-Reach search result without copying full job content."""
+    if not isinstance(item, dict):
+        return None
+    title = clean(item.get("title"))
+    url = clean(item.get("url"))
+    parsed = urlparse(url)
+    host = (parsed.hostname or "").lower()
+    source = next(
+        (name for domain, name in AGENT_REACH_SOURCE_HOSTS.items()
+         if host == domain or host.endswith("." + domain)),
+        "",
+    )
+    if not title or parsed.scheme != "https" or not host:
+        return None
+    if not source and re.search(r"/(?:careers?|vacancies|recruiting|workday)(?:/|$)", parsed.path, re.I):
+        source = "Employer Career Site"
+    if not source:
+        return None
+
+    # Keep LinkedIn limited to public job-detail URLs; discard profiles and search pages.
+    if source == "LinkedIn" and not re.search(r"^/jobs/view/(?:[^/]+-)?\d+/?$", parsed.path):
+        return None
+    if source == "JobStreet" and not re.search(r"/(?:job|jobs)/", parsed.path, re.I):
+        return None
+    if source == "Glints" and "/opportunities/" not in parsed.path:
+        return None
+    if source == "Kalibrr" and not re.search(r"/(?:job|jobs|careers?)/", parsed.path, re.I):
+        return None
+    if source == "Dealls" and not re.search(r"/(?:job|jobs|loker)/", parsed.path, re.I):
+        return None
+    if source == "KitaLulus" and not re.search(r"/(?:lowongan|jobs?)/", parsed.path, re.I):
+        return None
+    if source == "Employer Career Site" and not re.search(
+        r"/(?:careers?|vacancies|recruiting|workday)(?:/|$)", parsed.path, re.I
+    ):
+        return None
+
+    title = re.sub(r"\s*[|–—-]\s*(?:LinkedIn|JobStreet|Glints|Kalibrr|Dealls|KitaLulus)\s*$", "", title, flags=re.I).strip()
+    if not title:
+        return None
+    location = "Indonesia"
+    if "jakarta" in query.lower():
+        location = "Jakarta, Indonesia"
+    elif "bandung" in query.lower():
+        location = "Bandung, Indonesia"
+
+    published_at = clean(item.get("published_at")) or "Unknown"
+    source_id = ""
+    if source == "LinkedIn":
+        match = re.search(r"/jobs/view/(?:[^/]+-)?(\d+)", parsed.path)
+        source_id = match.group(1) if match else ""
+
+    return {
+        "id": make_id("Agent-Reach", source, source_id or url, title),
+        "source_job_id": source_id,
+        "title": title,
+        "company": "See original listing",
+        "location": location,
+        "district": infer_location(location, fallback="Indonesia"),
+        "province": infer_province(location),
+        "country": "Indonesia",
+        "market": "Indonesia",
+        "region": "Indonesia",
+        "via": "Agent-Reach public web discovery",
+        "source": source,
+        "source_family": "Employer Career Site" if source == "Employer Career Site" else "Job Portal — Indonesia",
+        "posted_at": published_at,
+        "expires_at": "",
+        "schedule_type": "",
+        "salary": "",
+        "description": "Public listing discovered by Agent-Reach. Open the original source for employer, requirements and application details.",
+        "original_url": url,
+        "search_query": query,
+        "extensions": [],
+        "remote": False,
+        "status": "current",
+        "country_code": "ID",
+        "source_domain": host,
+        "details": make_source_details(
+            source,
+            discovery_engine="Agent-Reach",
+            discovery_backend="public web search",
+            published_at=published_at,
+        ),
+    }
+
+
+def fetch_agent_reach_discovery():
+    """Discover public local vacancies via Agent-Reach's read-only web search channel."""
+    if not AGENT_REACH_ENABLED:
+        return [], {"status": "skipped", "count": 0, "message": "AGENT_REACH_ENABLED is false"}
+    if not shutil.which("agent-reach"):
+        return [], {"status": "skipped", "count": 0, "message": "Agent-Reach CLI is not installed"}
+
+    jobs, errors, by_source = [], [], Counter()
+    queries_run = []
+    for source_hint, query in AGENT_REACH_QUERIES:
+        command = [
+            "agent-reach", "web", "search", query,
+            "--limit", str(AGENT_REACH_LIMIT),
+            "--timeout", str(AGENT_REACH_TIMEOUT),
+        ]
+        try:
+            completed = subprocess.run(
+                command,
+                capture_output=True,
+                text=True,
+                timeout=AGENT_REACH_TIMEOUT + 10,
+                check=False,
+            )
+            try:
+                payload = json.loads(completed.stdout or "{}")
+            except json.JSONDecodeError:
+                payload = {}
+            if completed.returncode != 0 or not payload.get("ok"):
+                error = payload.get("error") or {}
+                code = clean(error.get("code"))
+                message = clean(error.get("message") or completed.stderr or "Agent-Reach search failed")
+                errors.append(f"{source_hint}: {code or 'ERROR'}: {message[:240]}")
+                if code in {"RATE_LIMITED", "PLATFORM_BLOCKED", "BUSY"}:
+                    break
+                continue
+
+            # Agent-Reach v1.6.1 emits the unified envelope with items at the root.
+            items = payload.get("items") or []
+            queries_run.append(source_hint)
+            for item in items:
+                job = normalize_agent_reach_job(item, query)
+                if job:
+                    jobs.append(job)
+                    by_source[job["source"]] += 1
+        except subprocess.TimeoutExpired:
+            errors.append(f"{source_hint}: TIMEOUT after {AGENT_REACH_TIMEOUT + 10}s")
+        except OSError as exc:
+            errors.append(f"{source_hint}: {type(exc).__name__}: {str(exc)[:200]}")
+
+    jobs = dedupe(jobs)
+    return jobs, {
+        "status": "ok" if jobs else ("error" if errors else "empty"),
+        "count": len(jobs),
+        "queries_run": queries_run,
+        "by_source": dict(by_source),
+        "errors": errors[:20],
+        "engine": "Agent-Reach 1.6.1 / public web search",
+        "login_required": False,
+    }
 
 
 def normalize_toploker(item):
@@ -2842,6 +3014,7 @@ def main():
         (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
         (fetch_toploker, "TopLoker"),
+        (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
         (fetch_reliefweb, "ReliefWeb"),
         (fetch_un_professional_global, "UN Careers — P-level"),
         (fetch_undp_ipsa_global, "UNDP — IPSA"),

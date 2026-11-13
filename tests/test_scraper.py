@@ -1,4 +1,7 @@
+import json
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from datetime import datetime, timezone
 
 from scraper import (
@@ -8,6 +11,8 @@ from scraper import (
     filter_expired,
     make_id,
     normalize_google,
+    normalize_agent_reach_job,
+    fetch_agent_reach_discovery,
     extract_un_p_level,
     html_description_to_text,
     normalize_un_search_result,
@@ -479,6 +484,87 @@ class ScraperTests(unittest.TestCase):
         self.assertIn("Bearer [REDACTED]", sanitized["message"])
         self.assertEqual(sanitized["nested"][0], "safe text")
         self.assertNotIn("secret-token", str(sanitized))
+
+    def test_agent_reach_fetch_reads_v161_root_items_envelope(self):
+        def fake_run(command, **kwargs):
+            query = command[3]
+            items = []
+            if "linkedin.com/jobs/view" in query:
+                items = [{
+                    "title": "Operations Analyst | LinkedIn",
+                    "url": "https://www.linkedin.com/jobs/view/123456789/",
+                    "published_at": "2026-11-13",
+                    "text": "Do not persist the full indexed description.",
+                }]
+            return SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps({"ok": True, "items": items, "error": None}),
+                stderr="",
+            )
+
+        with patch("scraper.AGENT_REACH_ENABLED", True), \
+             patch("scraper.shutil.which", return_value="/usr/bin/agent-reach"), \
+             patch("scraper.subprocess.run", side_effect=fake_run):
+            jobs, health = fetch_agent_reach_discovery()
+
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]["source"], "LinkedIn")
+        self.assertEqual(health["status"], "ok")
+        self.assertEqual(health["count"], 1)
+
+    def test_agent_reach_linkedin_public_job_normalization(self):
+        job = normalize_agent_reach_job({
+            "title": "Project Manager | Example Corp | LinkedIn",
+            "url": "https://www.linkedin.com/jobs/view/project-manager-123456789/",
+            "published_at": "2026-11-13",
+            "text": "This snippet must not be copied into the public dataset.",
+        }, "site:linkedin.com/jobs/view Indonesia jobs")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "LinkedIn")
+        self.assertEqual(job["source_job_id"], "123456789")
+        self.assertEqual(job["country"], "Indonesia")
+        self.assertEqual(job["company"], "See original listing")
+        self.assertNotIn("snippet", job)
+        self.assertNotIn("This snippet", job["description"])
+        self.assertTrue(job["original_url"].startswith("https://www.linkedin.com/jobs/view/"))
+
+    def test_agent_reach_rejects_linkedin_profile_and_unapproved_domain(self):
+        profile = normalize_agent_reach_job({
+            "title": "Recruiter",
+            "url": "https://www.linkedin.com/in/example/",
+        }, "Indonesia jobs")
+        unknown = normalize_agent_reach_job({
+            "title": "Project Manager",
+            "url": "https://unknown-jobs.example/jobs/123",
+        }, "Indonesia jobs")
+        self.assertIsNone(profile)
+        self.assertIsNone(unknown)
+
+    def test_agent_reach_jobstreet_regional_domain(self):
+        job = normalize_agent_reach_job({
+            "title": "Finance Analyst",
+            "url": "https://id.jobstreet.com/job/12345",
+        }, "site:jobstreet Indonesia jobs")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "JobStreet")
+
+    def test_agent_reach_employer_career_page(self):
+        job = normalize_agent_reach_job({
+            "title": "Programme Officer",
+            "url": "https://careers.example.org/careers/programme-officer-123",
+        }, "Indonesia company careers")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "Employer Career Site")
+        self.assertEqual(job["source_domain"], "careers.example.org")
+
+    def test_agent_reach_local_portal_allowlist(self):
+        job = normalize_agent_reach_job({
+            "title": "Data Analyst | Glints",
+            "url": "https://glints.com/id/opportunities/jobs/12345",
+        }, "site:glints.com/id Indonesia jobs")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "Glints")
+        self.assertEqual(job["title"], "Data Analyst")
 
     def test_dedupe_by_url(self):
         job = {

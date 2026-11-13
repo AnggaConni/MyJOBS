@@ -8,6 +8,7 @@ MyJOBS brings together job opportunities from multiple sources into a lightweigh
 
 - Google Jobs via SerpApi
 - Loker.id
+- Agent-Reach public web discovery (LinkedIn, JobStreet, Glints, Kalibrr, Dealls, KitaLulus and employer career pages)
 - ReliefWeb Jobs API
 - UN Careers RSS
 - OCHA-related vacancies detected from UN / humanitarian sources
@@ -58,11 +59,14 @@ No fake vacancy is generated when a source fails.
 4. Nationwide location intelligence.
 5. Global UN opportunities: UN Careers P-1 to P-7 and UNDP IPSA.
 6. Optional ASEAN expansion after source, privacy and jurisdiction review.
-5. Optional ASEAN expansion after source, privacy and jurisdiction review.
 
 ## Source-specific adapters
 
-MyJOBS treats Google Jobs, Loker.id, ReliefWeb, UN Careers and UNDP as separate source adapters because their data models, availability and application flows differ.
+MyJOBS treats each source as a separate adapter because data models, availability and application flows differ.
+
+Agent-Reach is installed in GitHub Actions from the pinned official v1.6.1 GitHub release wheel (SHA-256 verified). The scheduled workflow uses its read-only public web search channel to discover candidate listing URLs from LinkedIn and selected Indonesian job portals. It does not log in, use cookies, or access private LinkedIn content. Only allowlisted public job-detail URLs are normalized; full third-party job descriptions are not copied into the public dataset. Agent-Reach search failures are recorded in source health and do not stop the existing source adapters.
+
+The local portal discovery is best-effort search-engine discovery, not a claim that each portal provides an official API or has granted bulk redistribution rights. MyJOBS retains source attribution and links applicants to the original listing. Portal-specific direct adapters should only be added after checking public access, terms and stable detail URLs.
 
 UN Careers P-level ingestion first tries the public careers endpoints. If automated access is blocked, an optional Apify adapter can be enabled with the GitHub Actions secret APIFY_API_TOKEN. The adapter filters P-1 through P-7 only.
 
