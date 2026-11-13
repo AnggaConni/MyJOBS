@@ -441,6 +441,20 @@ class ScraperTests(unittest.TestCase):
         self.assertIn("/job/36742/", job["original_url"])
 
 
+    def test_undp_oracle_internal_15_digit_id_uses_search_fallback(self):
+        job = normalize_undp_oracle({
+            "Id": "300003970364665",
+            "Title": "Information Technology Analyst - AI and Emerging Technologies",
+            "EmployerName": "UNDP",
+            "JobGrade": "IPSA-9",
+            "ExternalUrl": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/300003970364665/",
+        })
+        self.assertIn(
+            "/jobs?keyword=Information+Technology+Analyst+-+AI+and+Emerging+Technologies",
+            job["original_url"],
+        )
+        self.assertNotIn("/job/300003970364665", job["original_url"])
+
     def test_undp_npsa_is_grouped_as_psa_and_keeps_npsa_grade(self):
         job = normalize_undp_oracle({
             "Id": "99991",
