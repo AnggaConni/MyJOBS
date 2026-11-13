@@ -409,7 +409,7 @@ class ScraperTests(unittest.TestCase):
         })
         self.assertIsNotNone(job)
         self.assertEqual(job["source"], "UNDP Careers")
-        self.assertEqual(job["source_category"], "UNDP — IPSA")
+        self.assertEqual(job["source_category"], "UNDP — PSA")
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertIn("/jobs?keyword=Country+Economist", job["original_url"])
 
@@ -451,7 +451,7 @@ class ScraperTests(unittest.TestCase):
             "ExternalUrl": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/99991",
         })
         self.assertEqual(job["contract_level"], "NPSA-3")
-        self.assertEqual(job["source_category"], "UNDP — IPSA")
+        self.assertEqual(job["source_category"], "UNDP — PSA")
         self.assertIn("/jobs?keyword=Communications+Clerk", job["original_url"])
 
     def test_sanitize_public_data_redacts_tokens_and_preserves_structure(self):
