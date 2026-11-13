@@ -441,6 +441,19 @@ class ScraperTests(unittest.TestCase):
         self.assertIn("/job/36742", job["original_url"])
 
 
+    def test_undp_npsa_is_grouped_as_psa_and_keeps_npsa_grade(self):
+        job = normalize_undp_oracle({
+            "Id": "99991",
+            "Title": "Communications Clerk (NPSA-3)",
+            "EmployerName": "UNDP",
+            "JobGrade": "NPSA-3",
+            "VacancyType": "National Personnel Service Agreement",
+            "ExternalUrl": "https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/job/99991",
+        })
+        self.assertEqual(job["contract_level"], "NPSA-3")
+        self.assertEqual(job["source_category"], "UNDP — IPSA")
+        self.assertIn("/jobs?keyword=Communications+Clerk", job["original_url"])
+
     def test_sanitize_public_data_redacts_tokens_and_preserves_structure(self):
         sample = {
             "url": "https://api.apify.com/v2/datasets?token=secret-token",
