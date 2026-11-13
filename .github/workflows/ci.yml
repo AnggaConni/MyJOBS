@@ -28,6 +28,14 @@ jobs:
       - name: Install dependencies
         run: pip install requests beautifulsoup4
 
+      - name: Install and verify pinned Agent-Reach CLI
+        run: |
+          set -euo pipefail
+          curl -fsSL https://github.com/Panniantong/Agent-Reach/releases/download/v1.6.1/agent_reach-1.6.1-py3-none-any.whl -o /tmp/agent_reach-1.6.1-py3-none-any.whl
+          echo "6a1085cae53118c5f1271ab24041e55ec17c509932612b919208f04d10183acb  /tmp/agent_reach-1.6.1-py3-none-any.whl" | sha256sum -c -
+          pip install /tmp/agent_reach-1.6.1-py3-none-any.whl
+          agent-reach version
+
       - name: Syntax check
         run: python -m py_compile scraper.py
 
