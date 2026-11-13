@@ -1,4 +1,7 @@
+import json
 import unittest
+from types import SimpleNamespace
+from unittest.mock import patch
 from datetime import datetime, timezone
 
 from scraper import (
@@ -9,6 +12,7 @@ from scraper import (
     make_id,
     normalize_google,
     normalize_agent_reach_job,
+    fetch_agent_reach_discovery,
     extract_un_p_level,
     html_description_to_text,
     normalize_un_search_result,
@@ -480,6 +484,33 @@ class ScraperTests(unittest.TestCase):
         self.assertIn("Bearer [REDACTED]", sanitized["message"])
         self.assertEqual(sanitized["nested"][0], "safe text")
         self.assertNotIn("secret-token", str(sanitized))
+
+    def test_agent_reach_fetch_reads_v161_root_items_envelope(self):
+        def fake_run(command, **kwargs):
+            query = command[3]
+            items = []
+            if "linkedin.com/jobs/view" in query:
+                items = [{
+                    "title": "Operations Analyst | LinkedIn",
+                    "url": "https://www.linkedin.com/jobs/view/123456789/",
+                    "published_at": "2026-11-13",
+                    "text": "Do not persist the full indexed description.",
+                }]
+            return SimpleNamespace(
+                returncode=0,
+                stdout=json.dumps({"ok": True, "items": items, "error": None}),
+                stderr="",
+            )
+
+        with patch("scraper.AGENT_REACH_ENABLED", True), \
+             patch("scraper.shutil.which", return_value="/usr/bin/agent-reach"), \
+             patch("scraper.subprocess.run", side_effect=fake_run):
+            jobs, health = fetch_agent_reach_discovery()
+
+        self.assertEqual(len(jobs), 1)
+        self.assertEqual(jobs[0]["source"], "LinkedIn")
+        self.assertEqual(health["status"], "ok")
+        self.assertEqual(health["count"], 1)
 
     def test_agent_reach_linkedin_public_job_normalization(self):
         job = normalize_agent_reach_job({
