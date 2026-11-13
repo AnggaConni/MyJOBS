@@ -2769,6 +2769,35 @@ def summary(jobs):
         "undp_ipsa_jobs": sum(j.get("source") == "UNDP — IPSA" for j in jobs),
     }
 
+def sanitize_public_data(value):
+    """Recursively redact credentials before writing the public vacancy dataset."""
+    if isinstance(value, dict):
+        return {key: sanitize_public_data(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [sanitize_public_data(item) for item in value]
+    if not isinstance(value, str):
+        return value
+
+    redacted = value
+    # Remove the configured token wherever it was accidentally copied into
+    # an API response, URL, exception message, or scraped text.
+    for secret in (APIFY_API_TOKEN, SERPAPI_KEY):
+        if secret:
+            redacted = redacted.replace(secret, "[REDACTED]")
+    # Defense in depth for credential-bearing URLs and authorization headers.
+    redacted = re.sub(
+        r"(?i)([?&](?:token|api_token|access_token|key)=)[^&\s\"'<>]+",
+        r"\1[REDACTED]",
+        redacted,
+    )
+    redacted = re.sub(
+        r"(?i)(authorization\s*:\s*bearer\s+)[A-Za-z0-9._~+/=-]+",
+        r"\1[REDACTED]",
+        redacted,
+    )
+    return redacted
+
+
 def main():
     started = time.time()
     all_jobs, sources = [], {}
@@ -2867,7 +2896,7 @@ def main():
     }
 
     with open("vacancy.json", "w", encoding="utf-8") as handle:
-        json.dump(output, handle, ensure_ascii=False, indent=2)
+        json.dump(sanitize_public_data(output), handle, ensure_ascii=False, indent=2)
 
     print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
     # Coverage diagnostics: classification is now metadata-driven, so log
