@@ -1405,10 +1405,29 @@ def html_description_to_text(value):
 
 
 def undp_oracle_search_url(title):
-    """Build a stable Oracle search URL when a requisition deep link 404s."""
+    """Build a search fallback only when no requisition ID is available."""
     keyword = quote_plus(clean(title))
     base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs"
     return f"{base}?keyword={keyword}" if keyword else base
+
+
+def undp_oracle_job_url(req_id, title="", source_url=""):
+    """Prefer the official Oracle requisition detail page over a keyword search."""
+    base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}"
+    source_url = clean(source_url)
+    match = re.search(
+        r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\d+)",
+        source_url,
+        flags=re.I,
+    )
+    job_id = match.group(1) if match else ""
+    if not job_id and re.fullmatch(r"\d+", clean(req_id)):
+        job_id = clean(req_id)
+    if job_id:
+        return f"{base}/job/{job_id}/"
+    if source_url and "/CandidateExperience/errors/404" not in source_url:
+        return source_url
+    return undp_oracle_search_url(title)
 
 def normalize_undp_oracle(item):
     title = clean(item.get("title") or item.get("Title") or item.get("name"))
@@ -1493,12 +1512,9 @@ def normalize_undp_oracle(item):
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
-    # Some Oracle requisition deep links redirect to CandidateExperience/errors/404.
-    # A keyword search on the verified live jobs route is a safer user-facing fallback.
-    is_oracle_deep_link = bool(re.search(r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/", url, re.I))
-    job_url = undp_oracle_search_url(title) if (
-        not url or "/CandidateExperience/errors/404" in url or is_oracle_deep_link
-    ) else url
+    # Link directly to the Oracle requisition detail page whenever its real
+    # requisition ID is available. Use title search only as a last resort.
+    job_url = undp_oracle_job_url(req_id, title, url)
 
     return {
         "id": make_id("UNDP Careers", req_id or job_url, title),

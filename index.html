@@ -91,7 +91,7 @@ button{cursor:pointer}
 .source-item{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid #edf0f3}.source-item:last-child{border-bottom:0}.source-icon{width:33px;height:33px;border-radius:8px;background:#f2f4f7;display:grid;place-items:center;font-size:15px}.source-item strong{display:block;font-size:12px}.source-item small{display:block;color:var(--muted);font-size:10px;margin-top:1px}
 .source-item .go{margin-left:auto;color:#98a2b3;font-size:14px}
 .stat-row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #edf0f3;font-size:12px}.stat-row:last-child{border-bottom:0}.stat-row span:last-child{font-weight:900}
-.note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:9px}.geo-select{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 10px;font-size:11px;font-weight:750;color:#3f4b5d;outline:none;margin-bottom:7px}.geo-select:disabled{background:#f6f8fa;color:#a1a9b4}.location-summary{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
+.note{font-size:10px;line-height:1.5;color:var(--muted);margin-top:9px}.psa-note{padding:9px 10px;background:#f7f9fc;border:1px solid #e8edf3;border-radius:8px}.psa-note strong{color:#344256}.geo-select{width:100%;border:1px solid var(--line);background:#fff;border-radius:8px;padding:9px 10px;font-size:11px;font-weight:750;color:#3f4b5d;outline:none;margin-bottom:7px}.geo-select:disabled{background:#f6f8fa;color:#a1a9b4}.location-summary{font-size:10px;color:var(--muted);margin-top:6px;line-height:1.4}
 .mobile-tools{display:none}
 .toast{position:fixed;left:50%;bottom:20px;transform:translate(-50%,18px);opacity:0;background:var(--navy);color:#fff;border-radius:8px;padding:9px 12px;font-size:11px;font-weight:800;pointer-events:none;transition:.2s;z-index:90}.toast.show{opacity:1;transform:translate(-50%,0)}
 .modal-backdrop{position:fixed;inset:0;background:rgba(8,15,28,.62);backdrop-filter:blur(3px);z-index:100;display:none;padding:24px}
@@ -234,7 +234,7 @@ button{cursor:pointer}
     <button class="filter" data-filter="humanitarian">Humanitarian</button>
     <button class="filter" data-filter="un">UN</button>
     <button class="filter" data-filter="un-p">UN P</button>
-    <button class="filter" data-filter="undp-ipsa">UNDP IPSA</button>
+    <button class="filter" data-filter="undp-ipsa">UNDP PSA</button>
   </div>
 
   <div class="layout">
@@ -247,7 +247,7 @@ button{cursor:pointer}
         <div class="side-link" data-filter="humanitarian">Humanitarian <span>›</span></div>
         <div class="side-link" data-filter="un">UN / OCHA <span>›</span></div>
         <div class="side-link" data-filter="un-p">UN P-Level <span>›</span></div>
-        <div class="side-link" data-filter="undp-ipsa">UNDP IPSA <span>›</span></div>
+        <div class="side-link" data-filter="undp-ipsa">UNDP PSA <span>›</span></div><div class="note psa-note"><strong>NPSA:</strong> Local/national recruitment, generally for candidates eligible to work in the duty-station country.<br><strong>IPSA:</strong> International recruitment, normally for assignments outside the candidate’s home country or permanent residence.<br>Always check each vacancy’s eligibility and tier restrictions.</div>
 
         <div class="side-section"><h4>Location</h4>
   <select class="geo-select" id="countrySelect" aria-label="Country"></select>
@@ -278,7 +278,8 @@ button{cursor:pointer}
         <a class="source-item" id="reliefwebLink" href="https://reliefweb.int/jobs" target="_blank" rel="noopener"><span class="source-icon">RW</span><span><strong>ReliefWeb</strong><small>Humanitarian jobs</small></span><span class="go">↗</span></a>
         <a class="source-item" id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">UN</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span><span class="go">↗</span></a>
         <a class="source-item" id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">P</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span><span class="go">↗</span></a>
-        <a class="source-item" id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="source-icon">DP</span><span><strong>UNDP PSA (IPSA/NPSA)</strong><small>International and national service agreements</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="undpLink" href="https://estm.fa.em2.oraclecloud.com/hcmUI/CandidateExperience/en/sites/CX_1/jobs" target="_blank" rel="noopener"><span class="source-icon">DP</span><span><strong>UNDP PSA (IPSA/NPSA)</strong><small>Official UNDP Oracle vacancy portal</small></span><span class="go">↗</span></a>
+        
         <a class="source-item" id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">OC</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span><span class="go">↗</span></a>
       </div>
       <div class="right-card">
@@ -517,7 +518,7 @@ button{cursor:pointer}
     var j=state.jobs.find(function(x){return x.id===id}); if(!j)return;
     var type=typeOf(j);
     $("#modalLogo").textContent=initials(j.company);
-    $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP International (IPSA)":(j.source||"Job opportunity"));
+    $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP Personnel Services Agreement (IPSA/NPSA)":(j.source||"Job opportunity"));
     $("#modalJobTitle").textContent=j.title||"Untitled opportunity";
     $("#modalCompany").textContent=j.company||"Unknown company";
 
