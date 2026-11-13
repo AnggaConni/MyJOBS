@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote_plus, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -1113,7 +1113,7 @@ def parse_undp_job_anchor(anchor):
     title_text = max([direct, parent, grand], key=len)
     href = urljoin("https://jobs.undp.org/", clean(anchor.get("href")))
 
-    level_match = re.search(r"\b(IPSA-\d+)\b", title_text, flags=re.I)
+    level_match = re.search(r"\b((?:IPSA|NPSA)-\d+)\b", title_text, flags=re.I)
     if not level_match:
         return None
 
@@ -1404,6 +1404,12 @@ def html_description_to_text(value):
     return result.strip()
 
 
+def undp_oracle_search_url(title):
+    """Build a stable Oracle search URL when a requisition deep link 404s."""
+    keyword = quote_plus(clean(title))
+    base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs"
+    return f"{base}?keyword={keyword}" if keyword else base
+
 def normalize_undp_oracle(item):
     title = clean(item.get("title") or item.get("Title") or item.get("name"))
     description = html_description_to_text(
@@ -1467,11 +1473,11 @@ def normalize_undp_oracle(item):
         if clean(item.get(key))
     )
     level_match = re.search(
-        r"\bIPSA\s*[-–—.]?\s*(\d+)\b",
+        r"\b(?:IPSA|NPSA)\s*[-–—.]?\s*(\d+)\b",
         level_blob,
         flags=re.I,
     )
-    level = f"IPSA-{level_match.group(1)}" if level_match else ""
+    level = (("NPSA-" if re.search(r"\bNPSA\s*[-–—.]?\s*\d+\b", level_blob, re.I) else "IPSA-") + level_match.group(1)) if level_match else ""
 
     vacancy_type = clean(
         item.get("VacancyType")
@@ -1487,10 +1493,12 @@ def normalize_undp_oracle(item):
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
-    job_url = url or (
-        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
-        f"{UNDP_ORACLE_SITE}/job/{req_id}"
-    )
+    # Some Oracle requisition deep links redirect to CandidateExperience/errors/404.
+    # A keyword search on the verified live jobs route is a safer user-facing fallback.
+    is_oracle_deep_link = bool(re.search(r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/", url, re.I))
+    job_url = undp_oracle_search_url(title) if (
+        not url or "/CandidateExperience/errors/404" in url or is_oracle_deep_link
+    ) else url
 
     return {
         "id": make_id("UNDP Careers", req_id or job_url, title),
@@ -1508,7 +1516,7 @@ def normalize_undp_oracle(item):
         "country": infer_country(location, explicit=""),
         "via": "UNDP Careers",
         "source": "UNDP Careers",
-        "source_category": "UNDP — IPSA" if level else "UNDP",
+        "source_category": "UNDP — PSA" if level else "UNDP",
         "source_family": "UN Development Programme",
         "posted_at": posting_date,
         "expires_at": closing_date,
@@ -1607,11 +1615,11 @@ def normalize_undp_bing_result(item):
     url = clean(item.get("url"))
     blob = " ".join([title, snippet])
 
-    grade_match = re.search(r"\bIPSA\s*-?\s*(\d+)\b", blob, flags=re.I)
+    grade_match = re.search(r"\b(IPSA|NPSA)\s*-?\s*(\d+)\b", blob, flags=re.I)
     if not grade_match:
         return None
 
-    level = f"IPSA-{grade_match.group(1)}"
+    level = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     posting_match = re.search(
         r"Posting\s+Date\s+(\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)",
@@ -1709,8 +1717,8 @@ def looks_like_undp_ipsa(row):
         or row.get("EmploymentType")
     )
     return (
-        "international personnel service agreement" in contract_type
-        or bool(re.search(r"\bIPSA\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
+        ("international personnel service agreement" in contract_type or "national personnel service agreement" in contract_type)
+        or bool(re.search(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
     )
 
 
@@ -1861,7 +1869,7 @@ def fetch_undp_ipsa_oracle_public():
         "detail_attempts": detail_attempts,
         "total_results": total_results if 'total_results' in locals() else 0,
         "endpoint": list_url,
-        "filter": "authoritative IPSA grade from current Oracle requisition details",
+        "filter": "authoritative IPSA/NPSA grade from current Oracle requisition details",
         "finder": "findReqs;siteNumber=CX_1;current-job-list",
         "site": UNDP_ORACLE_SITE,
         "row_preview": row_preview,
@@ -1875,10 +1883,10 @@ def parse_undp_oracle_job_page(text, url):
     blob = " ".join(lines)
     blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob).replace("\u00a0", " ")
 
-    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
         return None
-    grade = f"IPSA-{grade_match.group(1)}".upper()
+    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -1978,7 +1986,7 @@ def fetch_undp_ipsa_oracle_html():
             if url.lower() in text.lower():
                 idx = text.lower().find(url.lower())
                 context = text[max(0, idx-500):idx+500]
-                if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
+                if re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*\d+", context, flags=re.I):
                     ipsas.append(url)
         urls = list(dict.fromkeys(ipsas or discovered))[:150]
 
@@ -2132,7 +2140,7 @@ def parse_unvacancies_undp_card(anchor):
             f"{context} {anchor.parent.parent.get_text(' ', strip=True)}"
         )
 
-    grade_match = re.search(r"\b(IPSA-\d+)\b", context, flags=re.I)
+    grade_match = re.search(r"\b((?:IPSA|NPSA)-\d+)\b", context, flags=re.I)
     if not grade_match:
         return None
 
@@ -2184,13 +2192,13 @@ def parse_unvacancies_undp_detail(html, source_url):
     if not re.search(r"\bUNDP\b", blob, flags=re.I):
         return None
 
-    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
-        grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
+        grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
     if not grade_match:
         return None
 
-    grade = f"IPSA-{grade_match.group(1)}".upper()
+    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -2339,7 +2347,7 @@ def fetch_undp_ipsa_unvacancies():
 
                 detail_urls.add(candidate_url)
                 context = deep_context(anchor)
-                if re.search(r"IPSA\s*[-–—.]?\s*\d+", context, flags=re.I):
+                if re.search(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+", context, flags=re.I):
                     preferred_detail_urls.add(candidate_url)
 
         except Exception as exc:
@@ -2769,6 +2777,35 @@ def summary(jobs):
         "undp_ipsa_jobs": sum(j.get("source") == "UNDP — IPSA" for j in jobs),
     }
 
+def sanitize_public_data(value):
+    """Recursively redact credentials before writing the public vacancy dataset."""
+    if isinstance(value, dict):
+        return {key: sanitize_public_data(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [sanitize_public_data(item) for item in value]
+    if not isinstance(value, str):
+        return value
+
+    redacted = value
+    # Remove the configured token wherever it was accidentally copied into
+    # an API response, URL, exception message, or scraped text.
+    for secret in (APIFY_API_TOKEN, SERPAPI_KEY):
+        if secret:
+            redacted = redacted.replace(secret, "[REDACTED]")
+    # Defense in depth for credential-bearing URLs and authorization headers.
+    redacted = re.sub(
+        r"(?i)([?&](?:token|api_token|access_token|key)=)[^&\s\"'<>]+",
+        r"\1[REDACTED]",
+        redacted,
+    )
+    redacted = re.sub(
+        r"(?i)(authorization\s*:\s*bearer\s+)[A-Za-z0-9._~+/=-]+",
+        r"\1[REDACTED]",
+        redacted,
+    )
+    return redacted
+
+
 def main():
     started = time.time()
     all_jobs, sources = [], {}
@@ -2867,7 +2904,7 @@ def main():
     }
 
     with open("vacancy.json", "w", encoding="utf-8") as handle:
-        json.dump(output, handle, ensure_ascii=False, indent=2)
+        json.dump(sanitize_public_data(output), handle, ensure_ascii=False, indent=2)
 
     print(f"MyJOBS: {len(active_jobs)} active jobs; expired removed={expired_count}; stale removed={stale_count}; status={output['status']}")
     # Coverage diagnostics: classification is now metadata-driven, so log
@@ -2885,8 +2922,8 @@ def main():
         if re.fullmatch(r"P\s*[-–—.]?\s*[1-7]", level, flags=re.I):
             normalized = "P-" + re.search(r"([1-7])", level).group(1)
             p_counts[normalized] += 1
-        elif re.fullmatch(r"IPSA\s*[-–—.]?\s*\d+", level, flags=re.I):
-            normalized = "IPSA-" + re.search(r"(\d+)", level).group(1)
+        elif re.fullmatch(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+", level, flags=re.I):
+            normalized = re.sub(r"\s+", "", level.upper()).replace("–", "-").replace("—", "-").replace(".", "-")
             ipsa_counts[normalized] += 1
 
     print(f"MyJOBS detected UN P-Level: {sum(p_counts.values())} {dict(sorted(p_counts.items()))}")
