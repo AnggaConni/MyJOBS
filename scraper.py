@@ -1615,11 +1615,11 @@ def normalize_undp_bing_result(item):
     url = clean(item.get("url"))
     blob = " ".join([title, snippet])
 
-    grade_match = re.search(r"\bIPSA\s*-?\s*(\d+)\b", blob, flags=re.I)
+    grade_match = re.search(r"\b(IPSA|NPSA)\s*-?\s*(\d+)\b", blob, flags=re.I)
     if not grade_match:
         return None
 
-    level = f"IPSA-{grade_match.group(1)}"
+    level = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     posting_match = re.search(
         r"Posting\s+Date\s+(\d{1,2}/\d{1,2}/\d{4},\s+\d{1,2}:\d{2}\s+[AP]M)",
@@ -1717,7 +1717,7 @@ def looks_like_undp_ipsa(row):
         or row.get("EmploymentType")
     )
     return (
-        "international personnel service agreement" in contract_type
+        ("international personnel service agreement" in contract_type or "national personnel service agreement" in contract_type)
         or bool(re.search(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
     )
 
@@ -1886,7 +1886,7 @@ def parse_undp_oracle_job_page(text, url):
     grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
         return None
-    grade = f"IPSA-{grade_match.group(1)}".upper()
+    grade = f"{grade_match.group(0).split(chr(45))[0].upper()}-{grade_match.group(1)}".upper()
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -1986,7 +1986,7 @@ def fetch_undp_ipsa_oracle_html():
             if url.lower() in text.lower():
                 idx = text.lower().find(url.lower())
                 context = text[max(0, idx-500):idx+500]
-                if re.search(r"IPSA\s*[-–—‑]?\s*\d+", context, flags=re.I):
+                if re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*\d+", context, flags=re.I):
                     ipsas.append(url)
         urls = list(dict.fromkeys(ipsas or discovered))[:150]
 
@@ -2198,7 +2198,7 @@ def parse_unvacancies_undp_detail(html, source_url):
     if not grade_match:
         return None
 
-    grade = f"IPSA-{grade_match.group(1)}".upper()
+    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}".upper()
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -2347,7 +2347,7 @@ def fetch_undp_ipsa_unvacancies():
 
                 detail_urls.add(candidate_url)
                 context = deep_context(anchor)
-                if re.search(r"IPSA\s*[-–—.]?\s*\d+", context, flags=re.I):
+                if re.search(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+", context, flags=re.I):
                     preferred_detail_urls.add(candidate_url)
 
         except Exception as exc:
@@ -2922,7 +2922,7 @@ def main():
         if re.fullmatch(r"P\s*[-–—.]?\s*[1-7]", level, flags=re.I):
             normalized = "P-" + re.search(r"([1-7])", level).group(1)
             p_counts[normalized] += 1
-        elif re.fullmatch(r"IPSA\s*[-–—.]?\s*\d+", level, flags=re.I):
+        elif re.fullmatch(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+", level, flags=re.I):
             normalized = "IPSA-" + re.search(r"(\d+)", level).group(1)
             ipsa_counts[normalized] += 1
 
