@@ -1422,7 +1422,7 @@ def undp_oracle_job_url(req_id, title="", source_url=""):
             return source_url
 
     match = re.search(
-        r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\\d+)",
+        r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\d+)",
         source_url,
         flags=re.I,
     )
@@ -1434,7 +1434,7 @@ def undp_oracle_job_url(req_id, title="", source_url=""):
         return f"{base}/job/{public_job_id}/"
 
     candidate_id = clean(req_id)
-    if re.fullmatch(r"\\d{1,8}", candidate_id):
+    if re.fullmatch(r"\d{1,8}", candidate_id):
         return f"{base}/job/{candidate_id}/"
 
     # If only an internal Oracle ID is available, use the working title search.
