@@ -279,6 +279,7 @@ button{cursor:pointer}
         <a class="source-item" id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">UN</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span><span class="go">↗</span></a>
         <a class="source-item" id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">P</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span><span class="go">↗</span></a>
         <a class="source-item" id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="source-icon">DP</span><span><strong>UNDP PSA (IPSA/NPSA)</strong><small>National/local and international assignments</small></span><span class="go">↗</span></a>
+        <div class="note psa-note"><strong>NPSA:</strong> Local/national recruitment; work authorization or nationality requirements depend on the duty station and vacancy.<br><strong>IPSA:</strong> International assignment, normally outside your home country or permanent residence.<br>Check the official vacancy for exact eligibility.</div>
         <a class="source-item" id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">OC</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span><span class="go">↗</span></a>
       </div>
       <div class="right-card">
@@ -517,7 +518,7 @@ button{cursor:pointer}
     var j=state.jobs.find(function(x){return x.id===id}); if(!j)return;
     var type=typeOf(j);
     $("#modalLogo").textContent=initials(j.company);
-    $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP International (IPSA)":(j.source||"Job opportunity"));
+    $("#modalKicker").textContent=type==="un-p"?"UN Professional (P-Level)":(type==="undp-ipsa"?"UNDP Personnel Services Agreement (IPSA/NPSA)":(j.source||"Job opportunity"));
     $("#modalJobTitle").textContent=j.title||"Untitled opportunity";
     $("#modalCompany").textContent=j.company||"Unknown company";
 
