@@ -25,6 +25,7 @@ from scraper import (
     parse_unvacancies_undp_card,
     normalize_toploker,
     parse_toploker_detail,
+    sanitize_public_data,
 )
 
 
@@ -438,6 +439,19 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["contract_level"], "IPSA-10")
         self.assertEqual(job["location"], "Rome, Italy")
         self.assertIn("/job/36742", job["original_url"])
+
+
+    def test_sanitize_public_data_redacts_tokens_and_preserves_structure(self):
+        sample = {
+            "url": "https://api.apify.com/v2/datasets?token=secret-token",
+            "message": "request failed with Authorization: Bearer abc.def-123",
+            "nested": ["safe text", "embedded secret-token"],
+        }
+        sanitized = sanitize_public_data(sample)
+        self.assertEqual(sanitized["url"], "https://api.apify.com/v2/datasets?token=[REDACTED]")
+        self.assertIn("Bearer [REDACTED]", sanitized["message"])
+        self.assertEqual(sanitized["nested"][0], "safe text")
+        self.assertNotIn("secret-token", str(sanitized))
 
     def test_dedupe_by_url(self):
         job = {
