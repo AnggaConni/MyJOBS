@@ -317,7 +317,7 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Libreville, Gabon")
-        self.assertIn("/jobs?keyword=Chief+Engineering+Specialist", job["original_url"])
+        self.assertIn("/job/37266/", job["original_url"])
 
     def test_unvacancies_undp_detail(self):
         html = """
@@ -379,7 +379,7 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Dakar, Senegal")
-        self.assertIn("/jobs?keyword=Project+Manager", job["original_url"])
+        self.assertIn("/job/37195/", job["original_url"])
 
     def test_unvacancies_unicode_ipsa_detail(self):
         text = """
@@ -411,7 +411,7 @@ class ScraperTests(unittest.TestCase):
         self.assertEqual(job["source"], "UNDP Careers")
         self.assertEqual(job["source_category"], "UNDP — PSA")
         self.assertEqual(job["contract_level"], "IPSA-11")
-        self.assertIn("/jobs?keyword=Country+Economist", job["original_url"])
+        self.assertIn("/job/37241/", job["original_url"])
 
     def test_undp_oracle_html_parser(self):
         html = """
@@ -438,7 +438,7 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-10")
         self.assertEqual(job["location"], "Rome, Italy")
-        self.assertIn("/jobs?keyword=Public+and+Digital+Investment+Specialist", job["original_url"])
+        self.assertIn("/job/36742/", job["original_url"])
 
 
     def test_undp_npsa_is_grouped_as_psa_and_keeps_npsa_grade(self):
@@ -452,7 +452,7 @@ class ScraperTests(unittest.TestCase):
         })
         self.assertEqual(job["contract_level"], "NPSA-3")
         self.assertEqual(job["source_category"], "UNDP — PSA")
-        self.assertIn("/jobs?keyword=Communications+Clerk", job["original_url"])
+        self.assertIn("/job/99991/", job["original_url"])
 
     def test_sanitize_public_data_redacts_tokens_and_preserves_structure(self):
         sample = {
