@@ -9,7 +9,7 @@ import xml.etree.ElementTree as ET
 from collections import Counter
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
-from urllib.parse import urljoin, urlparse
+from urllib.parse import quote_plus, urljoin, urlparse
 
 import requests
 from bs4 import BeautifulSoup
@@ -1113,7 +1113,7 @@ def parse_undp_job_anchor(anchor):
     title_text = max([direct, parent, grand], key=len)
     href = urljoin("https://jobs.undp.org/", clean(anchor.get("href")))
 
-    level_match = re.search(r"\b(IPSA-\d+)\b", title_text, flags=re.I)
+    level_match = re.search(r"\b((?:IPSA|NPSA)-\d+)\b", title_text, flags=re.I)
     if not level_match:
         return None
 
@@ -1404,6 +1404,12 @@ def html_description_to_text(value):
     return result.strip()
 
 
+def undp_oracle_search_url(title):
+    """Build a stable Oracle search URL when a requisition deep link 404s."""
+    keyword = quote_plus(clean(title))
+    base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}/jobs"
+    return f"{base}?keyword={keyword}" if keyword else base
+
 def normalize_undp_oracle(item):
     title = clean(item.get("title") or item.get("Title") or item.get("name"))
     description = html_description_to_text(
@@ -1467,11 +1473,11 @@ def normalize_undp_oracle(item):
         if clean(item.get(key))
     )
     level_match = re.search(
-        r"\bIPSA\s*[-–—.]?\s*(\d+)\b",
+        r"\b(?:IPSA|NPSA)\s*[-–—.]?\s*(\d+)\b",
         level_blob,
         flags=re.I,
     )
-    level = f"IPSA-{level_match.group(1)}" if level_match else ""
+    level = (("NPSA-" if re.search(r"\bNPSA\s*[-–—.]?\s*\d+\b", level_blob, re.I) else "IPSA-") + level_match.group(1)) if level_match else ""
 
     vacancy_type = clean(
         item.get("VacancyType")
@@ -1487,10 +1493,12 @@ def normalize_undp_oracle(item):
     full_description = "\n\n".join(
         x for x in [description, qualifications, responsibilities] if x
     )
-    job_url = url or (
-        f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/"
-        f"{UNDP_ORACLE_SITE}/job/{req_id}"
-    )
+    # Some Oracle requisition deep links redirect to CandidateExperience/errors/404.
+    # A keyword search on the verified live jobs route is a safer user-facing fallback.
+    is_oracle_deep_link = bool(re.search(r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/", url, re.I))
+    job_url = undp_oracle_search_url(title) if (
+        not url or "/CandidateExperience/errors/404" in url or is_oracle_deep_link
+    ) else url
 
     return {
         "id": make_id("UNDP Careers", req_id or job_url, title),
@@ -1710,7 +1718,7 @@ def looks_like_undp_ipsa(row):
     )
     return (
         "international personnel service agreement" in contract_type
-        or bool(re.search(r"\bIPSA\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
+        or bool(re.search(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+\b", row_blob, flags=re.I))
     )
 
 
@@ -1875,7 +1883,7 @@ def parse_undp_oracle_job_page(text, url):
     blob = " ".join(lines)
     blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob).replace("\u00a0", " ")
 
-    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
         return None
     grade = f"IPSA-{grade_match.group(1)}".upper()
@@ -2132,7 +2140,7 @@ def parse_unvacancies_undp_card(anchor):
             f"{context} {anchor.parent.parent.get_text(' ', strip=True)}"
         )
 
-    grade_match = re.search(r"\b(IPSA-\d+)\b", context, flags=re.I)
+    grade_match = re.search(r"\b((?:IPSA|NPSA)-\d+)\b", context, flags=re.I)
     if not grade_match:
         return None
 
@@ -2184,9 +2192,9 @@ def parse_unvacancies_undp_detail(html, source_url):
     if not re.search(r"\bUNDP\b", blob, flags=re.I):
         return None
 
-    grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
-        grade_match = re.search(r"IPSA\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
+        grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
     if not grade_match:
         return None
 
