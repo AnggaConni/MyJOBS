@@ -665,8 +665,8 @@ def fetch_agent_reach_discovery():
                     break
                 continue
 
-            result = payload.get("result") or {}
-            items = result.get("items") or []
+            # Agent-Reach v1.6.1 emits the unified envelope with items at the root.
+            items = payload.get("items") or []
             queries_run.append(source_hint)
             for item in items:
                 job = normalize_agent_reach_job(item, query)
