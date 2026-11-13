@@ -445,7 +445,7 @@ class ScraperTests(unittest.TestCase):
         sample = {
             "url": "https://api.apify.com/v2/datasets?token=secret-token",
             "message": "request failed with Authorization: Bearer abc.def-123",
-            "nested": ["safe text", "embedded secret-token"],
+            "nested": ["safe text", "embedded ?token=secret-token"],
         }
         sanitized = sanitize_public_data(sample)
         self.assertEqual(sanitized["url"], "https://api.apify.com/v2/datasets?token=[REDACTED]")
