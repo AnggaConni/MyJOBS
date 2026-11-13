@@ -340,7 +340,7 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Libreville, Gabon")
-        self.assertIn("/jobs?keyword=Chief+Engineering+Specialist", job["original_url"])
+        self.assertIn("/job/37266/", job["original_url"])
 
     def test_undp_bing_normalization(self):
         job = normalize_undp_bing_result({
@@ -351,7 +351,7 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNotNone(job)
         self.assertEqual(job["contract_level"], "IPSA-11")
         self.assertEqual(job["location"], "Libreville, Gabon")
-        self.assertIn("/jobs?keyword=Chief+Engineering+Specialist", job["original_url"])
+        self.assertIn("/job/37266/", job["original_url"])
 
     def test_unvacancies_undp_markdown_detail(self):
         text = """
