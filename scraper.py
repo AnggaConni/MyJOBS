@@ -1516,7 +1516,7 @@ def normalize_undp_oracle(item):
         "country": infer_country(location, explicit=""),
         "via": "UNDP Careers",
         "source": "UNDP Careers",
-        "source_category": "UNDP — IPSA" if level else "UNDP",
+        "source_category": "UNDP — PSA" if level else "UNDP",
         "source_family": "UN Development Programme",
         "posted_at": posting_date,
         "expires_at": closing_date,
@@ -1869,7 +1869,7 @@ def fetch_undp_ipsa_oracle_public():
         "detail_attempts": detail_attempts,
         "total_results": total_results if 'total_results' in locals() else 0,
         "endpoint": list_url,
-        "filter": "authoritative IPSA grade from current Oracle requisition details",
+        "filter": "authoritative IPSA/NPSA grade from current Oracle requisition details",
         "finder": "findReqs;siteNumber=CX_1;current-job-list",
         "site": UNDP_ORACLE_SITE,
         "row_preview": row_preview,
@@ -1883,10 +1883,10 @@ def parse_undp_oracle_job_page(text, url):
     blob = " ".join(lines)
     blob = re.sub(r"[\u2010-\u2015\u2212]", "-", blob).replace("\u00a0", " ")
 
-    grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
         return None
-    grade = f"{grade_match.group(0).split(chr(45))[0].upper()}-{grade_match.group(1)}".upper()
+    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -2192,13 +2192,13 @@ def parse_unvacancies_undp_detail(html, source_url):
     if not re.search(r"\bUNDP\b", blob, flags=re.I):
         return None
 
-    grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
+    grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", blob, flags=re.I)
     if not grade_match:
-        grade_match = re.search(r"(?:IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
+        grade_match = re.search(r"(IPSA|NPSA)\s*[-–—‑]?\s*(\d+)", source_url, flags=re.I)
     if not grade_match:
         return None
 
-    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}".upper()
+    grade = f"{grade_match.group(1).upper()}-{grade_match.group(2)}"
 
     heading = soup.find("h1")
     title = clean(heading.get_text(" ", strip=True)) if heading else ""
@@ -2923,7 +2923,7 @@ def main():
             normalized = "P-" + re.search(r"([1-7])", level).group(1)
             p_counts[normalized] += 1
         elif re.fullmatch(r"(?:IPSA|NPSA)\s*[-–—.]?\s*\d+", level, flags=re.I):
-            normalized = "IPSA-" + re.search(r"(\d+)", level).group(1)
+            normalized = re.sub(r"\s+", "", level.upper()).replace("–", "-").replace("—", "-").replace(".", "-")
             ipsa_counts[normalized] += 1
 
     print(f"MyJOBS detected UN P-Level: {sum(p_counts.values())} {dict(sorted(p_counts.items()))}")
