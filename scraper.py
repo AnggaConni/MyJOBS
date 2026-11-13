@@ -1412,21 +1412,32 @@ def undp_oracle_search_url(title):
 
 
 def undp_oracle_job_url(req_id, title="", source_url=""):
-    """Prefer the official Oracle requisition detail page over a keyword search."""
+    """Use a public Oracle job number, never the tenant's long internal row ID."""
     base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}"
     source_url = clean(source_url)
+
+    # Preserve known non-Oracle source URLs.
+    if source_url and "estm.fa.em2.oraclecloud.com" not in source_url.lower():
+        if "/CandidateExperience/errors/404" not in source_url:
+            return source_url
+
     match = re.search(
         r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\d+)",
         source_url,
         flags=re.I,
     )
-    job_id = match.group(1) if match else ""
-    if not job_id and re.fullmatch(r"\d+", clean(req_id)):
-        job_id = clean(req_id)
-    if job_id:
-        return f"{base}/job/{job_id}/"
-    if source_url and "/CandidateExperience/errors/404" not in source_url:
-        return source_url
+    public_job_id = match.group(1) if match else ""
+
+    # UNDP's public career-site URLs use the short Job Identification number
+    # (for example /job/37681), not the 15-digit internal Oracle object ID.
+    if public_job_id and len(public_job_id) <= 8:
+        return f"{base}/job/{public_job_id}/"
+
+    candidate_id = clean(req_id)
+    if re.fullmatch(r"\d{1,8}", candidate_id):
+        return f"{base}/job/{candidate_id}/"
+
+    # If only an internal Oracle ID is available, use the working title search.
     return undp_oracle_search_url(title)
 
 def normalize_undp_oracle(item):
