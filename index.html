@@ -376,7 +376,7 @@ button{cursor:pointer}
       d.contract_level,d.employment_type
     ].concat(Array.isArray(j.extensions)?j.extensions:[]).filter(Boolean).join(" "));
     var isUNDP=/undp/.test(source) || norm(j.company||"").indexOf("undp")>=0;
-    var dedicatedBucket=/^undp\s*[—–-]\s*ipsa$/.test(category)
+    var dedicatedBucket=/^undp\s*[—–-]\s*(?:ipsa|psa)$/.test(category)
       || /undp\s*[—–-]\s*ipsa/.test(source);
     var explicitIPSA=/\b(?:ipsa|npsa)\s*[-–—.]?\s*\d+\b/i.test(level)
       || /(?:international|national) personnel service agreement/i.test(level);
