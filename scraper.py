@@ -1416,12 +1416,12 @@ def undp_oracle_job_url(req_id, title="", source_url=""):
     base = f"{UNDP_ORACLE_BASE}/hcmUI/CandidateExperience/en/sites/{UNDP_ORACLE_SITE}"
     source_url = clean(source_url)
     match = re.search(
-        r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\\d+)",
+        r"/hcmUI/CandidateExperience/(?:en/)?sites/[^/]+/job/(\d+)",
         source_url,
         flags=re.I,
     )
     job_id = match.group(1) if match else ""
-    if not job_id and re.fullmatch(r"\\d+", clean(req_id)):
+    if not job_id and re.fullmatch(r"\d+", clean(req_id)):
         job_id = clean(req_id)
     if job_id:
         return f"{base}/job/{job_id}/"
