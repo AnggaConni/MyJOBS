@@ -278,7 +278,7 @@ button{cursor:pointer}
         <a class="source-item" id="reliefwebLink" href="https://reliefweb.int/jobs" target="_blank" rel="noopener"><span class="source-icon">RW</span><span><strong>ReliefWeb</strong><small>Humanitarian jobs</small></span><span class="go">↗</span></a>
         <a class="source-item" id="unLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">UN</span><span><strong>UN Careers</strong><small>UN Secretariat</small></span><span class="go">↗</span></a>
         <a class="source-item" id="unPLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">P</span><span><strong>UN P-Level</strong><small>Global professional posts</small></span><span class="go">↗</span></a>
-        <a class="source-item" id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="source-icon">DP</span><span><strong>UNDP IPSA</strong><small>International roles</small></span><span class="go">↗</span></a>
+        <a class="source-item" id="undpLink" href="https://jobs.undp.org/cj_view_jobs.cfm?cur_categ_id=100" target="_blank" rel="noopener"><span class="source-icon">DP</span><span><strong>UNDP PSA (IPSA/NPSA)</strong><small>International and national service agreements</small></span><span class="go">↗</span></a>
         <a class="source-item" id="ochaLink" href="https://careers.un.org/job-openings" target="_blank" rel="noopener"><span class="source-icon">OC</span><span><strong>UN OCHA</strong><small>Humanitarian coordination</small></span><span class="go">↗</span></a>
       </div>
       <div class="right-card">
@@ -378,8 +378,8 @@ button{cursor:pointer}
     var isUNDP=/undp/.test(source) || norm(j.company||"").indexOf("undp")>=0;
     var dedicatedBucket=/^undp\s*[—–-]\s*ipsa$/.test(category)
       || /undp\s*[—–-]\s*ipsa/.test(source);
-    var explicitIPSA=/\bipsa\s*[-–—.]?\s*\d+\b/i.test(level)
-      || /international personnel service agreement/i.test(level);
+    var explicitIPSA=/\b(?:ipsa|npsa)\s*[-–—.]?\s*\d+\b/i.test(level)
+      || /(?:international|national) personnel service agreement/i.test(level);
     return dedicatedBucket || (isUNDP && explicitIPSA);
   }
   function isUN(j){
@@ -419,7 +419,7 @@ button{cursor:pointer}
   function card(j){
     var t=typeOf(j),saved=state.saved.indexOf(j.id)>=0,href=j.original_url&&j.original_url!=="#"?esc(j.original_url):"";
     var badgeClass=(t==="local"?"source":(t==="humanitarian"?"green":"orange"));
-    var label=t==="un-p"?"UN P-Level":(t==="undp-ipsa"?"UNDP IPSA":(t==="un"?(j.source||"UN / OCHA"):(j.source||"Source")));
+    var label=t==="un-p"?"UN P-Level":(t==="undp-ipsa"?"UNDP PSA (IPSA/NPSA)":(t==="un"?(j.source||"UN / OCHA"):(j.source||"Source")));
     var meta="<span>"+icon("pin")+" "+esc(j.location||j.district||j.country||"Indonesia")+"</span>";
     if(j.salary)meta+="<span>"+icon("money")+" "+esc(j.salary)+"</span>";
     if(j.schedule_type)meta+="<span>"+icon("clock")+" "+esc(j.schedule_type)+"</span>";
