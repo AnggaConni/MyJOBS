@@ -30,14 +30,16 @@ AGENT_REACH_LIMIT = max(1, min(10, int(os.getenv("AGENT_REACH_LIMIT", "5"))))
 AGENT_REACH_TIMEOUT = max(15, min(90, int(os.getenv("AGENT_REACH_TIMEOUT", "55"))))
 AGENT_REACH_QUERIES = [
     ("LinkedIn", 'site:linkedin.com/jobs/view Indonesia (Jakarta OR Indonesia) job vacancy'),
-    ("JobStreet", 'site:jobstreet.co.id Indonesia lowongan kerja vacancy'),
+    ("JobStreet", '(site:jobstreet.co.id OR site:id.jobstreet.com) Indonesia lowongan kerja vacancy'),
     ("Glints", 'site:glints.com/id Indonesia jobs lowongan kerja'),
     ("Kalibrr", 'site:kalibrr.com Indonesia jobs OR site:dealls.com Indonesia lowongan kerja'),
     ("KitaLulus", 'site:kitalulus.com Indonesia lowongan kerja jobs'),
+    ("Employer Career Sites", 'Indonesia company careers vacancies hiring jobs official career site Jakarta'),
 ]
 AGENT_REACH_SOURCE_HOSTS = {
     "linkedin.com": "LinkedIn",
     "jobstreet.co.id": "JobStreet",
+    "id.jobstreet.com": "JobStreet",
     "glints.com": "Glints",
     "kalibrr.com": "Kalibrr",
     "dealls.com": "Dealls",
@@ -552,7 +554,11 @@ def normalize_agent_reach_job(item, query):
          if host == domain or host.endswith("." + domain)),
         "",
     )
-    if not title or not source or parsed.scheme != "https":
+    if not title or parsed.scheme != "https" or not host:
+        return None
+    if not source and re.search(r"/(?:careers?|vacancies|recruiting|workday)(?:/|$)", parsed.path, re.I):
+        source = "Employer Career Site"
+    if not source:
         return None
 
     # Keep LinkedIn limited to public job-detail URLs; discard profiles and search pages.
@@ -567,6 +573,10 @@ def normalize_agent_reach_job(item, query):
     if source == "Dealls" and not re.search(r"/(?:job|jobs|loker)/", parsed.path, re.I):
         return None
     if source == "KitaLulus" and not re.search(r"/(?:lowongan|jobs?)/", parsed.path, re.I):
+        return None
+    if source == "Employer Career Site" and not re.search(
+        r"/(?:careers?|vacancies|recruiting|workday)(?:/|$)", parsed.path, re.I
+    ):
         return None
 
     title = re.sub(r"\s*[|–—-]\s*(?:LinkedIn|JobStreet|Glints|Kalibrr|Dealls|KitaLulus)\s*$", "", title, flags=re.I).strip()
@@ -597,7 +607,7 @@ def normalize_agent_reach_job(item, query):
         "region": "Indonesia",
         "via": "Agent-Reach public web discovery",
         "source": source,
-        "source_family": "Job Portal — Indonesia",
+        "source_family": "Employer Career Site" if source == "Employer Career Site" else "Job Portal — Indonesia",
         "posted_at": published_at,
         "expires_at": "",
         "schedule_type": "",
@@ -609,6 +619,7 @@ def normalize_agent_reach_job(item, query):
         "remote": False,
         "status": "current",
         "country_code": "ID",
+        "source_domain": host,
         "details": make_source_details(
             source,
             discovery_engine="Agent-Reach",
