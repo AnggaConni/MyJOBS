@@ -509,6 +509,23 @@ class ScraperTests(unittest.TestCase):
         self.assertIsNone(profile)
         self.assertIsNone(unknown)
 
+    def test_agent_reach_jobstreet_regional_domain(self):
+        job = normalize_agent_reach_job({
+            "title": "Finance Analyst",
+            "url": "https://id.jobstreet.com/job/12345",
+        }, "site:jobstreet Indonesia jobs")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "JobStreet")
+
+    def test_agent_reach_employer_career_page(self):
+        job = normalize_agent_reach_job({
+            "title": "Programme Officer",
+            "url": "https://careers.example.org/careers/programme-officer-123",
+        }, "Indonesia company careers")
+        self.assertIsNotNone(job)
+        self.assertEqual(job["source"], "Employer Career Site")
+        self.assertEqual(job["source_domain"], "careers.example.org")
+
     def test_agent_reach_local_portal_allowlist(self):
         job = normalize_agent_reach_job({
             "title": "Data Analyst | Glints",
