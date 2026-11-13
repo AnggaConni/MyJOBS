@@ -8,7 +8,7 @@ MyJOBS brings together job opportunities from multiple sources into a lightweigh
 
 - Google Jobs via SerpApi
 - Loker.id
-- Agent-Reach public web discovery (LinkedIn, JobStreet, Glints, Kalibrr, Dealls and KitaLulus public listing URLs)
+- Agent-Reach public web discovery (LinkedIn, JobStreet, Glints, Kalibrr, Dealls, KitaLulus and employer career pages)
 - ReliefWeb Jobs API
 - UN Careers RSS
 - OCHA-related vacancies detected from UN / humanitarian sources
