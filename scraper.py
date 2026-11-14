@@ -629,6 +629,147 @@ def normalize_agent_reach_job(item, query):
     }
 
 
+
+AGENT_REACH_DETAIL_LIMIT = max(0, min(40, int(os.getenv("AGENT_REACH_DETAIL_LIMIT", "20"))))
+
+
+def parse_public_job_detail(html, url):
+    """Extract structured JobPosting fields from a publicly accessible job page."""
+    soup = BeautifulSoup(html or "", "html.parser")
+    candidates = []
+    for node in soup.select('script[type="application/ld+json"]'):
+        try:
+            parsed = json.loads(node.string or node.get_text())
+        except (json.JSONDecodeError, TypeError):
+            continue
+        candidates.extend(parsed if isinstance(parsed, list) else [parsed])
+
+    def collect(value):
+        if isinstance(value, dict):
+            yield value
+            graph = value.get("@graph")
+            if isinstance(graph, list):
+                for child in graph:
+                    yield from collect(child)
+        elif isinstance(value, list):
+            for child in value:
+                yield from collect(child)
+
+    postings = [
+        item for candidate in candidates for item in collect(candidate)
+        if "JobPosting" in (
+            [item.get("@type")] if isinstance(item.get("@type"), str)
+            else (item.get("@type") or [])
+        )
+    ]
+    posting = postings[0] if postings else {}
+
+    def meta(*selectors):
+        for selector in selectors:
+            node = soup.select_one(selector)
+            if node:
+                value = clean(node.get("content") or node.get_text(" ", strip=True))
+                if value:
+                    return value
+        return ""
+
+    title = clean(posting.get("title")) or meta('meta[property="og:title"]', "h1", "title")
+    org = posting.get("hiringOrganization") or {}
+    company = clean(org.get("name")) if isinstance(org, dict) else ""
+    location = ""
+    job_location = posting.get("jobLocation") or {}
+    if isinstance(job_location, list):
+        job_location = job_location[0] if job_location else {}
+    if isinstance(job_location, dict):
+        address = job_location.get("address") or {}
+        if isinstance(address, dict):
+            location = clean(", ".join(
+                str(address.get(key) or "")
+                for key in ("addressLocality", "addressRegion", "addressCountry")
+                if address.get(key)
+            ))
+        elif isinstance(address, str):
+            location = clean(address)
+    description = html_description_to_text(posting.get("description") or "")
+    if not description:
+        description = meta('meta[name="description"]', 'meta[property="og:description"]')
+    salary = ""
+    salary_data = posting.get("baseSalary") or {}
+    if isinstance(salary_data, dict):
+        currency = clean(salary_data.get("currency"))
+        value = salary_data.get("value") or {}
+        if isinstance(value, dict):
+            amount = clean(value.get("value"))
+            minimum = clean(value.get("minValue"))
+            maximum = clean(value.get("maxValue"))
+            unit = clean(value.get("unitText"))
+            amount_text = f"{minimum}-{maximum}" if minimum and maximum else amount
+            salary = " ".join(part for part in (currency, amount_text, unit) if part)
+        else:
+            salary = " ".join(part for part in (currency, clean(value)) if part)
+
+    return {
+        "title": title,
+        "company": company,
+        "location": location,
+        "description": description[:1800],
+        "salary": salary,
+        "posted_at": clean(posting.get("datePosted")),
+        "expires_at": clean(posting.get("validThrough")),
+        "schedule_type": clean(posting.get("employmentType")),
+        "source_url": clean(posting.get("url") or url),
+        "structured": bool(posting),
+    }
+
+
+def enrich_agent_reach_job(job):
+    """Best-effort detail enrichment; blocked or unstructured pages remain discovery records."""
+    if not job or not clean(job.get("original_url")):
+        return job, "not_attempted"
+    url = clean(job["original_url"])
+    try:
+        response = requests.get(
+            url,
+            headers={"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"},
+            timeout=TIMEOUT,
+            allow_redirects=True,
+        )
+        if response.status_code in {401, 403, 429}:
+            return job, f"blocked_{response.status_code}"
+        response.raise_for_status()
+        detail = parse_public_job_detail(response.text, url)
+        if detail.get("title"):
+            job["title"] = detail["title"]
+        if detail.get("company"):
+            job["company"] = detail["company"]
+        if detail.get("location"):
+            job["location"] = detail["location"]
+            job["district"] = infer_location(detail["location"], fallback="Indonesia")
+            job["province"] = infer_province(detail["location"])
+        if detail.get("description"):
+            job["description"] = detail["description"]
+        if detail.get("salary"):
+            job["salary"] = detail["salary"]
+        if detail.get("posted_at"):
+            job["posted_at"] = detail["posted_at"]
+        if detail.get("expires_at"):
+            job["expires_at"] = detail["expires_at"]
+        if detail.get("schedule_type"):
+            job["schedule_type"] = detail["schedule_type"]
+        job["details"] = make_source_details(
+            job.get("source", "Agent-Reach"),
+            discovery_engine="Agent-Reach",
+            discovery_backend="public web search",
+            enrichment="public JobPosting JSON-LD" if detail.get("structured") else "public page metadata",
+            published_at=detail.get("posted_at"),
+            employment_type=detail.get("schedule_type"),
+        )
+        return job, "enriched" if detail.get("structured") else "page_metadata"
+    except Exception as exc:
+        return job, f"unavailable_{type(exc).__name__}"
+
+
+
 def fetch_agent_reach_discovery():
     """Discover public local vacancies via Agent-Reach's read-only web search channel."""
     if not AGENT_REACH_ENABLED:
@@ -638,6 +779,7 @@ def fetch_agent_reach_discovery():
 
     jobs, errors, by_source = [], [], Counter()
     queries_run = []
+    enrichment_counts = Counter()
     for source_hint, query in AGENT_REACH_QUERIES:
         command = [
             "agent-reach", "web", "search", query,
@@ -679,13 +821,19 @@ def fetch_agent_reach_discovery():
             errors.append(f"{source_hint}: {type(exc).__name__}: {str(exc)[:200]}")
 
     jobs = dedupe(jobs)
+    detail_candidates = jobs[:AGENT_REACH_DETAIL_LIMIT]
+    for job in detail_candidates:
+        _, enrichment_status = enrich_agent_reach_job(job)
+        enrichment_counts[enrichment_status] += 1
     return jobs, {
         "status": "ok" if jobs else ("error" if errors else "empty"),
         "count": len(jobs),
         "queries_run": queries_run,
         "by_source": dict(by_source),
+        "detail_enrichment": dict(enrichment_counts),
+        "detail_attempted": len(detail_candidates),
         "errors": errors[:20],
-        "engine": "Agent-Reach 1.6.1 / public web search",
+        "engine": "Agent-Reach 1.6.1 / public web search + public page extraction",
         "login_required": False,
     }
 
@@ -3186,15 +3334,17 @@ def main():
     all_jobs, sources = [], {}
     previous_jobs = load_previous_jobs()
 
+    # Free/public structured sources run first. Agent-Reach is discovery-only
+    # plus bounded public-page enrichment; paid SerpApi remains a fallback.
     for fetcher, name in [
-        (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
         (fetch_toploker, "TopLoker"),
         (fetch_karirhub, "Karirhub Kemnaker"),
         (fetch_public_ats_boards, "Public ATS Indonesia"),
+        (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
+        (fetch_google, "Google Jobs — Paid SerpApi Fallback"),
         (fetch_pasker_market_data, "Pasker ID — Aggregate Market Data"),
         (fetch_freehire_catalogue, "Freehire — Licence Check"),
-        (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
         (fetch_reliefweb, "ReliefWeb"),
         (fetch_un_professional_global, "UN Careers — P-level"),
         (fetch_undp_ipsa_global, "UNDP — IPSA"),
