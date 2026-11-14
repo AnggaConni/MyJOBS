@@ -64,7 +64,7 @@ No fake vacancy is generated when a source fails.
 
 MyJOBS treats each source as a separate adapter because data models, availability and application flows differ.
 
-Agent-Reach is installed in GitHub Actions from the pinned official v1.6.1 GitHub release wheel (SHA-256 verified). The scheduled workflow uses its read-only public web search channel to discover candidate listing URLs from LinkedIn and selected Indonesian job portals. It does not log in, use cookies, or access private LinkedIn content. Only allowlisted public job-detail URLs are normalized; full third-party job descriptions are not copied into the public dataset. Agent-Reach search failures are recorded in source health and do not stop the existing source adapters.
+Agent-Reach is installed in GitHub Actions from the pinned official v1.6.1 GitHub release wheel (SHA-256 verified). The scheduled workflow uses its read-only public web search channel to discover candidate listing URLs from LinkedIn and selected Indonesian job portals, targeting up to 10 results per query (subject to provider availability and rate limits). It does not log in, use cookies, or access private LinkedIn content. Only allowlisted public job-detail URLs are normalized; full third-party job descriptions are not copied into the public dataset. Agent-Reach search failures are recorded in source health and do not stop the existing source adapters.
 
 The local portal discovery is best-effort search-engine discovery, not a claim that each portal provides an official API or has granted bulk redistribution rights. MyJOBS retains source attribution and links applicants to the original listing. Portal-specific direct adapters should only be added after checking public access, terms and stable detail URLs.
 
