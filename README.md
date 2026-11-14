@@ -71,3 +71,11 @@ The local portal discovery is best-effort search-engine discovery, not a claim t
 UN Careers P-level ingestion first tries the public careers endpoints. If automated access is blocked, an optional Apify adapter can be enabled with the GitHub Actions secret APIFY_API_TOKEN. The adapter filters P-1 through P-7 only.
 
 UNDP IPSA is parsed separately from the current UNDP vacancies page and keeps its own post-level, agency, location and apply-by metadata.
+
+
+## Additional Indonesia-first sources
+
+- **Karirhub Kemnaker:** public job-detail pages are discovered through search-engine indexing and parsed best-effort. No login, cookies or private endpoints are used; search indexing may be incomplete.
+- **Public ATS boards:** Greenhouse, Lever, Ashby, SmartRecruiters, Workable and Recruitee boards are discovered by public search, then their unauthenticated public board endpoints are queried. Discovery is per employer and capped to reduce load.
+- **Pasker ID:** official CSV/XLSX datasets are aggregate labour-market statistics, not individual vacancies. They are recorded as informational metadata and never converted into fake job records.
+- **Freehire:** public reads are available without authentication, but its API documentation says redistribution/showing postings in a product requires an API plan. MyJOBS therefore does not ingest its listings until the appropriate licence is confirmed.
