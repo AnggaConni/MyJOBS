@@ -575,6 +575,27 @@ class ScraperTests(unittest.TestCase):
         }
         self.assertEqual(len(dedupe([job, dict(job)])), 1)
 
+    def test_karirhub_jobposting_jsonld(self):
+        html = """<html><head><script type="application/ld+json">{"@type":"JobPosting","title":"Data Analyst","datePosted":"2026-11-13","hiringOrganization":{"name":"Example Indonesia"},"jobLocation":{"address":{"addressLocality":"Jakarta Selatan","addressRegion":"DKI Jakarta","addressCountry":"Indonesia"}}}</script></head><body><h1>Data Analyst</h1></body></html>"""
+        job = parse_karirhub_job(html, "https://karirhub.kemnaker.go.id/lowongan-dalam-negeri/lowongan/data-analyst-123")
+        self.assertEqual(job["source"], "Karirhub Kemnaker")
+        self.assertEqual(job["company"], "Example Indonesia")
+
+    def test_public_ats_greenhouse_normalization(self):
+        job = normalize_public_ats_job("greenhouse", "example", {"title":"Operations Officer","location":{"name":"Jakarta, Indonesia"},"absolute_url":"https://boards.greenhouse.io/example/jobs/123"})
+        self.assertEqual(job["source"], "ATS — Greenhouse")
+
+    def test_public_ats_rejects_non_indonesia_listing(self):
+        job = normalize_public_ats_job("lever", "example", {"text":"Engineer","categories":{"location":"Berlin, Germany"},"hostedUrl":"https://jobs.lever.co/example/123"})
+        self.assertIsNone(job)
+
+    def test_pasker_and_freehire_are_not_misrepresented_as_free_job_feeds(self):
+        jobs, status = fetch_pasker_market_data()
+        self.assertEqual(jobs, [])
+        self.assertEqual(status["status"], "informational")
+        jobs, status = fetch_freehire_catalogue()
+        self.assertEqual(jobs, [])
+        self.assertEqual(status["status"], "blocked_by_licence")
 
 if __name__ == "__main__":
     unittest.main()

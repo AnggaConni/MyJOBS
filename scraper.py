@@ -3005,6 +3005,182 @@ def sanitize_public_data(value):
     return redacted
 
 
+
+KARIHUB_MAX_RESULTS = max(1, min(40, int(os.getenv("KARIHUB_MAX_RESULTS", "20"))))
+ATS_MAX_BOARDS_PER_PROVIDER = max(1, min(10, int(os.getenv("ATS_MAX_BOARDS_PER_PROVIDER", "5"))))
+ATS_DISCOVERY_ENABLED = os.getenv("ATS_DISCOVERY_ENABLED", "true").strip().lower() in {"1", "true", "yes", "on"}
+
+def normalize_public_ats_job(provider, board, item):
+    if not isinstance(item, dict):
+        return None
+    title = clean(item.get("title") or item.get("text") or item.get("name"))
+    location, url, posted, description = "", "", "", ""
+    company = board.replace("-", " ").replace("_", " ").title()
+    if provider == "greenhouse":
+        loc = item.get("location") or {}
+        location = clean(loc.get("name") if isinstance(loc, dict) else loc)
+        url, posted = clean(item.get("absolute_url")), clean(item.get("updated_at") or item.get("created_at"))
+    elif provider == "lever":
+        categories = item.get("categories") or {}
+        location, company = clean(categories.get("location")), clean(item.get("company") or company)
+        url, posted = clean(item.get("hostedUrl") or item.get("applyUrl")), clean(item.get("createdAt"))
+        description = clean(item.get("descriptionPlain") or item.get("description"))
+    elif provider == "ashby":
+        location, company = clean(item.get("location")), clean(item.get("companyName") or company)
+        url, posted = clean(item.get("jobUrl") or item.get("applyUrl")), clean(item.get("publishedAt"))
+        description = clean(item.get("descriptionPlain"))
+    elif provider == "smartrecruiters":
+        loc = item.get("location") or {}
+        location = clean(" ".join(str(loc.get(k) or "") for k in ("city", "region", "country")))
+        org = item.get("company") or {}
+        company = clean(org.get("name") if isinstance(org, dict) else "") or company
+        url, posted = clean(item.get("ref") or item.get("applyUrl")), clean(item.get("releasedDate"))
+    elif provider == "workable":
+        location, company = clean(item.get("location") or item.get("city")), clean(item.get("company") or company)
+        url, posted = clean(item.get("url") or item.get("application_url")), clean(item.get("created_at"))
+        description = clean(item.get("description"))
+    elif provider == "recruitee":
+        location, company = clean(item.get("location") or item.get("city")), clean(item.get("company_name") or company)
+        url, posted = clean(item.get("careers_url") or item.get("url")), clean(item.get("created_at"))
+        description = clean(item.get("description"))
+    else:
+        return None
+    if not title or not url.startswith("https://"):
+        return None
+    blob = f"{location} {description[:1200]}".lower()
+    if not any(x in blob for x in ("indonesia", "jakarta", "bandung", "surabaya", "bali", "banten", "jawa", "sumatera", "kalimantan", "sulawesi", "papua")):
+        return None
+    return {
+        "id": make_id("Public ATS", provider, board, url), "title": title, "company": company,
+        "location": location or "Indonesia", "district": infer_location(location or description, fallback="Indonesia"),
+        "province": infer_province(location or description), "country": "Indonesia", "market": "Indonesia",
+        "region": "Indonesia", "via": f"{provider.title()} public job board", "source": f"ATS — {provider.title()}",
+        "source_family": "Employer Career Site", "posted_at": posted or "Unknown", "expires_at": "",
+        "schedule_type": "", "salary": "", "description": description[:600] or "Open the employer's original listing for full details.",
+        "original_url": url, "search_query": f"{provider}:{board}", "extensions": [],
+        "remote": "remote" in canon(location), "status": "current", "country_code": "ID",
+        "details": make_source_details("Public ATS", provider=provider, board=board),
+    }
+
+def fetch_public_ats_boards():
+    if not ATS_DISCOVERY_ENABLED:
+        return [], {"status": "skipped", "count": 0, "message": "ATS_DISCOVERY_ENABLED is false"}
+    specs = {
+        "greenhouse": (r"(?:boards|job-boards)\.greenhouse\.io/([a-z0-9_-]+)", "https://boards-api.greenhouse.io/v1/boards/{}/jobs", "boards.greenhouse.io"),
+        "lever": (r"jobs\.lever\.co/([a-z0-9_-]+)", "https://api.lever.co/v0/postings/{}?mode=json", "jobs.lever.co"),
+        "ashby": (r"jobs\.ashbyhq\.com/([a-z0-9_-]+)", "https://api.ashbyhq.com/posting-api/job-board/{}", "jobs.ashbyhq.com"),
+        "smartrecruiters": (r"jobs\.smartrecruiters\.com/([a-z0-9_-]+)", "https://api.smartrecruiters.com/v1/companies/{}/postings?limit=100&offset=0", "jobs.smartrecruiters.com"),
+        "workable": (r"apply\.workable\.com/([a-z0-9_-]+)", "https://apply.workable.com/api/v1/widget/accounts/{}?details=true", "apply.workable.com"),
+        "recruitee": (r"([a-z0-9_-]+)\.recruitee\.com", "https://{}.recruitee.com/api/offers/", "recruitee.com"),
+    }
+    jobs, errors, boards = [], [], {}
+    headers = {"User-Agent": "Mozilla/5.0 (compatible; MyJOBS/1.0)"}
+    for provider, (pattern, endpoint, domain) in specs.items():
+        urls = search_bing_links(f"site:{domain} Indonesia jobs careers", pattern)
+        slugs = []
+        for url in urls:
+            match = re.search(pattern, url, re.I)
+            if match and match.group(1).lower() not in slugs:
+                slugs.append(match.group(1).lower())
+        boards[provider] = slugs[:ATS_MAX_BOARDS_PER_PROVIDER]
+        for slug in boards[provider]:
+            try:
+                response = requests.get(endpoint.format(slug), headers=headers, timeout=TIMEOUT)
+                response.raise_for_status()
+                payload = response.json()
+                if provider in {"greenhouse", "ashby"}:
+                    rows = payload.get("jobs") or []
+                elif provider == "lever":
+                    rows = payload if isinstance(payload, list) else []
+                elif provider == "smartrecruiters":
+                    rows = payload.get("content") or []
+                elif provider == "workable":
+                    rows = payload.get("jobs") or []
+                else:
+                    rows = payload if isinstance(payload, list) else (payload.get("offers") or [])
+                for row in rows:
+                    job = normalize_public_ats_job(provider, slug, row)
+                    if job:
+                        jobs.append(job)
+            except Exception as exc:
+                errors.append(f"{provider}:{slug}: {type(exc).__name__}: {str(exc)[:160]}")
+    jobs = dedupe(jobs)
+    return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs),
+                  "boards_discovered": boards, "errors": errors[:30],
+                  "note": "Public unauthenticated employer boards; discovery is best-effort and capped."}
+
+def parse_karirhub_job(html, url):
+    soup = BeautifulSoup(html, "html.parser")
+    nodes = []
+    for node in soup.select('script[type="application/ld+json"]'):
+        try:
+            obj = json.loads(node.string or node.get_text())
+            nodes.extend(obj if isinstance(obj, list) else [obj])
+        except Exception:
+            pass
+    posting = next((x for x in nodes if isinstance(x, dict) and (x.get("@type") == "JobPosting" or "JobPosting" in (x.get("@type") or []))), {})
+    h1 = soup.find("h1")
+    title = clean(posting.get("title")) or clean(h1.get_text(" ", strip=True) if h1 else "")
+    if not title:
+        return None
+    org = posting.get("hiringOrganization") or {}
+    company = clean(org.get("name")) if isinstance(org, dict) else ""
+    loc = posting.get("jobLocation") or {}
+    if isinstance(loc, list):
+        loc = loc[0] if loc else {}
+    addr = loc.get("address") or {} if isinstance(loc, dict) else {}
+    location = clean(", ".join(str(addr.get(k) or "") for k in ("addressLocality", "addressRegion", "addressCountry") if addr.get(k)))
+    text_blob = clean(soup.get_text(" ", strip=True))
+    if not location:
+        match = re.search(r"(?:Kota|Kab\\.?|Kabupaten)\\s+[^|•]{2,70}", text_blob, re.I)
+        location = clean(match.group(0)) if match else "Indonesia"
+    if not any(x in (location + " " + text_blob).lower() for x in ("indonesia","jakarta","banten","jawa","bali","sumatera","kalimantan","sulawesi","papua")):
+        return None
+    return {
+        "id": make_id("Karirhub", title, company, url), "title": title, "company": company or "Karirhub employer",
+        "location": location, "district": infer_location(location, fallback="Indonesia"), "province": infer_province(location),
+        "country": "Indonesia", "market": "Indonesia", "region": "Indonesia", "via": "Karirhub Kemnaker",
+        "source": "Karirhub Kemnaker", "source_family": "Government Job Portal — Indonesia",
+        "posted_at": clean(posting.get("datePosted")) or "Unknown", "expires_at": clean(posting.get("validThrough")),
+        "schedule_type": clean(posting.get("employmentType")), "salary": "",
+        "description": clean(posting.get("description"))[:600] or "Open the original Karirhub listing for full details.",
+        "original_url": url, "search_query": "Karirhub Kemnaker public listings", "extensions": [],
+        "remote": False, "status": "current", "country_code": "ID",
+        "details": make_source_details("Karirhub Kemnaker", source_type="public listing"),
+    }
+
+def fetch_karirhub():
+    query = 'site:karirhub.kemnaker.go.id/lowongan-dalam-negeri/lowongan lowongan kerja'
+    urls = list(dict.fromkeys(search_bing_links(query, r"karirhub\.kemnaker\.go\.id/lowongan-dalam-negeri/lowongan/")))[:KARIHUB_MAX_RESULTS]
+    jobs, errors = [], []
+    def fetch_one(url):
+        try:
+            response = requests.get(url, headers={"User-Agent":"Mozilla/5.0 (compatible; MyJOBS/1.0)"}, timeout=TIMEOUT)
+            response.raise_for_status()
+            return parse_karirhub_job(response.text, url), None
+        except Exception as exc:
+            return None, f"{url}: {type(exc).__name__}: {str(exc)[:160]}"
+    with ThreadPoolExecutor(max_workers=5) as pool:
+        futures = [pool.submit(fetch_one, url) for url in urls]
+        for future in as_completed(futures):
+            job, error = future.result()
+            if job: jobs.append(job)
+            if error: errors.append(error)
+    jobs = dedupe(jobs)
+    return jobs, {"status": "ok" if jobs else ("error" if errors else "empty"), "count": len(jobs),
+                  "discovered_urls": len(urls), "errors": errors[:20],
+                  "note": "Public indexed detail pages only; no login or private endpoints."}
+
+def fetch_pasker_market_data():
+    return [], {"status": "informational", "count": 0, "url": "https://paskerid.kemnaker.go.id/datasets",
+                "message": "Official CSV/XLSX datasets are aggregate labour-market statistics, not individual vacancies; excluded from vacancy records.",
+                "dataset_categories": ["education", "occupation_group", "industry", "experience"]}
+
+def fetch_freehire_catalogue():
+    return [], {"status": "blocked_by_licence", "count": 0, "url": "https://freehire.me/docs/api",
+                "message": "Unauthenticated reads exist, but the API documentation requires an API plan to redistribute postings in a product. Not ingested until licensed."}
+
+
 def main():
     started = time.time()
     all_jobs, sources = [], {}
@@ -3014,6 +3190,10 @@ def main():
         (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
         (fetch_toploker, "TopLoker"),
+        (fetch_karirhub, "Karirhub Kemnaker"),
+        (fetch_public_ats_boards, "Public ATS Indonesia"),
+        (fetch_pasker_market_data, "Pasker ID — Aggregate Market Data"),
+        (fetch_freehire_catalogue, "Freehire — Licence Check"),
         (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
         (fetch_reliefweb, "ReliefWeb"),
         (fetch_un_professional_global, "UN Careers — P-level"),
