@@ -465,7 +465,7 @@ button{cursor:pointer}
     if(state.province!=="all")summary.push(state.province);
     if(state.district!=="all")summary.push(state.district);
     $("#locationSummary").textContent=summary.length?"Filtering: "+summary.join(" → "):"Choose a country, then narrow by province/state and city/district when available.";
-    $("#locationTitle").textContent=summary.length?summary[summary.length-1]:"Indonesia-first · all indexed jobs";
+    $("#locationTitle").textContent=summary.length?summary[summary.length-1]:"Location-first · all indexed jobs";
   }
   function sync(){$$("[data-filter]").forEach(function(b){b.classList.toggle("active",b.getAttribute("data-filter")===state.type)})}
   function reset(){state.query="";state.type="all";state.country="all";state.province="all";state.district="all";$("#searchInput").value="";sync();populateGeoFilters();render()}
@@ -483,7 +483,7 @@ button{cursor:pointer}
     $("#locationStatus").textContent=message||"Location is used only to filter opportunities in your browser.";
     sync();populateGeoFilters();render();
   }
-  async function detectIP(){var b=$("#detectIpBtn"),g=$("#detectGpsBtn");b.disabled=true;g.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var r=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!r.ok)throw Error();var d=await r.json();if(String(d.country_code||"").toUpperCase()!=="ID"){setLocation("all","Outside current Indonesia-first coverage · showing Indonesia-wide jobs.");return}var c=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(c)setLocation(c,"Approximate IP location: "+c+" · not saved.");else setLocation("all","Indonesia detected · choose a city manually for a more specific view.")}catch(e){toast("Approximate location unavailable")}finally{b.disabled=false;g.disabled=false}}
+  async function detectIP(){var b=$("#detectIpBtn"),g=$("#detectGpsBtn");b.disabled=true;g.disabled=true;$("#locationStatus").textContent="Detecting approximate location…";try{var r=await fetch("https://ipapi.co/json/",{cache:"no-store"});if(!r.ok)throw Error();var d=await r.json();if(String(d.country_code||"").toUpperCase()!=="ID"){setLocation("all","Outside current Location-first coverage · showing Indonesia-wide jobs.");return}var c=Object.keys(CITY_COORDS).find(function(x){return String(d.city||"").toLowerCase()===x.toLowerCase()});if(c)setLocation(c,"Approximate IP location: "+c+" · not saved.");else setLocation("all","Indonesia detected · choose a city manually for a more specific view.")}catch(e){toast("Approximate location unavailable")}finally{b.disabled=false;g.disabled=false}}
   function detectGPS(){if(!navigator.geolocation){toast("Browser geolocation is unavailable");return}var b=$("#detectGpsBtn"),i=$("#detectIpBtn");b.disabled=true;i.disabled=true;$("#locationStatus").textContent="Requesting precise location permission…";navigator.geolocation.getCurrentPosition(function(p){var n=nearestCity(p.coords.latitude,p.coords.longitude);setLocation(n.city,"GPS selected: "+n.city+" · precise coordinates are not saved.");b.disabled=false;i.disabled=false},function(){b.disabled=false;i.disabled=false;$("#locationStatus").textContent="GPS permission was not granted · approximate detection is still available.";toast("Precise GPS unavailable")},{enableHighAccuracy:true,timeout:12000,maximumAge:0})}
   function formatDescription(raw){
     var text=String(raw||"").replace(/\r\n?/g,"\n").trim();
