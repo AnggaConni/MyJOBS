@@ -3186,15 +3186,17 @@ def main():
     all_jobs, sources = [], {}
     previous_jobs = load_previous_jobs()
 
+    # Free/public sources run first. The paid SerpApi adapter is deliberately
+    # deferred until after free discovery so it remains a fallback, not the default.
     for fetcher, name in [
-        (fetch_google, "Google Jobs"),
         (fetch_loker, "Loker.id"),
         (fetch_toploker, "TopLoker"),
         (fetch_karirhub, "Karirhub Kemnaker"),
         (fetch_public_ats_boards, "Public ATS Indonesia"),
+        (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
+        (fetch_google, "Google Jobs — Paid SerpApi Fallback"),
         (fetch_pasker_market_data, "Pasker ID — Aggregate Market Data"),
         (fetch_freehire_catalogue, "Freehire — Licence Check"),
-        (fetch_agent_reach_discovery, "Agent-Reach Public Discovery"),
         (fetch_reliefweb, "ReliefWeb"),
         (fetch_un_professional_global, "UN Careers — P-level"),
         (fetch_undp_ipsa_global, "UNDP — IPSA"),
