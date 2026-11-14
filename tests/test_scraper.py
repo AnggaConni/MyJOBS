@@ -12,6 +12,7 @@ from scraper import (
     make_id,
     normalize_google,
     normalize_agent_reach_job,
+    parse_public_job_detail,
     fetch_agent_reach_discovery,
     extract_un_p_level,
     html_description_to_text,
@@ -508,13 +509,26 @@ class ScraperTests(unittest.TestCase):
 
         with patch("scraper.AGENT_REACH_ENABLED", True), \
              patch("scraper.shutil.which", return_value="/usr/bin/agent-reach"), \
-             patch("scraper.subprocess.run", side_effect=fake_run):
+             patch("scraper.subprocess.run", side_effect=fake_run), \
+             patch("scraper.enrich_agent_reach_job", side_effect=lambda job: (job, "not_attempted")):
             jobs, health = fetch_agent_reach_discovery()
 
         self.assertEqual(len(jobs), 1)
         self.assertEqual(jobs[0]["source"], "LinkedIn")
         self.assertEqual(health["status"], "ok")
         self.assertEqual(health["count"], 1)
+
+    def test_public_job_detail_extracts_jsonld_fields(self):
+        html = """<html><head><script type="application/ld+json">{"@type":"JobPosting","title":"Programme Officer","datePosted":"2026-11-13","validThrough":"2026-12-01","employmentType":"FULL_TIME","hiringOrganization":{"name":"Example Foundation"},"jobLocation":{"address":{"addressLocality":"Jakarta","addressRegion":"DKI Jakarta","addressCountry":"Indonesia"}},"description":"<p>Coordinate field programmes.</p>","baseSalary":{"currency":"IDR","value":{"minValue":8000000,"maxValue":12000000,"unitText":"MONTH"}}}</script></head><body><h1>Programme Officer</h1></body></html>"""
+        detail = parse_public_job_detail(html, "https://example.org/careers/123")
+        self.assertEqual(detail["title"], "Programme Officer")
+        self.assertEqual(detail["company"], "Example Foundation")
+        self.assertIn("Jakarta", detail["location"])
+        self.assertEqual(detail["posted_at"], "2026-11-13")
+        self.assertEqual(detail["expires_at"], "2026-12-01")
+        self.assertEqual(detail["schedule_type"], "FULL_TIME")
+        self.assertIn("8000000-12000000", detail["salary"])
+        self.assertIn("Coordinate field programmes", detail["description"])
 
     def test_agent_reach_linkedin_public_job_normalization(self):
         job = normalize_agent_reach_job({
